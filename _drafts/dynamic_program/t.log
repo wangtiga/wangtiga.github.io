@@ -1,0 +1,235 @@
+=== RUN   TestQuickSort
+
+  Init TestQuickSort 
+    common []int{2, 0, 2, -1, 2, 3, 343, 4, 3}
+runtime: goroutine stack exceeds 250000000-byte limit
+fatal error: stack overflow
+
+runtime stack:
+runtime.throw(0xb6d79bee, 0xe)
+	/data/data/com.termux/files/usr/lib/go/src/runtime/panic.go:774 +0x60
+runtime.newstack()
+	/data/data/com.termux/files/usr/lib/go/src/runtime/stack.go:1046 +0x614
+runtime.morestack()
+	/data/data/com.termux/files/usr/lib/go/src/runtime/asm_arm.s:420 +0x60
+
+goroutine 7 [running]:
+command-line-arguments.partition(0x86814120, 0x9, 0x9, 0x0, 0xffffffff, 0x0)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:37 +0x1e0 fp=0x8e8aa35c sp=0x8e8aa35c pc=0xb6d76f1c
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:29 +0x3c fp=0x8e8aa37c sp=0x8e8aa35c pc=0xb6d76cbc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa39c sp=0x8e8aa37c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa3bc sp=0x8e8aa39c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa3dc sp=0x8e8aa3bc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa3fc sp=0x8e8aa3dc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa41c sp=0x8e8aa3fc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa43c sp=0x8e8aa41c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa45c sp=0x8e8aa43c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa47c sp=0x8e8aa45c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa49c sp=0x8e8aa47c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa4bc sp=0x8e8aa49c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa4dc sp=0x8e8aa4bc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa4fc sp=0x8e8aa4dc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa51c sp=0x8e8aa4fc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa53c sp=0x8e8aa51c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa55c sp=0x8e8aa53c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa57c sp=0x8e8aa55c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa59c sp=0x8e8aa57c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa5bc sp=0x8e8aa59c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa5dc sp=0x8e8aa5bc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa5fc sp=0x8e8aa5dc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa61c sp=0x8e8aa5fc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa63c sp=0x8e8aa61c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa65c sp=0x8e8aa63c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa67c sp=0x8e8aa65c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa69c sp=0x8e8aa67c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa6bc sp=0x8e8aa69c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa6dc sp=0x8e8aa6bc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa6fc sp=0x8e8aa6dc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa71c sp=0x8e8aa6fc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa73c sp=0x8e8aa71c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa75c sp=0x8e8aa73c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa77c sp=0x8e8aa75c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa79c sp=0x8e8aa77c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa7bc sp=0x8e8aa79c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa7dc sp=0x8e8aa7bc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa7fc sp=0x8e8aa7dc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa81c sp=0x8e8aa7fc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa83c sp=0x8e8aa81c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa85c sp=0x8e8aa83c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa87c sp=0x8e8aa85c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa89c sp=0x8e8aa87c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa8bc sp=0x8e8aa89c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa8dc sp=0x8e8aa8bc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa8fc sp=0x8e8aa8dc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa91c sp=0x8e8aa8fc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa93c sp=0x8e8aa91c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa95c sp=0x8e8aa93c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa97c sp=0x8e8aa95c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa99c sp=0x8e8aa97c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa9bc sp=0x8e8aa99c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa9dc sp=0x8e8aa9bc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aa9fc sp=0x8e8aa9dc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaa1c sp=0x8e8aa9fc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaa3c sp=0x8e8aaa1c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaa5c sp=0x8e8aaa3c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaa7c sp=0x8e8aaa5c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaa9c sp=0x8e8aaa7c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaabc sp=0x8e8aaa9c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaadc sp=0x8e8aaabc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaafc sp=0x8e8aaadc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aab1c sp=0x8e8aaafc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aab3c sp=0x8e8aab1c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aab5c sp=0x8e8aab3c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aab7c sp=0x8e8aab5c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aab9c sp=0x8e8aab7c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aabbc sp=0x8e8aab9c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aabdc sp=0x8e8aabbc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aabfc sp=0x8e8aabdc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aac1c sp=0x8e8aabfc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aac3c sp=0x8e8aac1c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aac5c sp=0x8e8aac3c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aac7c sp=0x8e8aac5c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aac9c sp=0x8e8aac7c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aacbc sp=0x8e8aac9c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aacdc sp=0x8e8aacbc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aacfc sp=0x8e8aacdc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aad1c sp=0x8e8aacfc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aad3c sp=0x8e8aad1c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aad5c sp=0x8e8aad3c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aad7c sp=0x8e8aad5c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aad9c sp=0x8e8aad7c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aadbc sp=0x8e8aad9c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaddc sp=0x8e8aadbc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aadfc sp=0x8e8aaddc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aae1c sp=0x8e8aadfc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aae3c sp=0x8e8aae1c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aae5c sp=0x8e8aae3c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aae7c sp=0x8e8aae5c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aae9c sp=0x8e8aae7c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaebc sp=0x8e8aae9c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaedc sp=0x8e8aaebc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaefc sp=0x8e8aaedc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaf1c sp=0x8e8aaefc pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaf3c sp=0x8e8aaf1c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaf5c sp=0x8e8aaf3c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaf7c sp=0x8e8aaf5c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aaf9c sp=0x8e8aaf7c pc=0xb6d76cfc
+command-line-arguments.quickSort2(0x86814120, 0x9, 0x9, 0x0, 0xffffffff)
+	/data/data/com.termux/files/home/wangtiga.github.io/_drafts/dynamic_program/sort_quick_test.go:33 +0x7c fp=0x8e8aafbc sp=0x8e8aaf9c pc=0xb6d76cfc
+...additional frames elided...
+created by testing.(*T).Run
+	/data/data/com.termux/files/usr/lib/go/src/testing/testing.go:960 +0x2e4
+
+goroutine 1 [chan receive]:
+testing.(*T).Run(0x86890140, 0xb6d79792, 0xd, 0xb6e2451c, 0x349)
+	/data/data/com.termux/files/usr/lib/go/src/testing/testing.go:961 +0x304
+testing.runTests.func1(0x868900a0)
+	/data/data/com.termux/files/usr/lib/go/src/testing/testing.go:1202 +0x68
+testing.tRunner(0x868900a0, 0x8683bed0)
+	/data/data/com.termux/files/usr/lib/go/src/testing/testing.go:909 +0xb4
+testing.runTests(0x8680e0b0, 0xb6ee65d8, 0x1, 0x1, 0x0)
+	/data/data/com.termux/files/usr/lib/go/src/testing/testing.go:1200 +0x288
+testing.(*M).Run(0x8684e580, 0x0)
+	/data/data/com.termux/files/usr/lib/go/src/testing/testing.go:1117 +0x15c
+main.main()
+	_testmain.go:44 +0x15c
+FAIL	command-line-arguments	1.595s
+FAIL
