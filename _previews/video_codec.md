@@ -5,6 +5,10 @@ date:   2020-01-01 12:00:00 +0800
 tags:   tech
 ---
 
+* category
+{:toc}
+
+
 
 # Video Conversion done right: Codecs and Software [^VideoCodec] [^devfest2019]
 
@@ -12,11 +16,16 @@ November 7, 2011  by  [slhck](http://blog.superuser.com/author/slhck/ "Posts by 
 
 Videos are everywhere. They come in quite a few different formats – all with their own advantages and disadvantages. Converting videos from one format to another is a very simple task, given the right tools. In this post, we will go through the most popular video codecs and the software you need to get the best results.
 
-## Current Video Codecs and Containers
+视频随处可见。视频格式花样繁多，各有优缺点。
+善于利用工具，则转换视频格式是很容易的事情。
+本文会介绍一些流程的视频编码格式，并分享几个好用的视频格式转换软件。
+
+
+## Current Video Codecs and Containers 当前的视频编码格式也容器格式
 
 Before we begin to encode, we have to ask: What is a video codec? “Codec” stands for encoder/decoder. A video codec specifies the software (or the algorithm) to convert video files into a bitstream and then decode that bitstream into a video again. But why is there even a need for codecs? Every video is a sequence of frames, mostly more than 25 frames per second. This is a lot of data. Codecs, when used to compress videos, try to reduce this data using some visual tricks.
 
-什么是 video codec ? ""Codec" 就是 编码器/解码器。
+什么是 video codec ? "Codec" 就是 编码器/解码器。
 视频编码是将 视频文件转换成 bitstream 。
 视频解码是将 bitstream 转换成视频文件。
 但为什么需要 codec 呢？
@@ -27,13 +36,13 @@ codec 利用 visual trick (视觉特点)压缩视频大小。
 -   **Codecs**  take a video and convert it into a bitstream, mostly with the goal to minimize its size.
 -   **Containers**  on the other hand are file formats that are supposed to wrap video and audio into a single file. Video codecs don’t know anything about audio encoding, so this is why there is a need to synchronize them for playback.
 
--   **Codecs** 将视频转换成 bitstream ，主要用于压缩视频大小
--   **Containers** 是一种文件格式，用于将 video 和 audio 包装成一个文件。 video codec 和 audio encoding 互不关心，因为需要一种同步机制，在回放视频文件时，保持音视频同步。
+-   **Codecs** 编解码器，将视频转换成 bitstream ，主要用于压缩视频大小。
+-   **Containers** 容器，是一种文件格式，用于将 video 和 audio 包装成一个文件。 video codec 和 audio encoding 互不关心，因为需要一种同步机制，在回放视频文件时，保持音视频同步。
 
 
 Codecs mostly encode video with regard to a specification. Almost every specification for video has been written by the Motion Picture Experts Group. This is why most video formats are known under a MPEG acronym. There is always one specification, but there can be an arbitrary number of codecs for this specification.
 
-codec 在 encode video 时都会遵守某个标准。
+codec 在 encode video 时都会遵守某个 specification （标准）。
 有关 video 的标准都是由 Motion Picture Experts Group (动态图像专家组)。
 所以很多视频格式后缀名都使用 MPEG 缩写。
 specification 只有一个，但会有很多 codec 。
@@ -42,22 +51,53 @@ specification 只有一个，但会有很多 codec 。
 
 These days, there are  [a lot of codecs](http://en.wikipedia.org/wiki/Video_codec#Commonly_used_video_codecs)  around. We will take a look at the best and most widely used ones. The following is partly taken from my answer to the question  [What is a Codec (e.g. DivX?), and how does it differ from a File Format (e.g. MPG)?](http://superuser.com/questions/300897/what-is-a-codec-e-g-divx-and-how-does-it-differ-from-a-file-format-e-g-mpg). Also see this answer for an explanation of current containers.
 
+目前，现存很多 codec 。我们只介绍几个使用比较广泛的。
+以下内部，有部分来自我在 superuser 问答网站上的一个回答。
+有关 container 的介绍中也会有一部分内部来自这个答案。
+
+
 ### MPEG-2
 
 This is mostly used on DVDs and TV broadcasting. It offers high quality at the expense of high file sizes. It’s been the main choice for video compression for many many years now. Encoders are often found embedded into hardware. The encoding scheme is very basic and therefore allows for fast encoding and fast playback.
 
+MPEG-2 是在 DVD 和 TV 广播电视使用最广泛的格式。
+它视频质量高，存储空间也大。
+多年间，它一直是视频压缩算法的首选格式。
+encoder （编码器）一般内嵌在硬件。
+因为编码算法很简单，所以能够快速编码，快速回放。
+
+
+
 At some point though, its quality is not good enough for low bitrates. While a satellite or cable transmission offered enough bitrate for a high quality MPEG-2 video, it just wasn’t good enough for the internet and multimedia age.
+
+但是，在低比特率带宽时，这种编码器无法正常工作。
+高质量的 MPEG-2 视频更适用于卫星或电缆等比特率带宽中，在互联网和多媒体时间，它不是一个理想选择。
+
 
 -   Containers for MPEG-2: Mostly found within an  `.mpg`  container
 -   Encoders for MPEG-2: CinemaCraft, TMPGEnc, MainConcept and ffmpeg
 
+- MPEG-2 container ： 一般使用 '.mpg' 后缀
+- MPEG-2 encoder ： CinemaCraft, TMPGEnc, MainConcept and ffmpeg
+
+
 Basically, you only want to create MPEG-2 videos if you really don’t care about storage size, or you want to put videos on a Video DVD. Note that many applications for authoring Video DVDs will already convert to MPEG-2 for you.
+
+基本上，只要你不在乎存储空间，或者你要把视频刻录到 DVD 上的时候，才会使用 MPEG-2 格式的视频。
+有很多程序支持将视频转码到 MPEG-2 格式，并刻录到 DVD 上。
+
 
 ### MPEG-4 Part II
 
 When it became clear that MPEG-2 was not enough, MPEG-4 was released. Actually, MPEG-4 is a huge standard consisting of many parts, only one of which is about basic video coding: MPEG-4 Part II.
 
+MPEG-2 无法满足需要时， MPEG-4 就出现了。
+实际上 MPEG-4 是一整套包含很多内容的标准，其中用于视频编解码的部分就是：MPEG-4 Part II 。
+
 This is probably the one used mostly to encode videos for the web. It offers good quality at practical file sizes, which means one can burn a whole movie onto a CD (whereas with MPEG-2 you would have needed a DVD).
+
+这是在 web 中使用最广泛的视频编码格式。它的画面质量高，而且文件占用存储空间更小。使用 MPEG-2 格式刻录一整部电影得用 DVD ，但 使用 MPEG-4 格式只要一张 CD 就能刻录一整部电影。
+
 
 Its drawback is that the quality itself might not be good enough for some viewers.
 
