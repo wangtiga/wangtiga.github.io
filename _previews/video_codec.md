@@ -101,11 +101,20 @@ This is probably the one used mostly to encode videos for the web. It offers goo
 
 Its drawback is that the quality itself might not be good enough for some viewers.
 
+它的缺点是画质对某些用户来说不够好。
+
 -   Containers for MPEG-4 Part II: Mostly in  `.avi`
 -   Encoders for MPEG-4 Part II:  [DivX](http://www.divx.com/),  [XviD](http://www.xvid.org/), Nero Digital
 -   Audio used in MPEG-4 Part II: Mostly MP3.
 
+- MPEG-4 Part II 的容器格式: 多数是 `.avi`
+- MPEG-4 Part II 的编码器格式:  [DivX](http://www.divx.com/),  [XviD](http://www.xvid.org/), Nero Digital
+- MPEG-4 Part II 的音频格式: 多数是 MP3
+
+
 So, if you want to rip a DVD without taking too much time, and at the same time ensuring best compatibility with current DVD players, go for this.
+
+如果你想刻录 DVD 速度快而且还能兼容市面上的 DVD 播放器，就用这个格式。
 
 ### MPEG-4 Advanced Video Coding (h.264)
 
@@ -121,11 +130,24 @@ Converting video for small bandwidths is its main purpose. Originally, it was ca
 
 h.264 is found in almost every modern application or device, from phones to camcorders, even on Blu Ray disks: Video is now encoded in h.264. Its quality vs. file size ratio is just so much better than what you could achieve with MPEG-2 or even MPEG-4 Part 2. The main disadvantage is that it is very slow to encode as it has some vast algorithmic improvements over them (which take a lot of time to compute).
 
+手机，摄像机，甚至蓝光光盘，我们几乎能在所有应用程序和硬件设备上找到使用 h.264 编码的视频。
+相同视频质量下，它的文件大小比 MPEG-2 或 MPEG-4 Part 2 都要好。
+它的主要缺点是编码过程较慢，因为它在算法上优化了很多，所以要花费大量时间计算。
+
 -   Containers for h.264:  `.mp4`,  `.mkv`,  `.mov`.
 -   Encoders for h.264:  [x264](http://www.videolan.org/developers/x264.html),  [Mainconcept](http://www.mainconcept.com/), QuickTime
 -   Audio used in h.264: Mostly  [AAC](http://en.wikipedia.org/wiki/Aac)  (MPEG-4 Audio).
 
+- h.264 的容器格式： `.mp4`, `.mkv`, `.mov`
+- h.264 的编码器格式：[x264](http://www.videolan.org/developers/x264.html),  [Mainconcept](http://www.mainconcept.com/), QuickTime
+- h.264 的音频格式：Mostly  [AAC](http://en.wikipedia.org/wiki/Aac)  (MPEG-4 Audio).
+
+
 If you upload videos to the web, this is your choice. Also, if you want the best quality at the lowest file size, you should always use h.264. In my experience,  [x264](http://www.videolan.org/developers/x264.html)  is the best free encoder for h.264 out there.
+
+如果想将视频上传到网络，最好使用这种格式。
+这种格式能保证在相同质量的前提下，文件大小最小。
+[x264](http://www.videolan.org/developers/x264.html) 是 h.264 格式最好用的免费的编码器。 
 
 ----------
 
@@ -142,6 +164,8 @@ Now that you have your codecs installed, you will be able to play almost every v
 ----------
 
 ## Software for Converting Videos
+
+> 这里主要介绍了几个视频格式转换软件，暂时不翻译了
 
 Of course, there are lots of applications that allow you to convert video from one format to another. Some of them are commercial, but a huge part is free.
 
