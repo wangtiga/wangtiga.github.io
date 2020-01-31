@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[译]Video Conversion done right: Codecs and Software"
-date:   2020-01-01 12:00:00 +0800
+date:   2020-01-31 08:00:00 +0800
 tags:   tech
 ---
 
@@ -10,7 +10,7 @@ tags:   tech
 
 
 
-# Video Conversion done right: Codecs and Software [^VideoCodec] [^devfest2019]
+# Video Conversion done right: Codecs and Software 视频格式转换：编解码器和格式转换软件 [^VideoCodec] [^devfest2019]
 
 November 7, 2011  by  [slhck](http://blog.superuser.com/author/slhck/ "Posts by slhck").  [6 comments](http://blog.superuser.com/2011/11/07/video-conversion-done-right-codecs-and-software/#comments)
 
@@ -126,7 +126,7 @@ Converting video for small bandwidths is its main purpose. Originally, it was ca
 
 设计 mp4 编码的主要目的是减少视频的大小，占用更小的 带宽 。
 最初，它被称为 h.264 （跟 MPEG 没什么关系）。
-实际上 ITU 最初是基于 h.263 设计 －－ 这两个编码方案都是用于视频会议的。
+实际上 ITU(国际电信联盟） 最初是基于 h.263 设计 －－ 这两个编码方案都是用于视频会议的。
 
 h.264 is found in almost every modern application or device, from phones to camcorders, even on Blu Ray disks: Video is now encoded in h.264. Its quality vs. file size ratio is just so much better than what you could achieve with MPEG-2 or even MPEG-4 Part 2. The main disadvantage is that it is very slow to encode as it has some vast algorithmic improvements over them (which take a lot of time to compute).
 
@@ -151,15 +151,27 @@ If you upload videos to the web, this is your choice. Also, if you want the best
 
 ----------
 
-## Set up your Codecs
+## Set up your Codecs  设置编解码器
 
 Most current operating systems don’t come with all codecs (encoders and decoders) installed. This is mainly due to legal and licensing issues. However there are codec packs that you can easily install later.
+
+当前大多数操作系统并未安装所有编解码器（编码器和解码器）。
+这主要是由于法律许可问题。
+但是，有些编解码器很容易手动安装。
 
 -   Windows: The  [K-Lite Codec Pack](http://www.codecguide.com/download_kl.htm)  offers almost everything there is. The Standard package should be enough for most users.
 -   OS X:  [Perian](http://perian.org/)  is a QuickTime component for OS X that allows native playback for all popular codecs within the QuickTime framework.
 -   Linux: Depending on your distribution, there are probably some codec packages in the repositories. For example, in Ubuntu there are  [RestrictedFormats](https://help.ubuntu.com/community/RestrictedFormats)  which can be easily installed later on.
 
 Now that you have your codecs installed, you will be able to play almost every video (and audio) file there is.
+
+
+- Windows：[K-Lite Codec Pack](http://www.codecguide.com/download_kl.htm) 几乎提供了所有功能。 标准软件包对于大多数用户来说应该足够了。
+- OS X：[Perian](http://perian.org/) 是 OS X 的 QuickTime 组件，它可以在 QuickTime 框架下播放所有流行编解码器。
+- Linux：根据您的发行版，repositories （存储库)中可能有一些编解码器软件包。 例如，在 Ubuntu 中有很容易安装的 [RestrictedFormats](https://help.ubuntu.com/community/RestrictedFormats) 。
+
+现在，您已经安装了编解码器，几乎可以播放所有视频（和音频）文件。
+
 
 ----------
 

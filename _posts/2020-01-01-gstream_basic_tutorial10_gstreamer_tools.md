@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[译]GStream Basic tutorial 10: GStreamer tools"
-date:   2019-11-03 12:00:00 +0800
+date:   2020-01-01 12:00:00 +0800
 tags:   tech
 ---
 
