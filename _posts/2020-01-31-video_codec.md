@@ -21,7 +21,7 @@ Videos are everywhere. They come in quite a few different formats – all with t
 本文会介绍一些流程的视频编码格式，并分享几个好用的视频格式转换软件。
 
 
-## Current Video Codecs and Containers 当前的视频编码格式也容器格式
+## Current Video Codecs and Containers 当前的视频编码格式和容器格式
 
 Before we begin to encode, we have to ask: What is a video codec? “Codec” stands for encoder/decoder. A video codec specifies the software (or the algorithm) to convert video files into a bitstream and then decode that bitstream into a video again. But why is there even a need for codecs? Every video is a sequence of frames, mostly more than 25 frames per second. This is a lot of data. Codecs, when used to compress videos, try to reduce this data using some visual tricks.
 
