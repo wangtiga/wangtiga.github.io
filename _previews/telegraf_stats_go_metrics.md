@@ -1,3 +1,15 @@
+---
+layout: post
+title:  "telegraf stats go metric"
+date:   2020-02-08 18:00:00 +0800
+tags:   tech
+---
+
+* category
+{:toc}
+
+
+
 
 # Metric registries [^JavaMetric]:
 The five metric types: Gauges, Counters, Histograms, Meters, and Timers.

@@ -19,6 +19,7 @@ tags: linux
 iptraf-ng
 watch -n 1 "ifconfig eth0"
 sar -n DEV 1 2
+# nload
 ```
 
 > [cnblogs](https://www.cnblogs.com/klb561/articles/9080151.html)

@@ -1,3 +1,13 @@
+---
+layout: post
+title:  "pkg-config"
+date:   2020-02-08 18:00:00 +0800
+tags:   tech
+---
+
+* category
+{:toc}
+
 
 
 # Guide to pkg-config [^GuidToPkgConfig]
