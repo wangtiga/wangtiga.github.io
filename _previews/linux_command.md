@@ -13,6 +13,20 @@ tags: linux
 
 ### shell
 
+#### Linux格式化 json base64
+
+使用 jq 命令格式化 json 数据
+```shell
+# -c 表示去除空格和换行 -compact-output
+echo "ewoJImNvbmZJZCI6CSI1Nzc1NjgiLAoJImFwcElkIjoJIjhhMmFmOTg4NTM2NDU4YzMwMTUzN2Q3MTk3MzIwMDA0IiwKCSJ1c2VySWQiOgkiODEwMzEwMzciLAoJInJlY29yZCI6CSJubyIsCgkibW9kZWwiOgkic2luZ2xlIiwKCSJtZW1iZXJJZCI6CSI3MjgxMTUyIgp9" | base64 -d | jq '.' -c
+
+# 无参数时，表示格式化后输出
+echo "ewoJImNvbmZJZCI6CSI1Nzc1NjgiLAoJImFwcElkIjoJIjhhMmFmOTg4NTM2NDU4YzMwMTUzN2Q3MTk3MzIwMDA0IiwKCSJ1c2VySWQiOgkiODEwMzEwMzciLAoJInJlY29yZCI6CSJubyIsCgkibW9kZWwiOgkic2luZ2xlIiwKCSJtZW1iZXJJZCI6CSI3MjgxMTUyIgp9" | base64 -d | jq '.' -c | jq '.'
+```
+
+> [jq tutorial](https://stedolan.github.io/jq/tutorial/)
+
+
 #### Linux查看实时网络速率
 
 ```shell

@@ -310,11 +310,63 @@ gst-launch-1.0 \
 # play rtmp  (pull stream)
 ffplay rtmp://127.0.0.1:1935/live/live
 
-# play rtp
-TODO
 
-# mp4 to rtp
-gst-launch-1.0 filesrc location=/Users/xiang/Movies/test2.mp4 ! qtdemux !  video/x-h264 ! h264parse ! rtph264pay config-interval=-1 ! udpsink  host=127.0.0.1 port=5000
+# mp4 to rtp(video audio)
+gst-launch-1.0 filesrc location=/Users/tiga/Downloads/big_buck_bunny.mp4 ! \
+    qtdemux name=demux \
+    demux.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! \
+      audio/x-raw,channels=1,rate=16000 ! \
+      opusenc bitrate=20000 ! \
+      rtpopuspay ! udpsink host=127.0.0.1 port=5000  \
+    demux.video_0 ! queue ! video/x-h264 ! h264parse ! rtph264pay config-interval=-1 ! udpsink  host=127.0.0.1 port=5001
+
+# play audio
+gst-launch-1.0 -v udpsrc port=5000 address=127.0.0.1 caps="application/x-rtp, encoding-name=OPUS, payload=96" ! rtpopusdepay ! decodebin ! autoaudiosink
+
+# play video
+gst-launch-1.0 -v udpsrc port=5001 address=127.0.0.1 caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! autovideosink
+
+
+# mp4 to rtp h264 video, play rtp h264 test ok
+gst-launch-1.0 filesrc location=/Users/tiga/Downloads/big_buck_bunny.mp4 ! qtdemux !  video/x-h264 ! h264parse ! rtph264pay config-interval=-1 ! udpsink  host=127.0.0.1 port=5000
+gst-launch-1.0 -v udpsrc port=5000 address=127.0.0.1 caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! autovideosink
+
+
+# remote mp4 to rtp opus audio, play rtp opus test ok
+gst-launch-1.0  uridecodebin uri=https://www.freedesktop.org/software/gstreamer-sdk/data/media/sintel_trailer-480p.mkv ! queue ! audioconvert ! opusenc ! rtpopuspay timestamp-offset=0      ! udpsink  host=127.0.0.1 port=5000 
+gst-launch-1.0 -v udpsrc port=5000 address=127.0.0.1 caps="application/x-rtp, encoding-name=OPUS, payload=96" ! rtpopusdepay ! decodebin ! autoaudiosink
+
+
+# local mp4 to rtp opus audio, play rtp opus test ok
+gst-launch-1.0 filesrc location=/Users/tiga/Downloads/big_buck_bunny.mp4 ! \
+    qtdemux name=demux \
+    demux.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! \
+      audio/x-raw,channels=1,rate=16000 ! \
+      opusenc bitrate=20000 ! \
+      rtpopuspay ! udpsink host=127.0.0.1 port=5000
+
+gst-launch-1.0 audiotestsrc ! \
+    audioresample ! audio/x-raw,channels=1,rate=16000 ! \
+    opusenc bitrate=20000 ! \
+    rtpopuspay ! udpsink host=127.0.0.1 port=5000
+
+ gst-launch-1.0 filesrc location=/Users/tiga/Downloads/big_buck_bunny.mp4 ! \
+    qtdemux name=demux  \
+    demux.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! autoaudiosink \
+    demux.video_0 ! queue ! decodebin ! videoconvert ! videoscale ! autovideosink
+
+
+
+
+# mkv to rtp video
+gst-launch-1.0 filesrc location=/Users/tiga/Downloads/sintel_trailer-480p.mkv ! qtdemux !  video/x-h264 ! h264parse ! rtph264pay config-interval=-1 ! udpsink  host=127.0.0.1 port=5000
+
+# play rtp h264
+gst-launch-1.0 -v udpsrc port=5000 address=127.0.0.1 caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! autovideosink
+
+# play rtp vp8
+gst-launch-1.0 -v udpsrc port=5000 address=127.0.0.1 caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)VP8,payload=(int)96" ! rtpvp8depay ! decodebin ! videoconvert ! autovideosink
+
 
 # rtmp to rtp
 gst-launch-1.0 -v rtmpsrc location=rtmp://localhost/live/stream  ! flvdemux name=demux demux.audio ! queue ! decodebin ! audioconvert ! audioresample ! opusenc ! rtpopuspay timestamp-offset=0  ! udpsink  host=127.0.0.1 port=5000 demux.video! queue ! h264parse ! rtph264pay timestamp-offset=0 config-interval=-1  ! udpsink  host=127.0.0.1 port=5002
