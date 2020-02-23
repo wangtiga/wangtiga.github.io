@@ -11,7 +11,7 @@ tags:   tech
 
 
 
-# High Performance Go Workshop
+# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] 
 
 Dave Cheney[dave@cheney.net](mailto:dave@cheney.net)Version Dotgo-2019-3-G660848,2019-04-26
 
@@ -87,31 +87,47 @@ The section on the execution tracer requires Google Chrome. It will not work wit
 
 The final section of the day will be an open session where you can experiment with the tools you’ve learnt.
 
-### One more thing …​
+### One more thing …
 
 This isn’t a lecture, it’s a conversation. We’ll have lots of breaks to ask questions.
 
 If you don’t understand something, or think what you’re hearing not correct, please ask.
 
-## 1. The past, present, and future of Microprocessor performance
+## 1. The past, present, and future of Microprocessor performance 微处理器性能的过去，现在和未来
 
 This is a workshop about writing high performance code. In other workshops I talk about decoupled design and maintainability, but we’re here today to talk about performance.
 
 I want to start today with a short lecture on how I think about the history of the evolution of computers and why I think writing high performance software is important .
 
+今天演讲的主要内容主要是：
+有关计算机发展历史,我的一些思考;
+为什么编写高性能的软件很重要。
+
 The reality is that software runs on hardware, so to talk about writing high performance code, first we need to talk about the hardware that runs our code.
 
-### 1.1. Mechanical Sympathy
+因为软件是在硬件上运行的，所以，要想讨论如何编写高性能软件的话题，我们先说一说运行代码的硬件。
 
-![image 20180818145606919](https://dave.cheney.net/high-performance-go-workshop/images/image-20180818145606919.png)
+### 1.1. Mechanical Sympathy 机械共情
+
+Sympathy![image 20180818145606919](https://dave.cheney.net/high-performance-go-workshop/images/image-20180818145606919.png)
 
 There is a term in popular use at the moment, you’ll hear people like Martin Thompson or Bill Kennedy talk about “mechanical sympathy”.
 
+你可能从 马丁·汤普森（Martin Thompson）或比尔·肯尼迪（Bill Kennedy）讨论过 “Mechanical Sympathy” 这一术语。
+
 The name "Mechanical Sympathy" comes from the great racing car driver Jackie Stewart, who was a 3 times world Formula 1 champion. He believed that the best drivers had enough understanding of how a machine worked so they could work in harmony with it.
+
+"Mechanical Sympathy" 最早由曾三度获得世界一级方程式赛车冠军的 赛车手杰基·斯图尔特（Jackie Stewart）提出。
+他认为，好的驾驶员肯定对机器的工作原理有足够了解，这样他们才能与机器和谐工作。
 
 To be a great race car driver, you don’t need to be a great mechanic, but you need to have more than a cursory understanding of how a motor car works.
 
+要成为一名出色的赛车手，您不需要成为一名出色的机械师，但您需要对汽车的工作原理有一个粗略的了解。
+
 I believe the same is true for us as software engineers. I don’t think any of us in this room will be a professional CPU designer, but that doesn’t mean we can ignore the problems that CPU designers face.
+
+我觉得软件工程师也是一样。
+我们不必成为专业的CPU设计者，但需要了解CPU设计人员所面临的问题。
 
 ### 1.2. Six orders of magnitude
 
@@ -121,19 +137,34 @@ There’s a common internet meme that goes something like this;
 
 Of course this is preposterous, but it underscores just how much has changed in the computing industry.
 
-As software authors all of us in this room have benefited from Moore’s Law, the doubling of the number of available transistors on a chip every 18 months, for 40 years. No other industry has experienced a  _six order of magnitude  [[1](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#_footnotedef_1 "View footnote.")]_  improvement in their tools in the space of a lifetime.
+As software authors all of us in this room have benefited from Moore’s Law, the doubling of the number of available transistors on a chip every 18 months, for 40 years. No other industry has experienced a  six order of magnitude  [1](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#_footnotedef_1 "View footnote.") improvement in their tools in the space of a lifetime.
+
+这里所有软件开发者都受益于摩尔定律，即40年来每18个月将芯片上可用晶体管的数量增加一倍。
+没有其他行业在使用寿命内对工具的改进达到六个数量级。
 
 But this is all changing.
 
-### 1.3. Are computers still getting faster?
+但这种好处马上将消失。
+
+
+
+### 1.3. Are computers still getting faster? 计算机会越来越快吗？
 
 So the fundamental question is, confronted with statistic like the ones in the image above, should we ask the question  _are computers still getting faster_?
 
+我们应该关心的问题是：计算机会一直越来越快吗？
+
 If computers are still getting faster then maybe we don’t need to care about the performance of our code, we just wait a bit and the hardware manufacturers will solve our performance problems for us.
+
+如果计算机的速度仍在不断提高，那么也许我们不需要关心代码的性能，只需稍等一下，硬件制造商就会为我们解决性能问题。
+
+
 
 #### 1.3.1. Let’s look at the data
 
 This is the classic data you’ll find in textbooks like  _Computer Architecture, A Quantitative Approach_  by John L. Hennessy and David A. Patterson. This graph was taken from the 5th edition
+
+下面的经典数据可以在 《 计算机体系结构》，《约翰·亨尼西和大卫·帕特森的定量方法》找到 。 此图摘自第5版。
 
 ![2313.processorperf](https://community.cadence.com/cfs-file/__key/communityserver-blogs-components-weblogfiles/00-00-00-01-06/2313.processorperf.jpg)
 
@@ -144,15 +175,28 @@ In the 5th edition, Hennessey and Patterson argue that there are three eras of c
 -   From the mid 80s to 2004 the trend line is clear. Computer integer performance improved on average by 52% each year. Computer power doubled every two years, hence people conflated Moore’s law — the doubling of the number of transistors on a die, with computer performance.
     
 -   Then we come to the third era of computer performance. Things slow down. The aggregate rate of change is 22% per year.
-    
+
+
+在第5版中，轩尼诗（Hennessey）和帕特森（Patterson）认为计算性能存在三个时代:
+
+- 1970 ~ 1985 是计算机形成的年代。微处理器不存在。计算机由集成电路组成　。成本，尺寸，及材料科学的发展是主要限制因素。 
+- 1985 ~ 2004 是调整发展的年代。计算机性能每年提高52％。计算能力每两年翻一翻。因此人们将摩尔定律和计算机性能混为一谈，摩尔定律是指芯片上晶休管的数量每两年翻一翻。
+- 2004 ~ 至今(2012)　增涨放缓，每年总共增加 22% 。
+
 
 That previous graph only went up to 2012, but fortunately in 2012  [Jeff Preshing](http://preshing.com/20120208/a-look-back-at-single-threaded-cpu-performance/)  wrote a  [tool to scrape the Spec website and build your own graph](https://github.com/preshing/analyze-spec-benchmarks).
+
+上图数据只到2012年。但　Jeff Preshing 在2012年写了一个爬取　Spec 网站数生成图表的工具，下图就是此工具生成的　1995～2017　年间的　Spec　数据　。
+
 
 ![int graph](https://dave.cheney.net/high-performance-go-workshop/images/int_graph.png)
 
 So this is the same graph using Spec data from 1995 til 2017.
 
 To me, rather than the step change we saw in the 2012 data, I’d say that  _single core_  performance is approaching a limit. The numbers are slightly better for floating point, but for us in the room doing line of business applications, this is probably not that relevant.
+
+
+> NOTE: integer performance  floating point performance 是有区别的。详细情况 TODO google
 
 #### 1.3.2. Yes, computer are still getting faster, slowly
 
@@ -2822,6 +2866,7 @@ Last updated 2019-04-26 02:55:54 UTC
 
 
 > Note: exec js in chrome console, to  remove anchor in https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html
+
 ```js
 var ehs = document.querySelectorAll( "h2" );
 ehs.forEach( e => {e.removeChild(e.childNodes[0])});
@@ -2846,6 +2891,13 @@ var ehs = document.querySelectorAll( "h4 a.link" );
 ehs.forEach ( e => { 
     e.removeAttribute("href");
 });
-
 ```
+
+[HighPerformanceWorkShopEN]:[High Performance Work Shop](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#mechanical_sympathy)
+
+[HighPerformanceWorkShopCN1]:[译文1 High Performance Work Shop](https://www.yuque.com/ksco/uiondt/nimz8b)
+
+[HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
+
+
 
