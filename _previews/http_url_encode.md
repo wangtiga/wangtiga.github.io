@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "pkg-config"
+title:  "url 格式"
 date:   2020-02-08 18:00:00 +0800
 tags:   tech
 ---

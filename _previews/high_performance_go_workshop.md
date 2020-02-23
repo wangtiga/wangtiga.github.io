@@ -2821,9 +2821,8 @@ Version dotgo-2019-3-g660848
 Last updated 2019-04-26 02:55:54 UTC
 
 
-> Note: 
+> Note: exec js in chrome console, to  remove anchor in https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html
 ```js
-// remove anchor in https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html
 var ehs = document.querySelectorAll( "h2" );
 ehs.forEach( e => {e.removeChild(e.childNodes[0])});
 
