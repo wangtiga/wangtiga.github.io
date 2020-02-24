@@ -195,16 +195,26 @@ So this is the same graph using Spec data from 1995 til 2017.
 
 To me, rather than the step change we saw in the 2012 data, I’d say that  _single core_  performance is approaching a limit. The numbers are slightly better for floating point, but for us in the room doing line of business applications, this is probably not that relevant.
 
+单核性能已经接近极限。
 
-> NOTE: integer performance  floating point performance 是有区别的。详细情况 TODO google
+> NOTE: integer performance  floating point performance 是有区别的。详细情况 TODO google CSAPP 了解浮点数计算
 
-#### 1.3.2. Yes, computer are still getting faster, slowly
+
+#### 1.3.2. Yes, computer are still getting faster, slowly 计算机还在变快，但是在慢慢变快
 
 > The first thing to remember about the ending of Moore’s law is something Gordon Moore told me. He said "All exponentials come to an end". — [John Hennessy](https://www.youtube.com/watch?v=Azt8Nc-mtKM)
 
 This is Hennessy’s quote from Google Next 18 and his Turing Award lecture. His contention is yes, CPU performance is still improving. However, single threaded integer performance is still improving around 2-3% per year. At this rate its going to take 20 years of compounding growth to double integer performance. Compare that to the go-go days of the 90’s where performance was doubling every two years.
 
 Why is this happening?
+
+> 戈登·摩尔告诉我，摩尔定律终结的过程，不会再以指数形势增涨。 — [John Hennessy](https://www.youtube.com/watch?v=Azt8Nc-mtKM)
+
+这是轩尼诗（Hennessy）在Google Next 18上的引用以及他在图灵奖上的演讲。 他认为CPU性能仍在提高,但是单线程 integer performance 每年仅提高2-3％左右。 以这种速度，它将需要20年的复合增长才能使整数性能翻倍。 相比之下，90年代的发展趋势是每两年翻一番。
+
+到底发生了什么呢？
+
+
 
 ### 1.4. Clock speeds
 
@@ -214,17 +224,38 @@ This graph from 2015 demonstrates this well. The top line shows the number of tr
 
 However, If we look at the middle line, we see clock speeds have not increased in a decade, we see that cpu speeds stalled around 2004
 
-The bottom graph shows thermal dissipation power; that is electrical power that is turned into heat, follows a same pattern—​clock speeds and cpu heat dissipation are correlated.
+The bottom graph shows thermal dissipation power; that is electrical power that is turned into heat, follows a same pattern—clock speeds and cpu heat dissipation are correlated.
 
-### 1.5. Heat
+
+2015 年的这张图很好地说明了这一点。
+第一条线显示了芯片上的晶体管数量。自 1970 年代以来，一直以线性趋势持续增长。 由于这是 log/lin 图，因此该图表示的是指数增长。
+
+如果我们看中间的线，会发现时钟速度近十年来没有增加， CPU 速度在 2004 年左右停滞了。
+
+最下面一条线，表示散热功率；即变成热量的电能，它和时钟速度的走向差不多，所以时钟速度和 cpu 散热也有一些关系。
+
+
+
+### 1.5. Heat 发热
 
 Why does a CPU produce heat? It’s a solid state device, there are no moving components, so effects like friction are not (directly) relevant here.
 
+为什么 CPU 会产生热量？它是固定不动的设备，也没有什么需要来回活动的零件，所以这个摩擦生热无关。
+
+
 This digram is taken from a great  [data sheet produced by TI](http://www.ti.com/lit/an/scaa035b/scaa035b.pdf). In this model the switch in N typed devices is attracted to a positive voltage P type devices are repelled from a positive voltage.
+
+下图来自 TI 公司的数据。
+在这个模型中，N device 中的开关被吸引到正电压上，P device 被排斥在正电压上。
 
 ![cmos inverter](https://dave.cheney.net/high-performance-go-workshop/images/cmos-inverter.png)
 
 The power consumption of a CMOS device, which is what every transistor in this room, on your desk, and in your pocket, is made from, is combination of three factors.
+
+我们身边能看到的所有 CMOS 设备功耗主要由以下三部分组成。
+
+- 1.静态功耗。当晶体管没有状态变化时，只有少量电流泄漏到大地。晶体管越小，泄漏越多；温度越高，泄漏越多。成长上亿的晶体管泄漏的电量累积到一起是非常巨大的。
+- 2.动态功耗。
 
 1.  Static power. When a transistor is static, that is, not changing its state, there is a small amount of current that leaks through the transistor to ground. The smaller the transistor, the more leakage. Leakage increases with temperature. Even a minute amount of leakage adds up when you have billions of transistors!
     
