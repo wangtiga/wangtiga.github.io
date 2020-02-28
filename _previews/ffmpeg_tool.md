@@ -311,6 +311,15 @@ gst-launch-1.0 \
 ffplay rtmp://127.0.0.1:1935/live/live
 
 
+# sample https://gstreamer.freedesktop.org/documentation/tools/gst-launch.html?gi-language=c
+
+# wav to rtp(audio)
+gst-launch-1.0 filesrc location=./test_16k.wav ! \
+    wavparse ! audioconvert ! audioresample ! \
+      audio/x-raw,channels=1,rate=16000 ! \
+      opusenc bitrate=16000 ! \
+      rtpopuspay ssrc=3494656 pt=122 ! udpsink host=127.0.0.1 port=5000
+
 # mp4 to rtp(video audio)
 gst-launch-1.0 filesrc location=/Users/tiga/Downloads/big_buck_bunny.mp4 ! \
     qtdemux name=demux \

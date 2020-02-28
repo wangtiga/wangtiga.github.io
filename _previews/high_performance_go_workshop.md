@@ -11,7 +11,7 @@ tags:   tech
 
 
 
-# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] 
+# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] [^PerformanceIntruction]
 
 Dave Cheney[dave@cheney.net](mailto:dave@cheney.net)Version Dotgo-2019-3-G660848,2019-04-26
 
@@ -252,17 +252,22 @@ This digram is taken from a great  [data sheet produced by TI](http://www.ti.com
 
 The power consumption of a CMOS device, which is what every transistor in this room, on your desk, and in your pocket, is made from, is combination of three factors.
 
-我们身边能看到的所有 CMOS 设备功耗主要由以下三部分组成。
-
-- 1.静态功耗。当晶体管没有状态变化时，只有少量电流泄漏到大地。晶体管越小，泄漏越多；温度越高，泄漏越多。成长上亿的晶体管泄漏的电量累积到一起是非常巨大的。
-- 2.动态功耗。
-
 1.  Static power. When a transistor is static, that is, not changing its state, there is a small amount of current that leaks through the transistor to ground. The smaller the transistor, the more leakage. Leakage increases with temperature. Even a minute amount of leakage adds up when you have billions of transistors!
     
 2.  Dynamic power. When a transistor transitions from one state to another, it must charge or discharge the various capacitances it is connected to the gate. Dynamic power per transistor is the voltage squared times the capacitance and the frequency of change. Lowering the voltage can reduce the power consumed by a transistor, but lower voltages causes the transistor to switch slower.
     
 3.  Crowbar, or short circuit current. We like to think of transistors as digital devices occupying one state or another, off or on, atomically. In reality a transistor is an analog device. As a switch a transistor starts out  _mostly_  off, and transitions, or switches, to a state of being  _mostly_  on. This transition or switching time is very fast, in modern processors it is in the order of pico seconds, but that still represents a period of time when there is a low resistance path from Vcc to ground. The faster the transistor switches, its frequency, the more heat is dissipated.
     
+
+我们身边能看到的所有 CMOS 设备功耗主要由以下三部分组成。
+
+- 1.静态功耗。当晶体管没有状态变化时，只有少量电流泄漏到大地。晶体管越小，泄漏越多；温度越高，泄漏越多。成长上亿的晶体管泄漏的电量累积到一起是非常巨大的。
+- 2.动态功耗。当晶体管进行状态转换时，要对栅极上的电容充放电。每个晶体管的动态功耗是 电压x电容x频率^2 。低电压会压低晶体管的能耗。但低电压也会使晶体管的开关速度变慢。
+- 3.短路。我们经常把晶体管当成数字设备，但它实际上是模拟设备。一个启动时是 off 状态，状态切换时是 on 状态的 switch 。这个转换过程很快，现在处理器大约只需要　一皮秒(pico second)，但当从 Vcc 到 ground 的电阻路径很低时，这个时间也不算短了。这个　switch 转换得越快，频率越高，它的温度也越高。
+
+> TODO gate 栅极 技术概念是指什么?
+
+
 
 ### 1.6. The end of Dennard scaling
 
@@ -2930,5 +2935,6 @@ ehs.forEach ( e => {
 
 [HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
 
+[PerformanceIntruction]:[性能调优攻略](https://coolshell.cn/articles/7490.html)
 
 
