@@ -269,35 +269,85 @@ The power consumption of a CMOS device, which is what every transistor in this r
 
 
 
-### 1.6. The end of Dennard scaling
+### 1.6. The end of Dennard scaling ( 丹纳德 扩展的终结 )
 
 To understand what happened next we need to look to a paper written in 1974 co-authored by  [Robert H. Dennard](https://en.wikipedia.org/wiki/Robert_H._Dennard). Dennard’s Scaling law states roughly that as transistors get smaller their  [power density](https://en.wikipedia.org/wiki/Power_density)  stays constant. Smaller transistors can run at lower voltages, have lower gate capacitance, and switch faster, which helps reduce the amount of dynamic power.
 
+参考 Robert H. Dennard 1974年论文可知。
+根据 Dennard’s Scaling 定律，在晶体管小到一定程度后，其 power density 保持恒定。
+晶体管越小，所需要的电压越低，栅极电容也越小，并且开关速度更快，这样总的动态功耗反而会降低。
+
+> NOTE: power density (功率密度) watts (瓦特 功率) hot plate (热铁板)  nuclear reactor (核反应堆) rocket nozzle (火箭喷射器)  
+
 So how did that work out?
+
+真的是这样吗？
 
 ![Screen Shot 2014 04 14 at 8.49.48 AM](http://semiengineering.com/wp-content/uploads/2014/04/Screen-Shot-2014-04-14-at-8.49.48-AM.png)
 
 It turns out not so great. As the gate length of the transistor approaches the width of a few silicon atom, the relationship between transistor size, voltage, and importantly leakage broke down.
 
+并非这样。当晶体管的栅极长度小到 silicon atom （硅原子）宽度时。晶体管大小、电压、leakage　之间的规律发生了变化。
+
+
 It was postulated at the  [Micro-32 conference in 1999](https://pdfs.semanticscholar.org/6a82/1a3329a60def23235c75b152055c36d40437.pdf)  that if we followed the trend line of increasing clock speed and shrinking transistor dimensions then within a processor generation the transistor junction would approach the temperature of the core of a nuclear reactor. Obviously this is was lunacy. The Pentium 4  [marked the end of the line](https://arstechnica.com/uncategorized/2004/10/4311-2/)  for single core, high frequency, consumer CPUs.
+
+在1999的 Micro-32 会议曾经推测，如果继续提高时钟速度，减小晶体管尺寸，按以上趋势图的发展，将生产出晶体箮结温度达到核反应堆温度的处理理。
+这有点荒谬了。
+单核心、高频率的消费类CPU奔腾4处理器，是最后一个符合上面趋势线的CPU。
+
+
 
 Returning to this graph, we see that the reason clock speeds have stalled is because cpu’s exceeded our ability to cool them. By 2006 reducing the size of the transistor no longer improved its power efficiency.
 
+我们再回过头讨论刚才这张图。
+时钟速度停止增长的主要原因是冷却 CPU 的技术能力跟不上。
+所以到 2006 年时，减小晶体管尺寸已经无法提高功率了。
+
+
 We now know that CPU feature size reductions are primarily aimed at reducing power consumption. Reducing power consumption doesn’t just mean “green”, like recycle, save the planet. The primary goal is to keep power consumption, and thus heat dissipation,  [below levels that will damage the CPU](https://en.wikipedia.org/wiki/Electromigration#Practical_implications_of_electromigration).
+
+我们知道，减小 CPU 尺寸的主要原因是为了降低能耗。
+降低能耗并非为了“绿色环保”，不是为了节约资源，保护地球环境。
+主要目标只是将保持能耗，在现有散热能力下，防止热量过高损坏CPU。
+
 
 ![stuttering](https://dave.cheney.net/high-performance-go-workshop/images/stuttering.png)
 
 But, there is one part of the graph that is continuing to increase, the number of transistors on a die. The march of cpu features size, more transistors in the same given area, has both positive and negative effects.
 
+但是图中晶体箮的数量仍然在持续增加。
+CPU尺寸变大，其中就能放更多晶体箮。这即有正面影响也有负面影响。
+
 Also, as you can see in the insert, the cost per transistor continued to fall until around 5 years ago, and then the cost per transistor started to go back up again.
+
+上图中左上角的插图显示，晶体管单价在2012年前一直在下降，随后2015年单价又开始上长。
+
+> NOTE: 图中显示的是1美元能购买的晶体管数量，所以跟单价趋势刚好相反。
+
+
 
 ![moores law](https://whatsthebigdata.files.wordpress.com/2016/08/moores-law.png)
 
 Not only is it getting more expensive to create smaller transistors, it’s getting harder. This report from 2016 shows the prediction of what the chip makers believed would occur in 2013; two years later they had missed all their predictions, and while I don’t have an updated version of this report, there are no signs that they are going to be able to reverse this trend.
 
+制造更小的晶体管不仅更贵了，也更难了。
+上面2016年的报告显示，芯片制造商预测2013年 physical gate length 从 20 nanometers　开始每年减小 2 nanometer 。
+但再看两年后2015的预测图发现，它们显示没有达到之前预期。
+虽然我没有相关报告的最新版本，但没有迹象表明谁能扭转这一趋势。
+
 It is costing intel, TSMC, AMD, and Samsung billions of dollars because they have to build new fabs, buy all new process tooling. So while the number of transistors per die continues to increase, their unit cost has started to increase.
 
-Even the term gate length, measured in nano meters, has become ambiguous. Various manufacturers measure the size of their transistors in different ways allowing them to demonstrate a smaller number than their competitors without perhaps delivering. This is the Non-GAAP Earning reporting model of CPU manufacturers.
+英特尔，台积电，AMD和三星等厂商在建厂，购置生产工具的花费高达数十亿美元。
+即使单个芯片的晶体管数量在增加，这些芯片的单位成本也仍然在上涨。
+
+
+> Even the term gate length, measured in nano meters, has become ambiguous. Various manufacturers measure the size of their transistors in different ways allowing them to demonstrate a smaller number than their competitors without perhaps delivering. This is the Non-GAAP Earning reporting model of CPU manufacturers.
+
+> 术语 gate length (栅极长度)的单位 nano meter（纳米）定义也有些模糊。
+> 每个厂商测量晶体管大小的方式都不一样，所以它们总能展示出比竞厂更小尺寸的样品。
+> 这是CPU制造商 Non-GAAP 收益报告模型。
+
 
 ### 1.7. More cores
 
@@ -2929,12 +2979,12 @@ ehs.forEach ( e => {
 });
 ```
 
-[HighPerformanceWorkShopEN]:[High Performance Work Shop](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#mechanical_sympathy)
+[^HighPerformanceWorkShopEN]:[High Performance Work Shop](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#mechanical_sympathy)
 
-[HighPerformanceWorkShopCN1]:[译文1 High Performance Work Shop](https://www.yuque.com/ksco/uiondt/nimz8b)
+[^HighPerformanceWorkShopCN1]:[译文1 High Performance Work Shop](https://www.yuque.com/ksco/uiondt/nimz8b)
 
-[HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
+[^HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
 
-[PerformanceIntruction]:[性能调优攻略](https://coolshell.cn/articles/7490.html)
+[^PerformanceIntruction]:[性能调优攻略](https://coolshell.cn/articles/7490.html)
 
 
