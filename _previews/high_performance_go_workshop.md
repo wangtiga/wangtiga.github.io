@@ -195,9 +195,10 @@ So this is the same graph using Spec data from 1995 til 2017.
 
 To me, rather than the step change we saw in the 2012 data, I’d say that  _single core_  performance is approaching a limit. The numbers are slightly better for floating point, but for us in the room doing line of business applications, this is probably not that relevant.
 
-单核性能已经接近极限。
+观察 2012 年的数据可以发现，_单核_ 整数运算单元的性能已经接近极限。
+虽然浮点数运算单元的数据可能会稍好一些，但对我们做业务程序的人来说，区别不大。
 
-> NOTE: integer performance  floating point performance 是有区别的。详细情况 TODO google CSAPP 了解浮点数计算
+> NOTE: 整数运算单元、浮点数运算单元 integer performance  floating point performance 是有区别的。详细情况 TODO google CSAPP 了解浮点数计算
 
 
 #### 1.3.2. Yes, computer are still getting faster, slowly 计算机还在变快，但是在慢慢变快
@@ -208,7 +209,7 @@ This is Hennessy’s quote from Google Next 18 and his Turing Award lecture. His
 
 Why is this happening?
 
-> 戈登·摩尔告诉我，摩尔定律终结的过程，不会再以指数形势增涨。 — [John Hennessy](https://www.youtube.com/watch?v=Azt8Nc-mtKM)
+> 戈登·摩尔告诉我，摩尔定律中指数增涨的过程即将结束。 — [John Hennessy](https://www.youtube.com/watch?v=Azt8Nc-mtKM)
 
 这是轩尼诗（Hennessy）在Google Next 18上的引用以及他在图灵奖上的演讲。 他认为CPU性能仍在提高,但是单线程 integer performance 每年仅提高2-3％左右。 以这种速度，它将需要20年的复合增长才能使整数性能翻倍。 相比之下，90年代的发展趋势是每两年翻一番。
 
@@ -216,7 +217,7 @@ Why is this happening?
 
 
 
-### 1.4. Clock speeds
+### 1.4. Clock speeds 时钟速度
 
 ![stuttering](https://dave.cheney.net/high-performance-go-workshop/images/stuttering.png)
 
@@ -228,6 +229,7 @@ The bottom graph shows thermal dissipation power; that is electrical power that 
 
 
 2015 年的这张图很好地说明了这一点。
+
 第一条线显示了芯片上的晶体管数量。自 1970 年代以来，一直以线性趋势持续增长。 由于这是 log/lin 图，因此该图表示的是指数增长。
 
 如果我们看中间的线，会发现时钟速度近十年来没有增加， CPU 速度在 2004 年左右停滞了。
@@ -240,7 +242,7 @@ The bottom graph shows thermal dissipation power; that is electrical power that 
 
 Why does a CPU produce heat? It’s a solid state device, there are no moving components, so effects like friction are not (directly) relevant here.
 
-为什么 CPU 会产生热量？它是固定不动的设备，也没有什么需要来回活动的零件，所以这个摩擦生热无关。
+为什么 CPU 会产生热量？它是固定不动的设备，也没有什么需要来回活动的零件，所以这里产生的热量肯定和摩擦生热无关。
 
 
 This digram is taken from a great  [data sheet produced by TI](http://www.ti.com/lit/an/scaa035b/scaa035b.pdf). In this model the switch in N typed devices is attracted to a positive voltage P type devices are repelled from a positive voltage.
@@ -355,47 +357,129 @@ It is costing intel, TSMC, AMD, and Samsung billions of dollars because they hav
 
 With thermal and frequency limits reached it’s no longer possible to make a single core run twice as fast. But, if you add another cores you can provide twice the processing capacity — if the software can support it.
 
+由于温度和频率的限制，想让单核心运行速度变快两倍已经不太容易了。
+但是，假如软件能同时利用好两个 core ，那只要再加一个 CPU 就能轻松让运行速度快两倍。
+
 In truth, the core count of a CPU is dominated by heat dissipation. The end of Dennard scaling means that the clock speed of a CPU is some arbitrary number between 1 and 4 Ghz depending on how hot it is. We’ll see this shortly when we talk about benchmarking.
 
-### 1.8. Amdahl’s law
+CPU 的核心数量主要由散热情况决定。
+由 Dennard’s Scaling 定律可知，CPU 时钟速度肯定是在 1 到 4 Ghz 之间，具体大小由它的热度决定。
+一会讨论基准测试时，我们就能看到这一点。
+
+
+### 1.8. Amdahl’s law (阿姆达尔定律)
 
 CPUs are not getting faster, but they are getting wider with hyper threading and multiple cores. Dual core on mobile parts, quad core on desktop parts, dozens of cores on server parts. Will this be the future of computer performance? Unfortunately not.
 
+CPU虽然没有变得更快，但由于超纯种和多核心技术的发展，CPU变的更“宽”了。
+在移动设备上使用双核处理器，桌面设备上使用四核处理器，在服务器中使用几十核心的处理器。
+在以后的日子，只要增加核心数量 ，计算机性能就能一直提升吗？
+当然不可能了。
+
 Amdahl’s law, named after the Gene Amdahl the designer of the IBM/360, is a formula which gives the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved.
+
+Amdahl 定律，是以 IBM/360 的设计师 Gene Amdahl 名字命名的。
+此定律中的公式能计算出，在任务工作量不变的情况下，能无限增加系统资源，最快能提前多久完成任务。
+
+> NOTE: “提前多久完成任务” 表达的含义与 “能提升工作效率多少倍” “提速多少倍” 一样。
 
 ![AmdahlsLaw](https://upload.wikimedia.org/wikipedia/commons/e/ea/AmdahlsLaw.svg)
 
 Amdahl’s law tells us that the maximum speedup of a program is limited by the sequential parts of the program. If you write a program with 95% of its execution able to be run in parallel, even with thousands of processors the maximum speedup in the programs execution is limited to 20x.
 
+Amdahl 定律告诉我们，能提速多少，取决于程序当中能够顺序执行的部分有多少。
+假设你的程序中有 95% 的代码都能并行执行，即使有上千个处理器，最多也只能提速 20 倍。
+
 Think about the programs that you work on every day, how much of their execution is parralisable?
 
-### 1.9. Dynamic Optimisations
+想想你每天写的程序，它们当中有多少是可以并行执行的呢？
+
+
+> TODO 超线程、整数运算单元、浮点数运算单元 integer performance  floating point performance
+> 
+> 参考链接：https://www.zhihu.com/question/20277695/answer/14588735
+>
+> Intel的超线程技术，目的是为了更充分地利用一个单核CPU的资源。CPU在执行一条机器指令时，并不会完全地利用所有的CPU资源，而且实际上，是有大量资源被闲置着的。超线程技术允许两个线程同时不冲突地使用CPU中的资源。比如一条整数运算指令只会用到整数运算单元，此时浮点运算单元就空闲了，若使用了超线程技术，且另一个线程刚好此时要执行一个浮点运算指令，CPU就允许属于两个不同线程的整数运算指令和浮点运算指令同时执行，这是真的并行。我不了解其它的硬件多线程技术是怎么样的，但单就超线程技术而言，它是可以实现真正的并行的。但这也并不意味着两个线程在同一个CPU中一直都可以并行执行，只是恰好碰到两个线程当前要执行的指令不使用相同的CPU资源时才可以真正地并行执行。
+
+
+
+
+### 1.9. Dynamic Optimisations 动态优化
 
 With clock speeds stalled and limited returns from throwing extra cores at the problem, where are the speedups coming from? They are coming from architectural improvements in the chips themselves. These are the big five to seven year projects with names like  [Nehalem, Sandy Bridge, and Skylake](https://en.wikipedia.org/wiki/List_of_Intel_CPU_microarchitectures#Pentium_4_/_Core_Lines).
 
+既然时钟速度停滞不前，通过增加 CPU core 数量带来的提速又十分有限，那么近年来的性能提升又来自哪里呢？
+这主要是由于芯片本身的架构改进。像 Nehalem, Sandy Bridge, Skylake 这些微处理器架构项目一般都要持久五到七年时间。
+
 Much of the improvement in performance in the last two decades has come from architectural improvements:
 
-#### 1.9.1. Out of order execution
+可以说，过去二十年间的性能提升大都来源于架构的改进。
+
+
+
+#### 1.9.1. Out of order execution 乱序执行
 
 Out of Order, also known as super scalar, execution is a way of extracting so called  _Instruction level parallelism_  from the code the CPU is executing. Modern CPUs effectively do SSA at the hardware level to identify data dependencies between operations, and where possible run independent instructions in parallel.
 
+乱序，也称为超标量，是一种能在运行中的 CPU 代码中，执行行指令级并行优化的方法。
+现代 CPU 能高效执行 SSA 过程，因为它能在硬件层识别各种数据操作之间的依赖关系，并尽可能并行执行。
+
+TODO [SSA Static single assignment 静态单赋值](https://en.wikipedia.org/wiki/Static_single_assignment_form)
+
+
 However there is a limit to the amount of parallelism inherent in any piece of code. It’s also tremendously power hungry. Most modern CPUs have settled on six execution units per core as there is an n squared cost of connecting each execution unit to all others at each stage of the pipeline.
 
-#### 1.9.2. Speculative execution
+但是每段代码的并行量是有限的。而且十分费电。
+现代CPU中，每个 core 配置六个执行单元，在执行指令流水线的过程中，将每个执行单元与其他执行单元连接到一起的成本是 N^2 。
+
+#### 1.9.2. Speculative execution 预测执行
 
 Save the smallest micro controllers, all CPUs utilise an  _instruction pipeline_  to overlap parts of in the instruction fetch/decode/execute/commit cycle.
+
+除了最小的微型控制器外，所有的 CPU 都能在执行 fetch/decode/execute/commit 指令周期的过程中，利用 _指令流水线_ 重叠（并行）执行其中部分指令。
+
+> NOTE [What are the smallest microcontrollers?](https://electronics.stackexchange.com/questions/84800/what-are-the-smallest-microcontrollers)
+
 
 ![800px Fivestagespipeline](https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Fivestagespipeline.png/800px-Fivestagespipeline.png)
 
 The problem with an instruction pipeline is branch instructions, which occur every 5-8 instructions on average. When a CPU reaches a branch it cannot look beyond the branch for additional instructions to execute and it cannot start filling its pipeline until it knows where the program counter will branch too. Speculative execution allows the CPU to "guess" which path the branch will take  _while the branch instruction is still being processed!_
 
+可是，指令流水线的分支指令平均每 5-8 个指令周期才会执行一次。
+当 CPU 达到分支时，它不能从当前分支之外寻找要执行的指令，必须从 program counter 获取到下一个要切换的分支后，才能填充流水线。
+预测执行功能，能让 CPU 在执行 分支指令 的过程中，猜测下一次执行的分支路径。
+
+> NOTE Program counter 程序计数器，也叫指令指针，用于保存程序下一次要执行的指令。
+> A program counter is a register in a computer processor that contains the address (location) of the instruction being executed at the current time. As each instruction gets fetched, the program counter increases its stored value by 1.
+> [What is program counter? And how it work?](https://www.quora.com/What-is-program-counter-And-how-it-work)
+
+
 If the CPU predicts the branch correctly then it can keep its pipeline of instructions full. If the CPU fails to predict the correct branch then when it realises the mistake it must roll back any change that were made to its  _architectural state_. As we’re all learning through Spectre style vulnerabilities, sometimes this rollback isn’t as seamless as hoped.
+
+如果 CPU 预测到正确的分支，就能保持它的分支流水线一直是满的。
+如果 CPU 预测错了分支，它就必须在发现错误时，立即回滚之前对 _architectural state_ 的改动。
+像我们在 Spectre style vulnerabilities 学习到的那样，有时这种回滚并非无缝的。
+
 
 Speculative execution can be very power hungry when branch prediction rates are low. If the branch is misprediction, not only must the CPU backtrace to the point of the misprediction, but the energy expended on the incorrect branch is wasted.
 
+如果分支预测的正确率很低时，是十分费电的。
+分支预测失败时，不仅 CPU 要回溯到之前的状态，花在分支在的能量也浪费了。
+
+
 All these optimisations lead to the improvements in single threaded performance we’ve seen, at the cost of huge numbers of transistors and power.
 
-Cliff Click has a  [wonderful presentation](https://www.youtube.com/watch?v=OFgxAFdxYAQ)  that argues out of order and speculative execution is most useful for starting cache misses early thereby reducing observed cache latency.
+这些在单线程性能上的提升，都是以大量晶体管和电子为代价的。
+
+> Cliff Click has a  [wonderful presentation](https://www.youtube.com/watch?v=OFgxAFdxYAQ)  that argues out of order and speculative execution is most useful for starting cache misses early thereby reducing observed cache latency.
+
+> Cliff Click 有一个精彩的演示，论证了 乱序执行和分支预测 能降低 cache latency .
+
+TODO starting cache misses early 如何理解？
+
+TODO [CPU 为何非得要用乱序执行和预测执行呢？](https://www.v2ex.com/t/420690)
+
+
 
 ### 1.10. Modern CPUs are optimised for bulk operations
 
@@ -2979,6 +3063,7 @@ ehs.forEach ( e => {
 });
 ```
 
+
 [^HighPerformanceWorkShopEN]:[High Performance Work Shop](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#mechanical_sympathy)
 
 [^HighPerformanceWorkShopCN1]:[译文1 High Performance Work Shop](https://www.yuque.com/ksco/uiondt/nimz8b)
@@ -2986,5 +3071,7 @@ ehs.forEach ( e => {
 [^HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
 
 [^PerformanceIntruction]:[性能调优攻略](https://coolshell.cn/articles/7490.html)
+
+[^GoMillionTCP]: [百万 Go TCP 连接的思考: epoll方式减少资源占用](https://colobu.com/2019/02/23/1m-go-tcp-connection/)
 
 
