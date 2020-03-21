@@ -469,23 +469,31 @@ Speculative execution can be very power hungry when branch prediction rates are 
 
 All these optimisations lead to the improvements in single threaded performance we’ve seen, at the cost of huge numbers of transistors and power.
 
-这些在单线程性能上的提升，都是以大量晶体管和电子为代价的。
+这些在单线程性能上的提升，都是以消耗大量晶体管和电力为代价的。
 
 > Cliff Click has a  [wonderful presentation](https://www.youtube.com/watch?v=OFgxAFdxYAQ)  that argues out of order and speculative execution is most useful for starting cache misses early thereby reducing observed cache latency.
 
 > Cliff Click 有一个精彩的演示，论证了 乱序执行和分支预测 能降低 cache latency .
 
-TODO starting cache misses early 如何理解？
+TODO starting cache misses early 如何理解？ 因为提前预测执行了代码，所以把相关数据和代码也都缓存到 L1 L2 L3 等多级缓存中较近的一级中了。所以当真正使用相关指令时，也就能更快找到所需要的数据和指令，进而减少 cache latency 。
 
 TODO [CPU 为何非得要用乱序执行和预测执行呢？](https://www.v2ex.com/t/420690)
 
+TODO [CPU Cache 机制以及 Cache miss](https://www.cnblogs.com/jokerjason/p/10711022.html)
 
 
-### 1.10. Modern CPUs are optimised for bulk operations
+
+### 1.10. Modern CPUs are optimised for bulk operations 现代 CPU 已针对批量操作进行了优化
 
 > Modern processors are a like nitro fuelled funny cars, they excel at the quarter mile. Unfortunately modern programming languages are like Monte Carlo, they are full of twists and turns. — David Ungar
 
-This a quote from David Ungar, an influential computer scientist and the developer of the SELF programming language that was referenced in a very old presentation I found online.
+> 现代处理器就像是硝基燃料的汽车，它们在四分之一英里处表现出色。不幸的是，现代编程语言就像蒙特卡洛一样，充满了曲折。—大卫·昂加（David Ungar）
+
+NOTE [Monte Carlo 蒙特卡罗方法是一种计算方法。原理是通过大量随机样本，去了解一个系统，进而得到所要计算的值。](http://www.ruanyifeng.com/blog/2015/07/monte-carlo-method.html)
+
+This a quote from David Ungar, an influential computer scientist and the developer of the SELF programming language that was referenced in a very old presentation [I found online](http://www.ai.mit.edu/projects/dynlangs/wizards-panels.html).
+
+这句话引用自有影响力的计算机科学家，SELF编程语言的开发人员 David Ungar ，我在网上找到了一个很旧的演示文稿，并引用了该引用。
 
 Thus, modern CPUs are optimised for bulk transfers and bulk operations. At every level, the setup cost of an operation encourages you to work in bulk. Some examples include
 
@@ -493,22 +501,70 @@ Thus, modern CPUs are optimised for bulk transfers and bulk operations. At every
     
 -   Vector instructions like MMX and SSE allow a single instruction to execute against multiple items of data concurrently providing your program can be expressed in that form.
     
+现代 CPU 针对批量传输和运算操作进行了优化。
+建议尽量把操作合并到一次调用来执行。
 
-### 1.11. Modern processors are limited by memory latency not memory capacity
+- 内存是按缓存行的倍数加载，不再像以前一样按字节加载。
+- 类似 MMX SSE 等向量指令允许一条指令同时针对多个数据项并发执行。当然，这也需要上层程序支持。
+
+
+
+### 1.11. Modern processors are limited by memory latency not memory capacity 现代处理器的主要瓶颈在内存延迟，而非内存大小
 
 If the situation in CPU land wasn’t bad enough, the news from the memory side of the house doesn’t get much better.
 
+如果 CPU 负载不是特别高，那内存延迟的影响也就没那么大。
+
 Physical memory attached to a server has increased geometrically. My first computer in the 1980’s had kilobytes of memory. When I went through high school I wrote all my essays on a 386 with 1.8 megabytes of ram. Now its commonplace to find servers with tens or hundreds of gigabytes of ram, and the cloud providers are pushing into the terabytes of ram.
+
+服务器上的物理内存已经程几何级数增长。
+我在1980年的第一台电脑只有几千字节内存。
+高中时所有论文都是在只有 1.8 MB 内存的 386 机器上编写。
+现在很容易找到拥有几十上百 GB 内在的服务器，云服务提供商甚至使用了 TB 大小的内存。
+
+> NOTE gemoetrically “几何级数”，又称“等比级数”。跟算法课程中的“复杂度量级”不同。
+
+> 常量阶O(1) 对数阶O(logn) 线性阶O(n) 线性对数阶O(n logn) 平方阶O(n^2) 立方阶O(n^3) k次方阶O(n^k) 指数阶O(2^n) 阶乘阶O(n!) 。
+> [数据结构与算法之美](https://time.geekbang.org/column/article/40036)
+
 
 ![mem gap](https://www.extremetech.com/wp-content/uploads/2018/01/mem_gap.png)
 
 However, the gap between processor speeds and memory access time continues to grow.
 
-![BmBr2mwCIAAhJo1](https://pbs.twimg.com/media/BmBr2mwCIAAhJo1.png)
+处理器速度与内存访问延迟之间的差异越来越大。（上图中2000到2010年间，CPU速度提高10倍速，Memory访问延迟仅提高2倍）
+
+[Table 2.2 Example Time Scale of System Latencies](https://pbs.twimg.com/media/BmBr2mwCIAAhJo1.png)
+
+Event        | Latency | Scaled |
+------------ | ---------------- |
+1 CPU cycle  | 0.3 ns  | 1s     |
+Level 1 cache access | 0.9 ns | 3s |
+Level 2 cache access | 2.8 ns | 9s |
+Level 3 cache access | 12.9 ns | 43 s |
+Main memory access (DRAM, from CPU) | 120 ns | 6 min |
+Solid-state disk I/O (flash memory) | S0- -150 us | 2- -6 days |
+Rotational disk I/O | 1-10 ms | 1-12 months |
+Internet: San Francisco to New York | 40 ms | 4 years |
+Internet: San Francisco to United Kingdom | 81 ms | 8 years |
+Internet: San Francisco to Australia | 183 ms | 19 years |
+TCP packet retransmit | 1-3 s | 105- 317 years |
+OS virtualization system reboot | 4S | 423 years |
+SCSI command time-out | 30 s | 3 millennia |
+Hardware (HW) virtualization system reboot | 40 s | 4 millennia |
+Physical system reboot | 5m | 32 millennia |
+
+
 
 But, in terms of processor cycles lost waiting for memory, physical memory is still as far away as ever because memory has not kept pace with the increases in CPU speed.
 
+Memory 跟不上 CPU 速度快速增长的步伐，所以处理要空转多个时钟周期来等待访问内存的过程。
+
 So, most modern processors are limited by memory latency not capacity.
+
+所以说，现代处理器主要瓶颈在内存延迟，而不是内存大小。
+
+
 
 ### 1.12. Cache rules everything around me
 

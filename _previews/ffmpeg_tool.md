@@ -326,8 +326,11 @@ gst-launch-1.0 filesrc location=/Users/tiga/Downloads/big_buck_bunny.mp4 ! \
     demux.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! \
       audio/x-raw,channels=1,rate=16000 ! \
       opusenc bitrate=20000 ! \
-      rtpopuspay ! udpsink host=127.0.0.1 port=5000  \
-    demux.video_0 ! queue ! video/x-h264 ! h264parse ! rtph264pay config-interval=-1 ! udpsink  host=127.0.0.1 port=5001
+      rtpopuspay ssrc=3494656 mtu=1400 pt=122 ! \
+      udpsink host=127.0.0.1 port=5000  \
+    demux.video_0 ! queue ! video/x-h264 ! h264parse ! \
+      rtph264pay ssrc=3494657 mtu=1400 config-interval=-1 ! \
+      udpsink  host=127.0.0.1 port=5001
 
 # play audio
 gst-launch-1.0 -v udpsrc port=5000 address=127.0.0.1 caps="application/x-rtp, encoding-name=OPUS, payload=96" ! rtpopusdepay ! decodebin ! autoaudiosink
@@ -366,6 +369,23 @@ gst-launch-1.0 audiotestsrc ! \
 
 
 
+# mkv to rtp(video h264 vp8 audio pcmu)
+gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.mkv"  ! decodebin ! \
+    videoscale ! video/x-raw, width=320, height=240 ! queue ! \
+    vp8enc error-resilient=partitions keyframe-max-dist=10 auto-alt-ref=true cpu-used=5 deadline=1 ! \
+    rtpvp8pay ssrc=3494657 mtu=1400 ! \
+    udpsink  host=127.0.0.1 port=5000
+
+gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.mkv"  ! decodebin ! \
+    queue ! audioconvert  ! \
+    opusenc bitrate=20000 ! \
+    rtpopuspay ssrc=3494656 mtu=1400 pt=122 ! \
+    udpsink host=127.0.0.1 port=5000  \
+
+gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.mkv"  ! decodebin ! \
+    videoconvert ! x264enc !  \
+    rtph264pay ssrc=3494657 mtu=1400 config-interval=-1 ! \
+    udpsink  host=127.0.0.1 port=5000
 
 # mkv to rtp video
 gst-launch-1.0 filesrc location=/Users/tiga/Downloads/sintel_trailer-480p.mkv ! qtdemux !  video/x-h264 ! h264parse ! rtph264pay config-interval=-1 ! udpsink  host=127.0.0.1 port=5000

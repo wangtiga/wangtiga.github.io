@@ -13,6 +13,39 @@ tags: linux
 
 ### shell
 
+#### tmux 持久化远程 ssh 会话
+```shell
+# 启动
+$ tmux
+
+# 查看当前所有的 Tmux 会话
+$ tmux ls
+
+# 接入会话
+$ tmux attach -t 0
+
+# 窗格管理 快捷键
+Ctrl+b %：划分左右两个窗格。
+Ctrl+b "：划分上下两个窗格。
+Ctrl+b <arrow key>：光标切换到其他窗格。<arrow key>是指向要切换到的窗格的方向键，比如切换到下方窗格，就按方向键↓。
+Ctrl+b ;：光标切换到上一个窗格。
+Ctrl+b o：光标切换到下一个窗格。
+
+# 分离会话
+$ tmux detach
+# 或者快捷键 Ctrl+b d
+
+# 重命名会话
+$ tmux rename-session -t 0 <new-name>
+
+# 使用指定名称启动
+$ tmux new -s <session-name>
+```
+
+> [Tmux 使用教程](http://www.ruanyifeng.com/blog/2019/10/tmux.html)
+
+
+
 #### Linux格式化 json base64
 
 使用 jq 命令格式化 json 数据

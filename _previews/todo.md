@@ -52,6 +52,12 @@ golang io.Copy 与内存分配使用
   https://matt.aimonetti.net/posts/2013-07-golang-multipart-file-upload-example/
 
   https://github.com/wangtiga/test/tgin/upload
+
+turn html to nice markdown
+  https://github.com/mdnice/sitdown
+
+Netgraph is a packet sniffer tool that captures all HTTP requests/responses, and display them in web page.
+  https://github.com/ga0/netgraph
   
 
 
