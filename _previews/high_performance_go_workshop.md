@@ -11,7 +11,10 @@ tags:   tech
 
 
 
-# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] [^PerformanceIntruction]
+# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] 
+
+
+> 其他值得参考的文章 [^GoMillionTCP] [^PerformanceIntruction]
 
 Dave Cheney[dave@cheney.net](mailto:dave@cheney.net)Version Dotgo-2019-3-G660848,2019-04-26
 
@@ -481,6 +484,7 @@ TODO [CPU 为何非得要用乱序执行和预测执行呢？](https://www.v2ex.
 
 TODO [CPU Cache 机制以及 Cache miss](https://www.cnblogs.com/jokerjason/p/10711022.html)
 
+NOTE CoolShell CPU Cache [^CPUCache]
 
 
 ### 1.10. Modern CPUs are optimised for bulk operations 现代 CPU 已针对批量操作进行了优化
@@ -3161,7 +3165,10 @@ ehs.forEach ( e => {
 
 [^HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
 
+[^CPUCache]:[CPUCache](https://coolshell.cn/articles/20793.html)
+
 [^PerformanceIntruction]:[性能调优攻略](https://coolshell.cn/articles/7490.html)
+
 
 [^GoMillionTCP]: [百万 Go TCP 连接的思考: epoll方式减少资源占用](https://colobu.com/2019/02/23/1m-go-tcp-connection/)
 

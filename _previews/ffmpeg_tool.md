@@ -411,3 +411,11 @@ GstBin that auto-magically constructs a decoding pipeline using available decode
 
 decodebin is considered stable now and replaces the old decodebin element. uridecodebin uses decodebin internally and is often more convenient to use, as it creates a suitable source element as well.
 
+
+
+[^FFMPEG_RYF]:[FFmpeg 视频处理入门教程](http://www.ruanyifeng.com/blog/2020/01/ffmpeg.html)
+
+[^FFMPEG_GUIDE]:[FFmpeg Streaming Guide](https://trac.ffmpeg.org/wiki/StreamingGuide)
+
+[^GSTREAMER_EN]:[Gstreamer basic real time streaming tutorial](http://www.einarsundgren.se/gstreamer-basic-real-time-streaming-tutorial/)
+
