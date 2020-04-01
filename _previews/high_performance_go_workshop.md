@@ -11,7 +11,10 @@ tags:   tech
 
 
 
-# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] [^PerformanceIntruction]
+# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] 
+
+
+> 其他值得参考的文章 [^GoMillionTCP] [^PerformanceIntruction]
 
 Dave Cheney[dave@cheney.net](mailto:dave@cheney.net)Version Dotgo-2019-3-G660848,2019-04-26
 
@@ -211,7 +214,7 @@ Why is this happening?
 
 > 戈登·摩尔告诉我，摩尔定律中指数增涨的过程即将结束。 — [John Hennessy](https://www.youtube.com/watch?v=Azt8Nc-mtKM)
 
-这是轩尼诗（Hennessy）在Google Next 18上的引用以及他在图灵奖上的演讲。 他认为CPU性能仍在提高,但是单线程 integer performance 每年仅提高2-3％左右。 以这种速度，它将需要20年的复合增长才能使整数性能翻倍。 相比之下，90年代的发展趋势是每两年翻一番。
+这是轩尼诗（Hennessy）在Google Next 18上的引用以及他在图灵奖上的演讲。 他认为CPU性能仍在提高,但是单线程 integer performance 每年仅提高2-3％左右。 以这种速度，它将需要20年的复合增长才能使整数运算的性能翻倍。 相比之下，90年代的发展趋势是每两年翻一番。
 
 到底发生了什么呢？
 
@@ -481,6 +484,7 @@ TODO [CPU 为何非得要用乱序执行和预测执行呢？](https://www.v2ex.
 
 TODO [CPU Cache 机制以及 Cache miss](https://www.cnblogs.com/jokerjason/p/10711022.html)
 
+NOTE CoolShell CPU Cache [^CPUCache]
 
 
 ### 1.10. Modern CPUs are optimised for bulk operations 现代 CPU 已针对批量操作进行了优化
@@ -558,7 +562,7 @@ Physical system reboot | 5m | 32 millennia |
 
 But, in terms of processor cycles lost waiting for memory, physical memory is still as far away as ever because memory has not kept pace with the increases in CPU speed.
 
-Memory 跟不上 CPU 速度快速增长的步伐，所以处理要空转多个时钟周期来等待访问内存的过程。
+Memory 跟不上 CPU 速度快速增长的步伐，所以处理器要空转多个时钟周期来等待访问内存的过程。
 
 So, most modern processors are limited by memory latency not capacity.
 
@@ -566,11 +570,18 @@ So, most modern processors are limited by memory latency not capacity.
 
 
 
-### 1.12. Cache rules everything around me
+### 1.12. Cache rules everything around 至关重要的缓存
 
 ![latency](https://www.extremetech.com/wp-content/uploads/2014/08/latency.png)
 
+> data access range  数据访问范围，大小
+
+> memory latency 内存延迟
+
+
 For decades the solution to the processor/memory cap was to add a cache-- a piece of small fast memory located closer, and now directly integrated onto, the CPU.
+
+近几十年来，提升处理器/内存瓶颈的主要方法就是加缓存 －－ 最开始是在CPU附近增加一小块高速内存，现在直接把高速内存集成到CPU内了。
 
 But;
 
@@ -579,21 +590,49 @@ But;
 -   L2 has slowly crept up to 512kb on the largest intel parts
     
 -   L3 is now measured in 4-32mb range, but its access time is variable
+
+
+但是：
+
+- 一级缓存一直保持在每核心 32kb 大小，几十年没什么变化
+
+- 二级缓存增长缓慢，在 interl 中最大 512kb
+
+- 三级缓存在 4-32mb 之间，但它的访问时间是变化的
+
+> TODO 三级缓存访问时间可变，是指不同厂商使用的三级缓存速度不同？还是说不凬时间点访问三级缓存所需要的时间是变化的？
     
 
 ![E5v4blockdiagram](https://i3.wp.com/computing.llnl.gov/tutorials/linux_clusters/images/E5v4blockdiagram.png)
 
 By caches are limited in size because they are  [physically large on the CPU die](http://www.itrs.net/Links/2000UpdateFinal/Design2000final.pdf), consume a lot of power. To halve the cache miss rate you must  _quadruple_  the cache size.
 
-### 1.13. The free lunch is over
+因为这块高速内存占用CPU的物理空间太多，且消费电量较高，所以缓存一直不大。
+如果想让缓存丢失率减小一半，至少要让缓存大小增加四倍。
 
-In 2005 Herb Sutter, the C++ committee leader, wrote an article entitled  [The free lunch is over](http://www.gotw.ca/publications/concurrency-ddj.htm). In his article Sutter discussed all the points I covered and asserted that future programmers will not longer be able to rely on faster hardware to fix slow programs—​or slow programming languages.
+
+
+
+### 1.13. The free lunch is over 免费午餐的时代结束了
+
+In 2005 Herb Sutter, the C++ committee leader, wrote an article entitled  [The free lunch is over](http://www.gotw.ca/publications/concurrency-ddj.htm). In his article Sutter discussed all the points I covered and asserted that future programmers will not longer be able to rely on faster hardware to fix slow programs or slow programming languages.
+
+ C+＋ 委员会领导人 Herb Sutter 于 2005 年写过一篇名为《The free lunch is over》的文章。
+ 文中讨论了我刚才讲的所有知识点，并且断言，以后的程序员再也不能仅仅靠升级更快的硬件来给应用程序或编程语言提升性能了。
+
 
 Now, more than a decade later, there is no doubt that Herb Sutter was right. Memory is slow, caches are too small, CPU clock speeds are going backwards, and the simple world of a single threaded CPU is long gone.
 
+十几年后的如今，可以肯定 Herb Sutter 是正确的。
+内存太慢，缓存又太小，CPU时钟速率还更慢了，单线程CPU的世界已经过去了。
+
 Moore’s Law is still in effect, but for all of us in this room, the free lunch is over.
 
-### 1.14. Conclusion
+摩尔定律仍然有效，但对在座各位来说，免费午餐时代已经过去了。
+
+
+
+### 1.14. Conclusion 结论
 
 > The numbers I would cite would be by 2010: 30GHz, 10billion transistors, and 1 tera-instruction per second. — [Pat Gelsinger, Intel CTO, April 2002](https://www.cnet.com/news/intel-cto-chip-heat-becoming-critical-issue/)
 
@@ -3126,7 +3165,10 @@ ehs.forEach ( e => {
 
 [^HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
 
+[^CPUCache]:[CPUCache](https://coolshell.cn/articles/20793.html)
+
 [^PerformanceIntruction]:[性能调优攻略](https://coolshell.cn/articles/7490.html)
+
 
 [^GoMillionTCP]: [百万 Go TCP 连接的思考: epoll方式减少资源占用](https://colobu.com/2019/02/23/1m-go-tcp-connection/)
 
