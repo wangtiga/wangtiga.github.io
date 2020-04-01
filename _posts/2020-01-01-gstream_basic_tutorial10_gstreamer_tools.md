@@ -27,7 +27,7 @@ Bear in mind that it can only create simple pipelines. In particular, it can onl
 
 Please note that gst-launch-1.0 is primarily a debugging tool for developers. You should not build applications on top of it. Instead, use the `gst_parse_launch()` function of the GStreamer API as an easy way to construct pipelines from pipeline descriptions.
 
-gst-launch-1.0 主要是给开发者使用的工具，不要使用它开发应用。
+gst-launch-1.0 主要是给开发者使用的调试工具，不要使用它开发应用。
 开发简单的功能可以用 `gst_parse_launch()` 函数运行 pipleine 。
 
 Although the rules to construct pipeline descriptions are very simple, the concatenation of multiple elements can quickly make such descriptions resemble black magic. Fear not, for everyone learns the gst-launch-1.0 syntax, eventually.
@@ -52,10 +52,11 @@ In simple form, a PIPELINE-DESCRIPTION is a list of element types separated by e
 gst-launch-1.0 videotestsrc ! videoconvert ! autovideosink
 ```
 
+You should see a windows with an animated video pattern. Use CTRL+C on the terminal to stop the program.
+
 执行完毕后，会看到一个视频窗口。
 在终端中按 CTRL+C 能结束这个程序。
 
-You should see a windows with an animated video pattern. Use CTRL+C on the terminal to stop the program.
 
 This instantiates a new element of type  `videotestsrc`  (an element which generates a sample video pattern), an  `videoconvert`  (an element which does raw video format conversion, making sure other elements can understand each other), and an  `autovideosink`  (a window to which video is rendered). Then, GStreamer tries to link the output of each element to the input of the element appearing on its right in the description. If more than one input or output Pad is available, the Pad Caps are used to find two compatible Pads.
 
@@ -71,7 +72,7 @@ This instantiates a new element of type  `videotestsrc`  (an element which gener
 
 Properties may be appended to elements, in the form `property=value` (multiple properties can be specified, separated by spaces). Use the  `gst-inspect-1.0`  tool (explained next) to find out the available properties for an element.
 
-可以设置 element 的 property ，格式为 `property2=value property2=value` （使用空格分隔多个属性）。
+可以设置 element 的 property ，格式为 `property1=value property2=value` （使用空格分隔多个属性）。
 使用 `gst-inspect-1.0` 工具查找 element 的可用属性（稍后会介绍）。
 
 ```shell
@@ -171,7 +172,7 @@ When an element has more than one output pad, it might happen that the link to t
 
 当 element 有多个 output pad 时， link 到另一个 element 的过程就会出现歧义：
 下一个 element 也许有多个兼容的 input pad ，甚至所有的 input pad 都能兼容 out pad 的 Pad Caps 。
-此时， GStreamer 会选择第一个可用的 pad ，可以理解成随机先了一个 output pad 使用。
+此时， GStreamer 会选择第一个可用的 pad ，可以理解成随机选了一个 output pad 使用。
 
 Consider the following pipeline:
 
@@ -183,7 +184,7 @@ gst-launch-1.0 souphttpsrc location=https://www.freedesktop.org/software/gstream
 
 This is the same media file and demuxer as in the previous example. The input Pad Caps of  `filesink`  are  `ANY`, meaning that it can accept any kind of media. Which one of the two output pads of  `matroskademux`  will be linked against the filesink?  `video_00`  or  `audio_00`? You cannot know.
 
-假设媒体文件与分流器与之前示例相同。
+假设媒体文件与分流器跟之前的示例相同。
 `filesink`的 input Pad Caps （输入垫的能力）是 `ANY` ，即它能接受任意类型的 media 。
 那么从 `matroskademux` 分流出来的 `video_00` 和 `audio_00` 中，哪个会被链接到 filesink 呢？
 不太确定吧。

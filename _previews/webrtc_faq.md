@@ -10,6 +10,11 @@ tags:   tech
 
 
 
+### 8.如何录制 vp8 opus 到一个文件中？
+用 gstream 推流到 confserver ，然后 chrome 播放时，音频异响， sdp 协商的是 48k opus 2 。
+如果能在 confserver 录制 chrome 推上来的视频到文件中，然后再用 confclient 推流到 confserver 。编码肯定就没问题了，
+
+
 ### 7.相关  RFC 文档都有哪些，什么作用？
 
 RFC版本号 名称 备注
@@ -62,11 +67,16 @@ The Secure Real-time Transport Protocol (SRTP)
 
 RTP媒体流采用AES-128对称加密
 
-#### 3984
+#### rfc6184 
+
+Internet Engineering Task Force (IETF)  
+
+- 3984
 
 RTP Payload Format for H.264 Video
 
 RTP负载为H264的格式定义，已被6184取代
+
 
 #### 4103
 
@@ -306,6 +316,12 @@ TODO 这个问题优先级最低
 ### 4.为什么 pion 的 ICE 协调过程那么慢？
 有时要几十秒。
 跟 stun:stun.l.google.com:19302 有关系吗？
+
+测试时，各端都是同一局域网，可以不用 stun ，这样就很快。
+```js
+    let config = {"iceServers":[],"iceTransportPolicy":"all","iceCandidatePoolSize":"0"}
+    let pc = new RTCPeerConnection();
+```
 
 ### 3.pionConfDemo 要实现的功能
 - ConfServer

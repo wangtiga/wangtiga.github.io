@@ -74,11 +74,17 @@ ffmpeg -i input output
 
 And you’re done. For example, you could convert an MP3 into a WAV file, or an MKV video into MP4 (but don’t do that just yet, please). You could also just extract audio from a video file.
 
+用以下命令把 MP3 转换成 WAV 文件。
+
 ```
 ffmpeg -i audio.mp3 audio.wav
 ```
 
 FFmpeg will guess which codecs you want to use depending on the format specifier (e.g. “.wav” container obviously needs a WAV codec inside, and MKV video will use x264 video and AC3 audio). But that’s not always what we want. Let’s say you have an MP4 container – which video codec should it include? There are a couple of possible answers. So, we’re better off specifying these codecs ourselves, since some codecs are better than others or have particularities that you might need.
+
+FFmpeg 会根据文件后缀推测编码类型。（比如 ".wav" container 显然会使用 WAV codec， MKV container 一般用 x264 的 video codec 和 AC3 的 audio codec 。）
+但不总是这么简单。
+如果是 MP4 container ，应该用什么 video codec 呢？
 
 ## Specifying Video and Audio codecs
 
@@ -371,7 +377,8 @@ gst-launch-1.0 audiotestsrc ! \
 
 # mkv to rtp(video h264 vp8 audio pcmu)
 gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.mkv"  ! decodebin ! \
-    videoscale ! video/x-raw, width=320, height=240 ! queue ! \
+    videoscale ! video/x-raw, width=320, height=240 ! \
+    queue ! \
     vp8enc error-resilient=partitions keyframe-max-dist=10 auto-alt-ref=true cpu-used=5 deadline=1 ! \
     rtpvp8pay ssrc=3494657 mtu=1400 ! \
     udpsink  host=127.0.0.1 port=5000
@@ -382,8 +389,26 @@ gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.m
     rtpopuspay ssrc=3494656 mtu=1400 pt=122 ! \
     udpsink host=127.0.0.1 port=5000  \
 
+gst-launch-1.0 filesrc location=big_buck_bunny.mp4 ! \
+    qtdemux name=demux \
+      demux.video_0 ! queue ! \
+      decodebin ! \
+      videoconvert ! \
+      videoscale ! \
+      videorate ! \
+      video/x-raw,width=320,height=240,framerate=15/1,pixel-aspect-ratio=1/1,level=1.2 ! \
+      x264enc bframes=0 byte-stream=true bitrate=9000 insert-vui=false ! \
+      filesink location=videotestsrc.264
+
+gst-launch-1.0 filesrc location=big_buck_bunny.mp4 ! \
+    qtdemux name=mdemux mdemux.video_0 ! queue ! \
+      filesink location=videotestsrc.264
+
+
 gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.mkv"  ! decodebin ! \
-    videoconvert ! x264enc !  \
+    videoconvert !  \
+    videoscale ! videorate ! video/x-raw,framerate=15/1,width=640,height=480 !  \
+    x264enc bframes=0  !  \
     rtph264pay ssrc=3494657 mtu=1400 config-interval=-1 ! \
     udpsink  host=127.0.0.1 port=5000
 
@@ -411,3 +436,4 @@ GstBin that auto-magically constructs a decoding pipeline using available decode
 
 decodebin is considered stable now and replaces the old decodebin element. uridecodebin uses decodebin internally and is often more convenient to use, as it creates a suitable source element as well.
 
+> https://gstreamer.freedesktop.org/documentation/tutorials/basic/handy-elements.html?gi-language=python#videorate
