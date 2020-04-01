@@ -11,7 +11,7 @@ tags:   tech
 
 
 
-# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] 
+# High Performance Go Workshop [^HighPerformanceWorkShopEN] [^HighPerformanceWorkShopGithub] [^HighPerformanceWorkShopCN1] [^HighPerformanceWorkShopCN2] 
 
 
 > 其他值得参考的文章 [^GoMillionTCP] [^PerformanceIntruction]
@@ -204,7 +204,8 @@ To me, rather than the step change we saw in the 2012 data, I’d say that  _sin
 > NOTE: 整数运算单元、浮点数运算单元 integer performance  floating point performance 是有区别的。详细情况 TODO google CSAPP 了解浮点数计算
 
 
-#### 1.3.2. Yes, computer are still getting faster, slowly 计算机还在变快，但是在慢慢变快
+#### 1.3.2. Yes, computer are still getting faster, slowly 计算机还在变快，但是在慢慢变快 [^CPUMax4GHz]
+
 
 > The first thing to remember about the ending of Moore’s law is something Gordon Moore told me. He said "All exponentials come to an end". — [John Hennessy](https://www.youtube.com/watch?v=Azt8Nc-mtKM)
 
@@ -271,6 +272,7 @@ The power consumption of a CMOS device, which is what every transistor in this r
 - 3.短路。我们经常把晶体管当成数字设备，但它实际上是模拟设备。一个启动时是 off 状态，状态切换时是 on 状态的 switch 。这个转换过程很快，现在处理器大约只需要　一皮秒(pico second)，但当从 Vcc 到 ground 的电阻路径很低时，这个时间也不算短了。这个　switch 转换得越快，频率越高，它的温度也越高。
 
 > TODO gate 栅极 技术概念是指什么?
+
 
 
 
@@ -636,7 +638,23 @@ Moore’s Law is still in effect, but for all of us in this room, the free lunch
 
 > The numbers I would cite would be by 2010: 30GHz, 10billion transistors, and 1 tera-instruction per second. — [Pat Gelsinger, Intel CTO, April 2002](https://www.cnet.com/news/intel-cto-chip-heat-becoming-critical-issue/)
 
+> Intel CTO  Pat Gelsinger 在 2002 4月曾预测2010年的CPU性能指标： 30GHz, 100亿个晶体管，每秒种执行 一千亿 条指令。
+>
+> NOTE 引用的文章中，Pat Gelsinger 是说在没有散热问题的情况下，才能达到 30GHz 的频率。虽然 2004 年时已经生产出 3.8GHz 主频的 [Prescott](https://zh.wikipedia.org/wiki/%E5%A5%94%E8%85%BE4#cite_note-3) ，但至今 2020 年，单核心CPU主频普遍低于 4GHz [^InterlCPUList] 。
+> 
+> - 1k = 1000
+> - 1m = 1000k = 100 万
+> - 1g = 1000m = 1 亿
+> - 1t = 1000g = 一千亿 
+> 
+> NOTE 其他相关文章 [Favorite Forecast Fallacies](https://semiengineering.com/favorite-forecast-fallacies/)  [请问目前主流CPU的每秒计算次数能达到多少？能够上亿吗？](https://www.zhihu.com/question/39604940)
+
+
 It’s clear that without a breakthrough in material science the likelihood of a return to the days of 52% year on year growth in CPU performance is vanishingly small. The common consensus is that the fault lies not with the material science itself, but how the transistors are being used. The logical model of sequential instruction flow as expressed in silicon has lead to this expensive endgame.
+
+显然，如果材料科学方面没有技术突破，想让 CPU 性能恢复到同比 52％ 增长的可能性很小。
+普遍的共识是，问题不在于材料科学本身，而在于晶体管的使用方式。
+只要使用硅表示的顺序指令流的逻辑模型，必然导致这种代价。
 
 There are many presentations online that rehash this point. They all have the same prediction — computers in the future will not be programmed like they are today. Some argue it’ll look more like graphics cards with hundreds of very dumb, very incoherent processors. Others argue that Very Long Instruction Word (VLIW) computers will become predominant. All agree that our current sequential programming languages will not be compatible with these kinds of processors.
 
@@ -3161,6 +3179,9 @@ ehs.forEach ( e => {
 
 [^HighPerformanceWorkShopEN]:[High Performance Work Shop](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#mechanical_sympathy)
 
+[^HighPerformanceWorkShopGithub]:[High Performance Work Shop Github](https://github.com/davecheney/gophercon2018-performance-tuning-workshop)
+
+
 [^HighPerformanceWorkShopCN1]:[译文1 High Performance Work Shop](https://www.yuque.com/ksco/uiondt/nimz8b)
 
 [^HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
@@ -3172,4 +3193,8 @@ ehs.forEach ( e => {
 
 [^GoMillionTCP]: [百万 Go TCP 连接的思考: epoll方式减少资源占用](https://colobu.com/2019/02/23/1m-go-tcp-connection/)
 
+
+[^InterlCPUList]: [英特尔微处理器列表](https://zh.wikipedia.org/wiki/%E8%8B%B1%E7%89%B9%E5%B0%94%E5%BE%AE%E5%A4%84%E7%90%86%E5%99%A8%E5%88%97%E8%A1%A8)。
+
+[^CPUMax4GHz]: [为什么主流CPU的频率止步于4G?我们触到频率天花板了吗？](https://zhuanlan.zhihu.com/p/30409360)
 
