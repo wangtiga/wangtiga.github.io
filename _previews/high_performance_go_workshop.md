@@ -800,7 +800,10 @@ For the rest of us, have a before and after sample and run them multiple times t
 
 The  `testing`  package has built in support for writing benchmarks. If we have a simple function like this:
 
-```
+`testing` package 专门编写基准测试的内置包。
+如果我们有一个下面这样简单的函数要测试：
+
+```go
 func Fib(n int) int {
 	switch n {
 	case 0:
@@ -817,7 +820,9 @@ func Fib(n int) int {
 
 The we can use the  `testing`  package to write a  _benchmark_  for the function using this form.
 
-```
+可以像下面这样，用 `testing` package  编写 _基准测试_  测试刚才函数。
+
+```go
 func BenchmarkFib20(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		Fib(20) // run the Fib function b.N times
@@ -827,15 +832,31 @@ func BenchmarkFib20(b *testing.B) {
 
 The benchmark function lives alongside your tests in a  `_test.go`  file.
 
+这个基准测试函数一般放在以 `_test.go` 结尾的单元测试中。
+
 Benchmarks are similar to tests, the only real difference is they take a  `*testing.B`  rather than a  `*testing.T`. Both of these types implement the  `testing.TB`  interface which provides crowd favorites like  `Errorf()`,  `Fatalf()`, and  `FailNow()`.
 
-#### 2.2.1. Running a package’s benchmarks
+基准测试与单元测试很像，唯一区别是，基准测试函数参数是 `*testing.B`，而单元测试函数参数是 `*testing.T`。
+两者都实现了 `testing.TB` 接口定义的 `Errorf()`,  `Fatalf()`, 和  `FailNow()` 方法。
+
+
+
+
+#### 2.2.1. Running a package’s benchmarks 运行 package 的基准测试
 
 As benchmarks use the  `testing`  package they are executed via the  `go test`  subcommand. However, by default when you invoke  `go test`, benchmarks are excluded.
 
+因为 benchmark 使用 `testing` package ，自然是使用 `go test` 的子命令运行基准测试的。
+但，执行 `go test` 命令时，默认不会执行基准测试。
+
 To explicitly run benchmarks in a package use the  `-bench`  flag.  `-bench`  takes a regular expression that matches the names of the benchmarks you want to run, so the most common way to invoke all benchmarks in a package is  `-bench=.`. Here is an example:
 
-```
+使用 `-bench` 标志可明确运行 package 中的基准测试。
+`-bench` 使用正则匹配要运行基准测试的 package 名称。
+一般常用 `-bench=.` 运行 package 中的所有基准测试。
+下面是示例：
+
+```shell
 % go test -bench=. ./examples/fib/
 goos: darwin
 goarch: amd64
@@ -844,25 +865,45 @@ PASS
 ok      _/Users/dfc/devel/high-performance-go-workshop/examples/fib     1.671s
 ```
 
-`go test`  will also run all the tests in a package before matching benchmarks, so if you have a lot of tests in a package, or they take a long time to run, you can exclude them by providing  ``go test’s `-run``  flag with a regex that matches nothing; ie.
+`go test`  will also run all the tests in a package before matching benchmarks, so if you have a lot of tests in a package, or they take a long time to run, you can exclude them by providing  go test’s `-run`  flag with a regex that matches nothing; ie.
 
-```
+`go test` 在匹配基准测试前，会先运行 package 中的所有单元测试，如果 package 中的单元测试很多，或者运行单元测试需要很长时间，可以给 go test 的 `-run` 标记加一个匹配结果为空的参数，就能跳过单元测试。
+
+
+```shell
 go test -run=^$
 ```
 
-#### 2.2.2. How benchmarks work
+
+#### 2.2.2. How benchmarks work 基准测试是如何工作的
 
 Each benchmark function is called with different value for  `b.N`, this is the number of iterations the benchmark should run for.
 
-`b.N`  starts at 1, if the benchmark function completes in under 1 second—​the default—​then  `b.N`  is increased and the benchmark function run again.
+`b.N` 参数是基准的迭代次数，每个基准测试函数都会使用不同的 `b.N` 值被调用多次。
+
+`b.N`  starts at 1, if the benchmark function completes in under 1 second --the default-- then  `b.N`  is increased and the benchmark function run again.
+
+`b.N` 默认取值是1，如果基准测试函数在1秒内完成，会增加 `b.N` 的值，然后再次运行基准测试。
+
 
 `b.N`  increases in the approximate sequence; 1, 2, 3, 5, 10, 20, 30, 50, 100, and so on. The benchmark framework tries to be smart and if it sees small values of  `b.N`  are completing relatively quickly, it will increase the the iteration count faster.
 
+`b.N` 的增加过程类似这个数列：1, 2, 3, 5, 10, 20, 30, 50, 100, 等等。
+基准测试框架如果发现很小的 `b.N` 值能很快完成，会增加迭代 `b.N` 数时的取值(NOTE:跳过较小的数)。
+
+
 Looking at the example above,  `BenchmarkFib20-8`  found that around 30,000 iterations of the loop took just over a second. From there the benchmark framework computed that the average time per operation was 40865ns.
+
+从上面的例子可以看出 `BenchmarkFib20-8` 过程大概 30000 次迭代只需要 1 秒钟。
+所以基准测试框架计算出平均每次操作是 40865ns 。
 
 The  `-8`  suffix relates to the value of  `GOMAXPROCS`  that was used to run this test. This number, like  `GOMAXPROCS`, defaults to the number of CPUs visible to the Go process on startup. You can change this value with the  `-cpu`  flag which takes a list of values to run the benchmark with.
 
-```
+后缀 `-8` 的取值与运行测试时的 `GOMAXPROCS` 有关。
+跟 `GOMAXPROCS` 环境变量一样，它的默认取值是 Go 进程启动时的 CPU 数量。
+你能用 `-cpu` 参数改变运行基准测试时的取值
+
+```shell
 % go test -bench=. -cpu=1,2,4 ./examples/fib/
 goos: darwin
 goarch: amd64
@@ -875,9 +916,16 @@ ok      _/Users/dfc/devel/high-performance-go-workshop/examples/fib     5.531s
 
 This shows running the benchmark with 1, 2, and 4 cores. In this case the flag has little effect on the outcome because this benchmark is entirely sequential.
 
-#### 2.2.3. Improving benchmark accuracy
+以上是分别使用 1，2 和 4 个CPU核心运行基准测试的结果。
+因为被测函数是顺序执行的 (NOTE:Fib没有利用多核心优化)  ，所以这里的基准测试结果变化不大。
 
-The  `fib`  function is a slightly contrived example—​unless your writing a TechPower web server benchmark—​it’s unlikely your business is going to be gated on how quickly you can compute the 20th number in the Fibonaci sequence. But, the benchmark does provide a faithful example of a valid benchmark.
+
+#### 2.2.3. Improving benchmark accuracy 提高基准测试的精度
+
+The  `fib`  function is a slightly contrived example —-unless your writing a TechPower web server benchmark—- it’s unlikely your business is going to be gated on how quickly you can compute the 20th number in the Fibonaci sequence. But, the benchmark does provide a faithful example of a valid benchmark.
+
+这个 `fib` 是人为的例子 --除非你写 TechPower 网络服务的基准测试-- 否则你的业务瓶颈不在可能限制在计算第 20 个斐波那契序列的值。
+但这个示例对于演示基准测试足够了。
 
 Specifically you want your benchmark to run for several tens of thousand iterations so you get a good average per operation. If your benchmark runs for only 100’s or 10’s of iterations, the average of those runs may have a high standard deviation. If your benchmark runs for millions or billions of iterations, the average may be very accurate, but subject to the vaguaries of code layout and alignment.
 
