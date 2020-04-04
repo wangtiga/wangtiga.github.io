@@ -192,7 +192,7 @@ That previous graph only went up to 2012, but fortunately in 2012  [Jeff Preshin
 上图数据只到2012年。但　Jeff Preshing 在2012年写了一个爬取　Spec 网站数生成图表的工具，下图就是此工具生成的　1995～2017　年间的　Spec　数据　。
 
 
-![int graph](https://dave.cheney.net/high-performance-go-workshop/images/int_graph.png)
+![intgraph](https://dave.cheney.net/high-performance-go-workshop/images/int_graph.png)
 
 So this is the same graph using Spec data from 1995 til 2017.
 
@@ -658,11 +658,33 @@ It’s clear that without a breakthrough in material science the likelihood of a
 
 There are many presentations online that rehash this point. They all have the same prediction — computers in the future will not be programmed like they are today. Some argue it’ll look more like graphics cards with hundreds of very dumb, very incoherent processors. Others argue that Very Long Instruction Word (VLIW) computers will become predominant. All agree that our current sequential programming languages will not be compatible with these kinds of processors.
 
+互联网上有很多资料强调过这一观点。
+它们都预，未来的计算机将不会像今天这样编程。
+有人认为未来的处理器将由上百个型号不一的低端处理器组成。也有人认为超长指令字(VLIW)将成为主流。
+但大家一致同意，现在的顺序编程语言无法适应未来的处理器。
+
 My view is that these predictions are correct, the outlook for hardware manufacturers saving us at this point is grim. However, there is  _enormous_  scope to optimise the programs today we write for the hardware we have today. Rick Hudson spoke at GopherCon 2015 about  [reengaging with a "virtuous cycle"](https://talks.golang.org/2015/go-gc.pdf)  of software that works  _with_  the hardware we have today, not indiferent of it.
+
+我认为这些预测是对的，靠硬件厂商提升我们的软件性能是不太靠谱了。
+但现有硬件上的程序还有很大优化空间。
+Rick Hudson (里克·哈德森)在2015年GopherCon谈到“良性循环”的概念。
+即硬件和软件应该应该互相配合，迭代优化升级。
+
+> NOTE: 以前的硬件频率增长快，那软件应该充分发按高频的特性；以后的硬件 CPU 核心数量越来越多，那软件应该充分利用多核心的优势。
+
 
 Looking at the graphs I showed earlier, from 2015 to 2018 with at best a 5-8% improvement in integer performance and less than that in memory latency, the Go team have decreased the garbage collector pause times by  [two orders of magnitude](https://blog.golang.org/ismmkeynote). A Go 1.11 program exhibits significantly better GC latency than the same program on the same hardware using Go 1.6. None of this came from hardware.
 
+回顾之前的图标可看出，从 2015 年到 2018 年间， integer performance 性能仅提高了 5-8% ， memory latency 提高得更少。即使这种情况下， Go 开发团队仍然将 garbage collector 暂停时间提高了两个数量级。
+同样的代码，在同样的硬件中，使用 Go 1.11 编译时其 GC latency 明显优于 Go 1.6 版本。
+这些提升可不来自硬件。
+
+![intgraph](https://dave.cheney.net/high-performance-go-workshop/images/int_graph.png)
+
+
 So, for best performance on today’s hardware in today’s world, you need a programming language which:
+
+为了在现今世界的硬件中获得更好的性能，你需要的编程语言应该是下面这样：
 
 -   Is compiled, not interpreted, because interpreted programming languages interact poorly with CPU branch predictors and speculative execution.
     
@@ -671,9 +693,20 @@ So, for best performance on today’s hardware in today’s world, you need a pr
 -   You need a language which lets programmers talk about memory effectively, think structs vs java objects, because all that pointer chasing puts pressure on the CPU cache and cache misses burn hundreds of cycles.
     
 -   A programming language that scales to multiple cores as performance of an application is determined by how efficiently it uses its cache and how efficiently it can parallelise work over multiple cores.
+
+- 它应该是编译型语言，而非解释型语言，因为解释型语言没法发挥 CPU 的分支预测和乱序执行功能优势。
+
+- 这种语言应该支持编写更高效率的代码，它应该能操作 bit 和 byte ，而且能区分 integer 和 float 数值类型，以便更高效率地处理 integer 
+
+- 这种语言应该能让程序员讨论内存，思考 struct 与 java object 的区别，因为所有的 pointer chasing 都会给 CPU  cache 带来很大压力，而 cache miss 会消耗上百个时钟周期。
+
+- 这种编程语言应该支持，通过增加CPU核心数量来提升程序性能。所以它要能高效地利用 cache ，并高效地利用多核心并行工作。
     
 
 Obviously we’re here to talk about Go, and I believe that Go inherits many of the traits I just described.
+
+我们来到这里讨论 Go 语言，显然是因为 Go 具备很多我刚才描述的那些特点。
+
 
 #### 1.14.1. What does that mean for us?
 
@@ -681,11 +714,22 @@ Obviously we’re here to talk about Go, and I believe that Go inherits many of 
 > 
 > The largest gains come from 1, but we spend all our time on 3. — [Michael Fromberger](https://twitter.com/creachadair/status/1039602865831010305)
 
+> 有三种优化手段：少做。再少做一点。做快点。
+
+> 收益最大的是第一种，但我们把时间都花到第三种手段上了。  — Michael Fromberger
+
+
 The point of this lecture was to illustrate that when you’re talking about the performance of a program or a system is entirely in the software. Waiting for faster hardware to save the day is a fool’s errand.
+
+这次讲座的目的是想说明，当我们谈论软件或系统性能优化时，肯定是在说完全基于软件的优化手段。
+妄想等硬件变快大幅提高软件性能的想法是愚蠢的。
 
 But there is good news, there is a tonne of improvements we can make in software, and that is what we’re going to talk about today.
 
-#### 1.14.2. Further reading
+好消息是，软件上还有非常大的优化空间，这就是我们今天要讲的内容。
+
+
+#### 1.14.2. Further reading 延伸阅读
 
 -   [The Future of Microprocessors, Sophie Wilson](https://www.youtube.com/watch?v=zX4ZNfvw1cw)  JuliaCon 2018
     
@@ -696,30 +740,63 @@ But there is good news, there is a tonne of improvements we can make in software
 -   [The future of computing: a conversation with John Hennessy](https://www.youtube.com/watch?v=Azt8Nc-mtKM)  (Google I/O '18)
     
 
-## 2. Benchmarking
+## 2. Benchmarking 基准测试
 
 > Measure twice and cut once. — Ancient proverb
 
+> 测量两次，切一次。  — 谚语
+
+> NOTE 这是它的直接翻译。它的深刻含义是指，做事情要精心准备，特别是当你只有一次机会的时候。例如，当人们切割木头的时候，必须仔细测量尺寸，因为你只有一次机会，否则你最后的尺寸不是大了就是小了。所以，当我们提醒别人做事情要三思后行时，在英文中就说“Measure Twice, Cut Once”。充足的准备是成功所必需的。有准备未必成功，但是没准备，失败的可能性很大。[http://learn-english-writing.blogspot.com/](http://learn-english-writing.blogspot.com/2011/12/measure-twice-cut-once.html)
+
+
 Before we attempt to improve the performance of a piece of code, first we must know its current performance.
+
+在我们试图提高一段代码的性能时，必须先了解它当前的性能。
 
 This section focuses on how to construct useful benchmarks using the Go testing framework, and gives practical tips for avoiding the pitfalls.
 
-### 2.1. Benchmarking ground rules
+本节将重点介绍如何使用 Go 测试框架构建基准测试，并给出避坑实践指南。
+
+
+### 2.1. Benchmarking ground rules 基准测试规则
 
 Before you benchmark, you must have a stable environment to get repeatable results.
 
--   The machine must be idle—​don’t profile on shared hardware, don’t browse the web while waiting for a long benchmark to run.
+进行基准测试前，你必须有一个稳定的运行环境，才能得到可重复的结果。
+
+
+-   The machine must be idle -- don’t profile on shared hardware, don’t browse the web while waiting for a long benchmark to run.
     
 -   Watch out for power saving and thermal scaling. These are almost unavoidable on modern laptops.
     
 -   Avoid virtual machines and shared cloud hosting; they can be too noisy for consistent measurements.
     
 
-If you can afford it, buy dedicated performance test hardware. Rack it, disable all the power management and thermal scaling, and never update the software on those machines. The last point is poor advice from a system adminstration point of view, but if a software update changes the way the kernel or library performs—​think the Spectre patches—​this will invalidate any previous benchmarking results.
+- 机器必须是空闲的 -- 不要使用公用的硬件环境，也不要在等待运行较长时间的基准测试过程浏览网页。
+
+- 注意系统的节能配置和热力缩放。这些问题在现代笔记本中几乎无法避免。
+
+- 避免使用虚拟机和公共的云主机；这些环境干扰因素太多，无法保证测量结果一致性。
+
+
+If you can afford it, buy dedicated performance test hardware. Rack it, disable all the power management and thermal scaling, and never update the software on those machines. The last point is poor advice from a system adminstration point of view, but if a software update changes the way the kernel or library performs —-think the Spectre patches—- this will invalidate any previous benchmarking results.
+
+如果有钱，就买专门用于性能测试的硬件。放机架上，禁用所有电源管理和热力缩放功能，并且永远不要升级这台机器的软件。
+从系统管理员的角度来说，最后一条建议非常糟糕。但如果升级软件后，改变了系统内核或第三方库，那么在此之前所有基准测试结果都无效了，比如 Spectre 漏洞的补丁就会除低系统性能。
+
+> NOTE Spectre 漏洞的修复补丁会降低系统性能，参考 [如何看待 2018 年 1 月 2 日爆出的 Intel CPU 设计漏洞？](https://www.zhihu.com/question/265012502/answer/288239171)
+> 芯片微码更新不足以修复漏洞，必须修改系统或者购买新设计的 CPU。
+目前 Linux 内核的解决方案是重新设计页表（KPTI 技术，前身为 KAISER）。之前普通程序和内核程序共用页表，靠 CPU 来阻止普通程序的越权访问。新方案让内核使用另外一个页表，而普通程序的页表中只保留一些必要的内核信息（例如调用内核的地址）。这个方案会导致每次普通程序和内核程序之间的切换（例如系统内核调用或者硬件中断）都需要切换页表，引起 CPU 的 TLB 缓存刷新。TLB 缓存刷新相对来说是非常耗时的，因此会降低系统的效率。
+> KAISER 技术对系统性能的影响一般是 5%，最高可达 30%。一些高级的芯片功能（例如 PCID）可以支持其他技术，从而减少性能影响。Linux 已经在 4.14 版本的开发过程中添加了对 PCID 的支持。
+> 在 Linux 系统中，KPTI 只有在英特尔芯片上才会启用，因此 AMD 芯片不受影响，且用户可以通过手动修改开关的方式关闭 KPTI 。  
+
 
 For the rest of us, have a before and after sample and run them multiple times to get consistent results.
 
-### 2.2. Using the testing package for benchmarking
+优化前，优化后，都要运行多次基准测试，来保证前后样本结果的一致性。
+
+
+### 2.2. Using the testing package for benchmarking 使用 testing package 进行基准测试
 
 The  `testing`  package has built in support for writing benchmarks. If we have a simple function like this:
 
