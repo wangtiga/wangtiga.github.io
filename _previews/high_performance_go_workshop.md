@@ -929,9 +929,18 @@ The  `fib`  function is a slightly contrived example —-unless your writing a T
 
 Specifically you want your benchmark to run for several tens of thousand iterations so you get a good average per operation. If your benchmark runs for only 100’s or 10’s of iterations, the average of those runs may have a high standard deviation. If your benchmark runs for millions or billions of iterations, the average may be very accurate, but subject to the vaguaries of code layout and alignment.
 
+如果你的基准测试运行成千上万次，应该能得到一个较真实的平均操作时间。
+如果你的基准测试只运行几十几百次，那么得到的平均操作时间应该有较大的误差。
+如果你的基准测试运行几百万甚至几十亿次，结果会非常精确。但这时有可能受到代码布局和对齐的影响。
+
+> NOTE 这里 vaguaries of code layout and alignment 可能是指数据对齐。数据对齐有可能对CPU性能产生影响，当数据结构大小刚才好 Cache Line 对齐，有可能提高性能。 [^CPUCache]
+
+
 To increase the number of iterations, the benchmark time can be increased with the  `-benchtime`  flag. For example:
 
-```
+可以使用 `-benchtime` 参数增加基准测试时间，进而增加迭代次数。比如：
+
+```shell
 % go test -bench=. -benchtime=10s ./examples/fib/
 goos: darwin
 goarch: amd64
@@ -942,15 +951,29 @@ ok      _/Users/dfc/devel/high-performance-go-workshop/examples/fib     20.066s
 
 Ran the same benchmark until it reached a value of  `b.N`  that took longer than 10 seconds to return. As we’re running for 10x longer, the total number of iterations is 10x larger. The result hasn’t changed much, which is what we expected.
 
+此时会选取一个使基准测试的运行时间至少超过 10s 的 `b.N` 值。 
+我们的运行时间增加了10倍，运行次数也增加了10倍。
+但平均操作时间的结果并没有变化，这也正是我们期望看到的结果。
+
+
 Why is the total time reporteded to be 20 seconds, not 10?
+
+但为什么总耗时是 20s 而不是 10s 呢？
 
 If you have a benchmark which runs for millons or billions of iterations resulting in a time per operation in the micro or nano second range, you may find that your benchmark numbers are unstable because thermal scaling, memory locality, background processing, gc activity, etc.
 
+如果你的基准测试会运行上百万甚至数亿次，而每次操作在微秒和纳秒范围内。
+你会发现，基准测试结果会因为 thermal scaling, memory locality, background processing, gc 活动等变得十分不稳定。
+
 For times measured in 10 or single digit nanoseconds per operation the relativistic effects of instruction reordering and code alignment will have an impact on your benchmark times.
+
+对于单次操作耗时在 10纳秒以内的情况，基准测试受指令重排和代码对齐的影响很大。
 
 To address this run benchmarks multiple times with the  `-count`  flag:
 
-```
+为解决这种问题，可以使用 `-count` 参数指定运行基准测试的数次。
+
+```shell
 % go test -bench=Fib1 -count=10 ./examples/fib/
 goos: darwin
 goarch: amd64
@@ -968,25 +991,42 @@ BenchmarkFib1-8         1000000000               2.00 ns/op
 
 A benchmark of  `Fib(1)`  takes around 2 nano seconds with a variance of +/- 2%.
 
+函数 `Fib(1)` 耗时大概2纳秒，方差为 +/- 2% 。 
+
 New in Go 1.12 is the  `-benchtime`  flag now takes a number of iterations, eg.  `-benchtime=20x`  which will run your code exactly  `benchtime`  times.
+
+Go 1.12 版本中 `-benchtime` 参数支持设置迭代的次数，比如 `-benchtime=20x` 可以让准确的让基准测试运行20次。
 
 Try running the fib bench above with a  `-benchtime`  of 10x, 20x, 50x, 100x, and 300x. What do you see?
 
+尝试使用 10x, 20x, 50x, 100x, 和 300x 为 `-benchtime` 分别运行基准测试，看看结果是什么样？
+
 If you find that the defaults that  `go test`  applies need to be tweaked for a particular package, I suggest codifying those settings in a  `Makefile`  so everyone who wants to run your benchmarks can do so with the same settings.
 
-### 2.3. Comparing benchmarks with benchstat
+如果你希望调整执行 `go test` 所用的默认参数，建议把这些配置写到 `Makefile` 中，以便所有人运行基准测试时，都使用相同的配置。
+
+
+### 2.3. Comparing benchmarks with benchstat 使用 benchstat 比较基准测试
 
 In the previous section I suggested running benchmarks more than once to get more data to average. This is good advice for any benchmark because of the effects of power management, background processes, and thermal management that I mentioned at the start of the chapter.
 
+上一节中，我建议多运行几次基准测试，以便得到更准确的平均结果。
+为防止 power management, background process 和 thermal management 的影响，这是个很好的建议。
+
 I’m going to introduce a tool by Russ Cox called  [benchstat](https://godoc.org/golang.org/x/perf/cmd/benchstat).
 
-```
+下面我要介绍的是 Russ Cox 的 benchstat 工具。
+
+```shell
 % go get golang.org/x/perf/cmd/benchstat
 ```
 
 Benchstat can take a set of benchmark runs and tell you how stable they are. Here is an example of  `Fib(20)`  on battery power.
 
-```
+Benchstat 可以分析出一组基准测试结果的稳定性如何。
+下面是在 battery power 上执行 `Fib(20)` 的基准测试结果。
+
+```shell
 % go test -bench=Fib20 -count=10 ./examples/fib/ | tee old.txt
 goos: darwin
 goarch: amd64
@@ -1009,11 +1049,21 @@ Fib20-8  38.4µs ± 1%
 
 `benchstat`  tells us the mean is 38.8 microseconds with a +/- 2% variation across the samples. This is pretty good for battery power.
 
+`benchstat` 发现样本均值在 38.8ms ，方差 +/- 1% 。
+这个结果对 battery power 来说很不错了。
+
 -   The first run is the slowest of all because the operating system had the CPU clocked down to save power.
     
 -   The next two runs are the fastest, because the operating system as decided that this isn’t a transient spike of work and it has boosted up the clock speed to get through the work as quick as possible in the hope of being able to go back to sleep.
     
 -   The remaining runs are the operating system and the bios trading power consumption for heat production.
+
+- 第一次运行结果是最慢的，因为操作系统为了省电，把 CPU 时钟速率降到最低了。
+
+- 紧接下来的丙次是最快的，因为操作系统发现这不是一个短暂的临时任务，为了尽快完成任务，回到睡眠状态，它调高了CPU时钟速率。
+
+-  剩下的结果都是伴随 操作系统与 BIOS 协调处理电量消耗与散热管理的过程运行的。
+
     
 
 #### 2.3.1. Improve  `Fib`
