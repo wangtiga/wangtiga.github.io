@@ -933,7 +933,7 @@ Specifically you want your benchmark to run for several tens of thousand iterati
 如果你的基准测试只运行几十几百次，那么得到的平均操作时间应该有较大的误差。
 如果你的基准测试运行几百万甚至几十亿次，结果会非常精确。但这时有可能受到代码布局和对齐的影响。
 
-> NOTE 这里 vaguaries of code layout and alignment 可能是指数据对齐。数据对齐有可能对CPU性能产生影响，当数据结构大小刚才好 Cache Line 对齐，有可能提高性能。 [^CPUCache]
+> NOTE 这里 vaguaries of code layout and alignment 可能是指数据对齐。数据对齐有可能对CPU性能产生影响，当数据结构大小刚才好 Cache Line 对齐，有可能提高性能。 [^CPUCache] [^MemoryAndNativeCodePerformance]
 
 
 To increase the number of iterations, the benchmark time can be increased with the  `-benchtime`  flag. For example:
@@ -3362,6 +3362,8 @@ ehs.forEach ( e => {
 [^HighPerformanceWorkShopCN2]:[译文2 High Performance Work Shop](https://blog.zeromake.com/pages/high-performance-go-workshop/)
 
 [^CPUCache]:[CPUCache](https://coolshell.cn/articles/20793.html)
+
+[^MemoryAndNativeCodePerformance]: [内存与本机代码的性能](https://www.infoq.cn/article/2013/07/Native-Performance)
 
 [^PerformanceIntruction]:[性能调优攻略](https://coolshell.cn/articles/7490.html)
 

@@ -48,7 +48,7 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
 # 类似这样： make clean && make mediaserver && cd media-server/ && make  && cd ../ && make clean && make
 
 # https://github.com/notedit/media-server-go-demo
-# gstreamer1.0.plugins-bad gstreamer1.0.plugins-good 的区别参考 
+# gstreamer1.0.plugins-bad gstreamer1.0.plugins-good 的区别参考 https://gstreamer.freedesktop.org/documentation/additional/splitup.html?gi-language=python
 #sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-libav gstreamer1.0-plugins-bad libgstreamer-plugins-bad1.0-dev
 sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-libav gstreamer1.0-plugins-good libgstreamer-plugins-good1.0-dev
 #brew install gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-ffmpeg
