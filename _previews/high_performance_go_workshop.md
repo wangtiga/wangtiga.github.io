@@ -1052,6 +1052,9 @@ Fib20-8  38.4µs ± 1%
 `benchstat` 发现样本均值在 38.8ms ，方差 +/- 1% 。
 这个结果对 battery power 来说很不错了。
 
+> NOTE: 描述有误，以命令输出的内容为准，均值应该是 38.4µs ± 1%。 38.8 microseconds 比 38.4µs 大太多了。
+
+
 -   The first run is the slowest of all because the operating system had the CPU clocked down to save power.
     
 -   The next two runs are the fastest, because the operating system as decided that this isn’t a transient spike of work and it has boosted up the clock speed to get through the work as quick as possible in the hope of being able to go back to sleep.
@@ -1060,26 +1063,46 @@ Fib20-8  38.4µs ± 1%
 
 - 第一次运行结果是最慢的，因为操作系统为了省电，把 CPU 时钟速率降到最低了。
 
-- 紧接下来的丙次是最快的，因为操作系统发现这不是一个短暂的临时任务，为了尽快完成任务，回到睡眠状态，它调高了CPU时钟速率。
+- 紧接下来的两次是最快的，因为操作系统发现这不是一个短暂的临时任务，为了尽快完成任务，回到睡眠状态，它调高了CPU时钟速率。
 
--  剩下的结果都是伴随 操作系统与 BIOS 协调处理电量消耗与散热管理的过程运行的。
+-  剩下的结果都是伴随操作系统与 BIOS 间协调能耗与散热的情况执行的。
+
+> TODO: 后面这次结果时高时低，是想说明什么呢？ 
+> 因为主频调高后，能耗高，热量高，导致降频，然后能耗变低，热量低，所以结果时高时低吗？ 但主频升高后，应该会维护一段时间才对。所以这里结果时高时低应该和能耗处理无关，
+> 也许是运行多次后，由于每次运算都是重复的，导致更好得利用了 CacheLine 等特性，才产生时高时低的结果吗？没想通。
 
     
 
-#### 2.3.1. Improve  `Fib`
+#### 2.3.1. Improve  `Fib` 改善 `Fib`
 
 Determining the performance delta between two sets of benchmarks can be tedious and error prone. Benchstat can help us with this.
 
-Saving the output from a benchmark run is useful, but you can also save the  _binary_  that produced it. This lets you rerun benchmark previous iterations. To do this, use the  `-c`  flag to save the test binary—​I often rename this binary from  `.test`  to  `.golden`.
+确定两组基准测试之间的性能偏差可能会很繁琐，而且容易出错。Benchstat 可以帮助我们解决这个问题。
 
+Saving the output from a benchmark run is useful, but you can also save the  _binary_  that produced it. This lets you rerun benchmark previous iterations. To do this, use the  `-c`  flag to save the test binary。I often rename this binary from  `.test`  to  `.golden`.
+
+将基准测试的输出结果保存起来也许会很有用的，但也可以保存产生测试结果的二进制可执行文件。
+这可以让你重新运行之前的基准测试。
+要做到这一点，使用 `-c` 标志来保存产生测试结果的二进制可执行文件。
+我经常把这个二进制文件从 `.test` 重命名为 `.golden` 。
+
+> NOTE golden 珍贵
+
+```shell
 % go test -c
 % mv fib.test fib.golden
+```
 
 The previous  `Fib`  fuction had hard coded values for the 0th and 1st numbers in the fibonaci series. After that the code calls itself recursively. We’ll talk about the cost of recursion later today, but for the moment, assume it has a cost, especially as our algorithm uses exponential time.
 
+前面的 Fib 函数硬编码了 fibonacci 中的第0和第1个数字。之后的代码会进行递归调用。
+我们稍后会讲到递归的成本，暂时先假设它是有成本的，而且时间复杂度是指数阶的。
+
 As simple fix to this would be to hard code another number from the fibonacci series, reducing the depth of each recusive call by one.
 
-```
+最简单的优化方法是，直接硬编码其他几个 fibonacci 数量，直接减少递归的尝试。
+
+```go
 func Fib(n int) int {
 	switch n {
 	case 0:
@@ -1096,9 +1119,14 @@ func Fib(n int) int {
 
 This file also includes a comprehensive test for  `Fib`. Don’t try to improve your benchmarks without a test that verifies the current behaviour.
 
+代码中还有 `Fib` 相关的基准测试。
+在没有验证过改进后的函数代码前，不要调整基准测试的代码。
+
 To compare our new version, we compile a new test binary and benchmark both of them and use  `benchstat`  to compare the outputs.
 
-```
+为了比较我们新版本的函数，可以分别编译两个基准测试的二进制文件，并使用 benchstat 来比较两个基准测试的输出结果。
+
+```shell
 % go test -c
 % ./fib.golden -test.bench=. -test.count=10 > old.txt
 % ./fib.test -test.bench=. -test.count=10 > new.txt
@@ -1109,11 +1137,19 @@ Fib20-8  44.3µs ± 6%  25.6µs ± 2%  -42.31%  (p=0.000 n=10+10)
 
 There are three things to check when comparing benchmarks
 
+比较基准测试结果时，主要关注这三点
+
 -   The variance ± in the old and new times. 1-2% is good, 3-5% is ok, greater than 5% and some of your samples will be considered unreliable. Be careful when comparing benchmarks where one side has a high variance, you may not be seeing an improvement.
+
+- 新旧结果中各自的方差值。最好的方差是 1-2% ，其次是 3-5% ， 超过 5% 的方差结果，说明这个样本结果不可信。无论新旧基准测试结果中哪一个方差值偏高，这次优化提升的结果(delta)都是不准确的了。
     
 -   p value. p values lower than 0.05 are good, greater than 0.05 means the benchmark may not be statistically significant.
+
+- p 值。低于 0.05 的 p 值是有意义的，只要基准测试结果 p 值超过 0.05 ，都没有意义。
     
 -   Missing samples. benchstat will report how many of the old and new samples it considered to be valid, sometimes you may find only, say, 9 reported, even though you did  `-count=10`. A 10% or lower rejection rate is ok, higher than 10% may indicate your setup is unstable and you may be comparing too few samples.
+
+- 样本数量不足。 benchstat 会报告新旧基准测试结果中它认为有效的样本数量，有时你会发现，即使指定了 `-count=10` 参数，却仅显示 9 个样本数量。缺少的样本数量在 10% 以下，都是可以接受的。缺失的样本数量大于 10% ，可能就是你参数配置不正确。
     
 
 ### 2.4. Avoiding benchmarking start up costs
