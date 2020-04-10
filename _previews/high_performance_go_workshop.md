@@ -1152,11 +1152,14 @@ There are three things to check when comparing benchmarks
 - 样本数量不足。 benchstat 会报告新旧基准测试结果中它认为有效的样本数量，有时你会发现，即使指定了 `-count=10` 参数，却仅显示 9 个样本数量。缺少的样本数量在 10% 以下，都是可以接受的。缺失的样本数量大于 10% ，可能就是你参数配置不正确。
     
 
-### 2.4. Avoiding benchmarking start up costs
+### 2.4. Avoiding benchmarking start up costs 减少基准测试的启动成本
 
 Sometimes your benchmark has a once per run setup cost.  `b.ResetTimer()`  will can be used to ignore the time accrued in setup.
 
-```
+有时，在运行基准测试前，可能需要执行一些比较耗时的初始化配置。
+使用 `b.ResetTimer()` 可以忽略这些初始化配置浪费的时间。
+
+```go
 func BenchmarkExpensive(b *testing.B) {
         boringAndExpensiveSetup()
         b.ResetTimer() 
@@ -1168,9 +1171,13 @@ func BenchmarkExpensive(b *testing.B) {
 
 Reset the benchmark timer
 
+重置基准测试定时器
+
 If you have some expensive setup logic  _per loop_  iteration, use  `b.StopTimer()`  and  `b.StartTimer()`  to pause the benchmark timer.
 
-```
+如果在循环迭代 `b.N` 的过程每次都要执行一些耗时的操作，可以搭配使用 `b.StopTimer()`  和 `b.StartTimer()`  暂停基准测试过程的计时器。
+
+```go
 func BenchmarkComplicated(b *testing.B) {
         for n := 0; n < b.N; n++ {
                 b.StopTimer() 
@@ -1183,13 +1190,22 @@ func BenchmarkComplicated(b *testing.B) {
 
 Pause benchmark timer
 
+暂停计时器使用 `b.StopTimer()` 
+
 Resume timer
 
-### 2.5. Benchmarking allocations
+恢复计时器使用 `b.StartTimer()` 
+
+
+
+### 2.5. Benchmarking allocations 基准测试过程的内存分配
 
 Allocation count and size is strongly correlated with benchmark time. You can tell the  `testing`  framework to record the number of allocations made by code under test.
 
-```
+内存分配的次数和大小与基准测试的耗时密切相关。
+你让 `testing` 框架记录记录被测试代码执行内存分配的次数。
+
+```go
 func BenchmarkRead(b *testing.B) {
         b.ReportAllocs()
         for n := 0; n < b.N; n++ {
@@ -1200,7 +1216,9 @@ func BenchmarkRead(b *testing.B) {
 
 Here is an example using the  `bufio`  package’s benchmarks.
 
-```
+以下示例是运行标准库中 `bufio` package 的基准测试的结果。
+
+```shell
 % go test -run=^$ -bench=. bufio
 goos: darwin
 goarch: amd64
@@ -1219,7 +1237,9 @@ BenchmarkWriterFlush-8                  100000000               17.0 ns/op      
 
 You can also use the  `go test -benchmem`  flag to force the testing framework to report allocation statistics for all benchmarks run.
 
-```
+还可以用 `go test -benchmem` 标志强制  testing 框架记录基准测试过程的内存分配情况。
+
+```shell
 % go test -run=^$ -bench=. -benchmem bufio
 goos: darwin
 goarch: amd64
@@ -1237,6 +1257,8 @@ BenchmarkWriterFlush-8                  100000000               16.9 ns/op      
 PASS
 ok      bufio   20.366s
 ```
+
+
 
 ### 2.6. Watch out for compiler optimisations
 
