@@ -1260,11 +1260,13 @@ ok      bufio   20.366s
 
 
 
-### 2.6. Watch out for compiler optimisations
+### 2.6. Watch out for compiler optimisations 小心编译器的优化
 
 This example comes from  [issue 14813](https://github.com/golang/go/issues/14813#issue-140603392).
 
-```
+这下例子来自 [issue 14813](https://github.com/golang/go/issues/14813#issue-140603392) 。
+
+```go
 const m1 = 0x5555555555555555
 const m2 = 0x3333333333333333
 const m4 = 0x0f0f0f0f0f0f0f0f
@@ -1286,19 +1288,42 @@ func BenchmarkPopcnt(b *testing.B) {
 
 How fast do you think this function will benchmark? Let’s find out.
 
+你觉得这个函数的基准测试结果有多快？我们看看结果吧。
+
+```shell
 % go test -bench=. ./examples/popcnt/
 goos: darwin
 goarch: amd64
 BenchmarkPopcnt-8       2000000000               0.30 ns/op
 PASS
+```
 
 0.3 of a nano second; that’s basically one clock cycle. Even assuming that the CPU may have a few instructions in flight per clock tick, this number seems unreasonably low. What happened?
 
+只用了 0.3 纳秒，也就是只有一个时钟周期。
+即使 CPU 在一个时钟滴答内能执行多个指令，这个结果也太小了。
+到底为什么会这样呢？
+
+> CPU时钟周期耗时，内存访问耗时等，可参考本文 1.11 节 Table 2.2 Example Time Scale of System Latencies
+
+> [Concept of clock tick and clock cycles](https://stackoverflow.com/questions/25743995/concept-of-clock-tick-and-clock-cycles)
+> 
+> clock tick 时钟滴答 指系统时钟，是系统能识别的最小时间单位。
+> 
+> clock cycle 时钟周期 则是 CPU 执行一次完整的处理器脉冲所花费的时间。这是能从 CPU 主频计算出来的。比如 2GHz 的处理器，每秒钟能执行 2,000,000,000 clock cycles 。 
+
+
 To understand what happened, we have to look at the function under benchmake,  `popcnt`.  `popcnt`  is a leaf function — it does not call any other functions — so the compiler can inline it.
+
+要了解原因，我们得看看基准测试时 `popcnt` 到底做了什么。
+`popcnt`是叶子函数 - 它不调用任意子函数 - 所以编译器会内联此函数。
 
 Because the function is inlined, the compiler now can see it has no side effects.  `popcnt`  does not affect the state of any global variable. Thus, the call is eliminated. This is what the compiler sees:
 
-```
+因为这个函数是内联的，而编译器发现它没有任何副作用。`popcnt`没有修改任何全局变量的值。因此这个调用被省略了。
+编译器看到的代码实际是下面这样。
+
+```go
 func BenchmarkPopcnt(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		// optimised away
@@ -1308,21 +1333,39 @@ func BenchmarkPopcnt(b *testing.B) {
 
 On all versions of the Go compiler that i’ve tested, the loop is still generated. But Intel CPUs are really good at optimising loops, especially empty ones.
 
-#### 2.6.1. Exercise, look at the assembly
+虽然我所测试过的所有 Go 编译器中，都会产生循环代码。但 Intel CPU 太擅长优化循环语言了，尤其是空循环。
+
+
+
+#### 2.6.1. Exercise, look at the assembly 练习，看看汇编语言 
 
 Before we go on, lets look at the assembly to confirm what we saw
 
-```
+继续讲其他内容前，我们先看看汇编语言确认下刚才的判断。
+
+```go
 % go test -gcflags=-S
 ```
 
-Use `gcflags="-l -S" to disable inlining, how does that affect the assembly output
+Use `gcflags="-l -S"` to disable inlining, how does that affect the assembly output
 
-Optimisation is a good thing
+可以使用 `gcflags="-l -S"` 关闭内联，这会影响编译出的汇编代码。
 
-The thing to take away is the same optimisations that  _make real code fast_, by removing unnecessary computation, are the same ones that remove benchmarks that have no observable side effects.
+> Optimisation is a good thing
+> 
+> The thing to take away is the same optimisations that  _make real code fast_, by removing unnecessary computation, are the same ones that remove benchmarks that have no observable side effects.
+> 
+> This is only going to get more common as the Go compiler improves.
 
-This is only going to get more common as the Go compiler improves.
+
+> 优化是一件好事
+> 
+> 优化是为了 _更快执行真正有用的代码_ 。
+> 移除无用的计算是一种优化；像基准测试这样，移除没有副作用的代码也是一种优化。
+>
+> 随着Go编译器的改进，这种优化更更加常见。
+
+
 
 #### 2.6.2. Fixing the benchmark
 
