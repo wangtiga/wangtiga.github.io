@@ -429,7 +429,6 @@ tags: network
        <td colspan="16">长度</td>
        <td colspan="16">校验和</td>
      </tr>
-     </tr>
    </tbody>
  </table>
  

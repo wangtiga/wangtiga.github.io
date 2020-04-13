@@ -72,6 +72,36 @@ sar -n DEV 1 2
 > [cnblogs](https://www.cnblogs.com/klb561/articles/9080151.html)
 
 
+[use IPERF test network Speed BandWidth](https://www.slashroot.in/iperf-how-test-network-speedperformancebandwidth)
+
+- server
+
+```shell
+$ iperf -s -u
+------------------------------------------------------------
+Server listening on UDP port 5001                           
+Receiving 1470 byte datagrams                               
+UDP buffer size:  208 KByte (default)                       
+------------------------------------------------------------
+```
+
+- client
+
+```shell
+$ iperf -c 192.168.1.123 -u -b 30m -t 60s
+------------------------------------------------------------
+Client connecting to ubuntucard.tiga.wang, UDP port 5001
+Sending 1470 byte datagrams, IPG target: 392.00 us (kalman adjust)
+UDP buffer size:  160 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.1.100 port 64768 connected with 192.168.1.123  port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-60.0 sec   215 MBytes  30.0 Mbits/sec
+[  3] Sent 153063 datagrams
+[  3] Server Report:
+[  3]  0.0-60.0 sec   215 MBytes  30.0 Mbits/sec   0.000 ms    0/153063 (0%)
+```
+
 #### 在 linux 中制作  ubuntu 系统安装盘
 
 首先在 Linux 系统中打开终端，确认 U 盘路径：
