@@ -451,7 +451,7 @@ Thanks in advance!
 >   个人主观认为，加锁超过 5s 都算长。当然，具体业务情况，要具体讨论。
 > 
 > 进程 crash 后，销毁锁的方法：
-> - 1.超时自动清查
+> - 1.超时自动清理
 >   redis key Time To Live
 > - 2.每个加锁的进程维护一个 session 
 >   zookeeper ephemeral nodes
