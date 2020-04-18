@@ -40,6 +40,9 @@ $ tmux rename-session -t 0 <new-name>
 
 # 使用指定名称启动
 $ tmux new -s <session-name>
+
+# 滚动屏幕 [scroll in tmux](https://www.freecodecamp.org/news/tmux-in-practice-scrollback-buffer-47d5ffa71c93/)
+$ Ctrl-b [  : 进入copy mode, 使用 Down/Up 或 PageDown 和PageUp 键翻页, q 或 Enter 退出 copy mode 。
 ```
 
 > [Tmux 使用教程](http://www.ruanyifeng.com/blog/2019/10/tmux.html)
