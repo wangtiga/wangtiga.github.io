@@ -1363,17 +1363,24 @@ Use `gcflags="-l -S"` to disable inlining, how does that affect the assembly out
 > 优化是为了 _更快执行真正有用的代码_ 。
 > 移除无用的计算是一种优化；像基准测试这样，移除没有副作用的代码也是一种优化。
 >
-> 随着Go编译器的改进，这种优化更更加常见。
+> 随着Go编译器的改进，这种优化会更加常见。
 
 
 
-#### 2.6.2. Fixing the benchmark
+#### 2.6.2. Fixing the benchmark 修复基准测试
 
 Disabling inlining to make the benchmark work is unrealistic; we want to build our code with optimisations on.
 
+在基准测试中关闭内联不太现实；因为我们编译代码时，肯定希望能启用内联功能优化代码。
+
+> NOTE 如果基准测试关内联，但编译代码时又开内联，那基准测试结果就没有参考价值了。
+
+
 To fix this benchmark we must ensure that the compiler cannot  _prove_  that the body of  `BenchmarkPopcnt`  does not cause global state to change.
 
-```
+为了修复这一现象，我们只需要让编译器无法 _证明_ `BenchmarkPopcnt` 没有修改全局变量即可。
+
+```go
 var Result uint64
 
 func BenchmarkPopcnt(b *testing.B) {
@@ -1387,27 +1394,46 @@ func BenchmarkPopcnt(b *testing.B) {
 
 This is the recommended way to ensure the compiler cannot optimise away body of the loop.
 
+这样就能保证编译器不会优化循环体内的代码了。
+
+
 First we  _use_  the result of calling  `popcnt`  by storing it in  `r`. Second, because  `r`  is declared locally inside the scope of  `BenchmarkPopcnt`  once the benchmark is over, the result of  `r`  is never visible to another part of the program, so as the final act we assign the value of  `r`  to the package public variable  `Result`.
+
+首先，我们把调用 `popcnt` 返回的结果保存在变量 `r` 中。
+因为`r`是`BenchmarkPopcnt`是局部变量，所以一旦基准测试完毕，变量`r`的值对程序内其他代码都不可见，因此，我们还要把`r`的值分配到 package 公开变量 `Result` 。
 
 Because  `Result`  is public the compiler cannot prove that another package importing this one will not be able to see the value of  `Result`  changing over time, hence it cannot optimise away any of the operations leading to its assignment.
 
+因为`Result`是公开变量，所以编译器无法判断其他 package 何时会在导入当前 package 后访问`Result`的取值，因此编译器不会随意去除公共变量的赋值语句进行优化的。
+
+
 What happens if we assign to  `Result`  directly? Does this affect the benchmark time? What about if we assign the result of  `popcnt`  to  `_`?
+
+如果我们使用局部变量`r`，直接赋值给`Result`会发生什么呢？这会影响基准测试的时间吗？
+如果我们把 `popcnt` 的结果赋值给 `_`  又会怎样呢？
 
 In our earlier  `Fib`  benchmark we didn’t take these precautions, should we have done so?
 
-### 2.7. Benchmark mistakes
+在以前的 `Fib` 基准测试中，我们没有防范这些情况，那我们是否应该考虑并防范这些问题呢？
+
+
+### 2.7. Benchmark mistakes 错误的基准测试
 
 The  `for`  loop is crucial to the operation of the benchmark.
 
+`for`循环是基准测试的关系部分。
+
 Here are two incorrect benchmarks, can you explain what is wrong with them?
 
-```
+下面两个基准测试中，你能解释一下他们分别错在哪里吗？
+
+```go
 func BenchmarkFibWrong(b *testing.B) {
 	Fib(b.N)
 }
 ```
 
-```
+```go
 func BenchmarkFibWrong2(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		Fib(n)
@@ -1415,7 +1441,13 @@ func BenchmarkFibWrong2(b *testing.B) {
 }
 ```
 
+TODO 验证：1.应该是没有修改全局状态，所以被优化了。 2. b.N 表示执行 N 次函数，而非调用 Fib 时传参数为N 。
+
 Run these benchmarks, what do you see?
+
+运行这些基准测试，你看到了什么样的结果？
+
+
 
 ### 2.8. Profiling benchmarks
 
