@@ -13,6 +13,20 @@ tags: linux
 
 ### shell
 
+
+#### Mac OS 查看占用端口的程序
+
+https://tonydeng.github.io/2016/07/07/use-lsof-to-replace-netstat/
+
+```shell
+sudo lsof -nP -i  :443
+```
+- -n 表示不显示主机名
+- -P 表示不显示端口俗称
+- 不加 sudo 只能查看以当前用户运行的程序
+
+
+
 #### tmux 持久化远程 ssh 会话
 ```shell
 # 启动
