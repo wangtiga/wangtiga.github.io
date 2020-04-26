@@ -362,7 +362,10 @@ v=0
 o=- 4380437079560121890 2 IN IP4 127.0.0.1
 s=-
 t=0 0
+
+// NOTE BUNDLE
 a=group:BUNDLE 0 1
+
 a=msid-semantic: WMS gBybe8DpDXnbRHnN4dAhyMiHrcmIZizyQn7S
 m=audio 62066 UDP/TLS/RTP/SAVPF 111 103 104 9 0 8 106 105 13 110 112 113 126
 c=IN IP4 192.168.0.105
@@ -386,9 +389,12 @@ a=extmap:6 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
 a=sendrecv
 a=msid:gBybe8DpDXnbRHnN4dAhyMiHrcmIZizyQn7S 734751a3-05c2-4399-a57a-092888c42f6a
 a=rtcp-mux
+
+// NOTE useinbandfec
 a=rtpmap:111 opus/48000/2
 a=rtcp-fb:111 transport-cc
 a=fmtp:111 minptime=10;useinbandfec=1
+
 a=rtpmap:103 ISAC/16000
 a=rtpmap:104 ISAC/32000
 a=rtpmap:9 G722/8000
