@@ -199,6 +199,12 @@ If we were to rebuild WebRTC in 2018, we might have taken a similar approach to 
 
 如果在 2018 年重新设计 WebRTC ，我可能会对以下组件重新拆分。基本步骤如下：
 
+- 将 webrtc.org 的编码解码器编译为 wasm
+- 支持解码器输出到 canvas WebAudio 播放
+- 支持编码器从 getUserMedia 获取输出
+- 支持通过任意 datachannel 作为 transport 发送编码后的媒体流
+- 将 RTCDataChannel 反馈指标与 audio/video 编码器以某种方式连接
+
 -   compile webrtc.org encoders/decoders to wasm
 -   connect decoders with canvas and WebAudio for ?playout?
 -   connect encoders with  getUserMedia for input
@@ -206,6 +212,9 @@ If we were to rebuild WebRTC in 2018, we might have taken a similar approach to 
 -   connect  RTCDataChannel feedback metrics to audio/video encoder somehow
 
 The approach is visualized on one of the slides from the working groups meeting materials:  
+
+可以在 working groups meeting 的幻灯片资源中观看此种方式的图示：
+
 [![](https://ltwus2ix28x10gixx34jeigv-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/webrtc-pthatcher-1024x106.png)](https://ltwus2ix28x10gixx34jeigv-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/webrtc-pthatcher.png)
 
 That proposal some has very obvious technical advantages over the Zoom approach. For instance, using  RTCDataChannels for transferring the data which gives a much much better congestion control properties than WebSockets, in particular if there is packet loss.
