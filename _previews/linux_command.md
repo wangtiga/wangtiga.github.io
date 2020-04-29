@@ -13,6 +13,26 @@ tags: linux
 
 ### shell
 
+#### influxdb
+
+```shell
+$ influx -precision rfc3339
+Visit https://enterprise.influxdata.com to register for updates, InfluxDB server management, and monitoring.
+Connected to http://localhost:8086 version 1.1.1
+InfluxDB shell version: 1.1.1
+> use mydb
+Using database mydb
+> show measurements
+name: measurements
+name
+----
+tab_monitor_cpu
+tab_monitor_net
+
+> drop measurement tab_monitor_cpu
+> drop measurement tab_monitor_net
+```
+
 
 #### Mac OS 查看占用端口的程序
 
