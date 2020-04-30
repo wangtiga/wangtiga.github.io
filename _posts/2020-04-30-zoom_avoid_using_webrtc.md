@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[译]How Zoom's web client avoids using WebRTC (DataChannel Update)?"
-date:   2020-04-29 12:00:00 +0800
+date:   2020-04-30 23:00:00 +0800
 tags:   todo
 ---
 
@@ -10,11 +10,7 @@ tags:   todo
 
 
 
-## How Zoom's web client avoids using WebRTC (DataChannel Update)? [^webrtcInZoomEN] [^webrtcInZoomCN]
-
-## Zoom 的 web client 如何避免使用 WebRTC ？ [^webrtcInZoomEN] [^webrtcInZoomCN]
-
-
+## How Zoom's web client avoids using WebRTC (DataChannel Update)?  Zoom 的 web client 与 WebRTC ？ [^webrtcInZoomEN] [^webrtcInZoomCN]
 
 Posted by  [Philipp Hancke](https://webrtchacks.com/author/philipp-hancke/)  on  [September 8, 2019](https://webrtchacks.com/zoom-avoids-using-webrtc/)
 
@@ -118,8 +114,12 @@ Data received on the WebSockets goes into a WebAssembly (WASM) based decoder. Au
 音频送到浏览器的 AudioWorklet 中。
 解码后的音频使用 WebAudio 播放。
 
-TODO AudioWorklet WebAudio 都是 Chrome 浏览器本身提供的组件吗？ WASM 仅执行解码过程，播放还是由调用浏览器本身的组件执行？
-
+> NOTE AudioWorklet WebAudio 都是 Chrome 浏览器本身提供的组件。 WASM 仅执行解码过程，播放还是由调用浏览器本身的组件执行。
+> 
+> Web Audio API的AudioWorklet接口用于提供自定义音频处理脚本。 AudioWorklet 是 Javascript 中处理音频数据的一些组件和接口集合。
+> 文中说的WebAudio 可理解 video canvas audio 这些 h5 element 中类似 audio element 的作用 ，可以播放音频。
+> 
+> 参考[AudioWorklet](http://s0developer0mozilla0org.icopy.site/en-US/docs/Web/API/AudioWorklet)
 
 [![](https://ltwus2ix28x10gixx34jeigv-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/zoom-flow2.png)](https://ltwus2ix28x10gixx34jeigv-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/zoom-flow2.png)  
 
