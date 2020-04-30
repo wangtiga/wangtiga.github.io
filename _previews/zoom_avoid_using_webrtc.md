@@ -5,6 +5,10 @@ date:   2020-04-29 12:00:00 +0800
 tags:   todo
 ---
 
+* category
+{:toc}
+
+
 
 ## How Zoom's web client avoids using WebRTC (DataChannel Update)? [^webrtcInZoomEN] [^webrtcInZoomCN]
 
@@ -12,13 +16,10 @@ tags:   todo
 
 
 
-Posted by  [Philipp Hancke](https://webrtchacks.com/author/philipp-hancke/ "View all posts by Philipp Hancke")  on  [September 8, 2019](https://webrtchacks.com/zoom-avoids-using-webrtc/)
+Posted by  [Philipp Hancke](https://webrtchacks.com/author/philipp-hancke/)  on  [September 8, 2019](https://webrtchacks.com/zoom-avoids-using-webrtc/)
 
-**Posted in:**  [Reverse-Engineering](https://webrtchacks.com/category/reverse-engineering/).
+Posted in  [Reverse-Engineering](https://webrtchacks.com/category/reverse-engineering/).
 
-**Tagged:**  [Blackbox Exploration](https://webrtchacks.com/tag/blackbox-exploration/),  [DataChannel](https://webrtchacks.com/tag/datachannel/),  [webassembly](https://webrtchacks.com/tag/webassembly/),  [webrtc-nv](https://webrtchacks.com/tag/webrtc-nv/),  [websocket](https://webrtchacks.com/tag/websocket/),  [zoom](https://webrtchacks.com/tag/zoom/).
-
-[3 comments](https://webrtchacks.com/zoom-avoids-using-webrtc/#comments)
 
 _Editor?s Note: This post was originally published on October 23, 2018. Zoom recently started using WebRTC?s DataChannels so we have added some new details at the end  [in the DataChannels section](https://webrtchacks.com/zoom-avoids-using-webrtc/#datachannels)._
 
@@ -28,11 +29,10 @@ Rube Goldberg?s Professor Butts and the Self-Operating Napkin (1931)
 
 [Zoom](https://zoom.us/)  has a web client that allows a participant to join meetings without downloading their app.  [Chris Koehncke](https://twitter.com/ckoehncke)  was excited to see how this worked (watch him at the upcoming  [KrankyGeek event](https://www.krankygeek.com/)!) so we gave it a try. It worked, removing the download barrier. The quality was acceptable and we had a good chat for half an hour.
 
-可以通过 Web 客户端直接参与 Zoom 视频会议，不需要下载安装 App 。
-Chris Koehncke 对于这个客户端的工作原理十分感兴趣。
-我在这里尝试分析一下。
-使用 Web 客户端时，完全避免下载安装 App 的麻烦。
-我们使用了大概半小时，质量还是比较满意。
+ [Zoom](https://zoom.us/) 有一个 web client ，可以在浏览器中直接参与 Zoom 视频会议，不需要下载安装 App 。
+ [Chris Koehncke](https://twitter.com/ckoehncke)对于这个客户端的工作原理十分感兴趣(观看他在[KrankyGeek event](https://www.krankygeek.com/)上传的视频)。
+我在这里尝试分析一下。当我们使用 web client 时，省去了下载安装 App 的麻烦。
+体验了大概半小时，质量还算比较满意。
 
 
 Opening  `chrome://webrtc-internals`  showed only  getUserMedia being used for accessing camera and microphone but no RTCPeerConnection like a WebRTC call should have. This got me very interested ? how are they making calls without WebRTC?
@@ -49,30 +49,41 @@ Opening  `chrome://webrtc-internals`  showed only  getUserMedia being used for a
 The relationship between Zoom and WebRTC is a difficult one as shown in this statement from their website:  
 [![](https://ltwus2ix28x10gixx34jeigv-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/zoom-webrtc-bashing-1024x247-1024x247.png)](https://ltwus2ix28x10gixx34jeigv-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/zoom-webrtc-bashing-1024x247.png)
 
-TODO 
+> 4. Is Zoom a web-RTC platform?
+> Zoom runs on a lightweight downloaded client or app on each participant's device, so it is not web-RTC based. 
+> `This is because web-RTC is a very limited solution that would not allow us to provide all the excellent features that our users have come to expect from us. `
+> Please note that even though Zoom does require a download, only the host must have an account, 
+> so it is still very easy for patients and other first time users to join.
+
+> 4. Zoom 是 基于 web-RTC 平台的吗？
+> 每个参会的成员都要下载安装一个轻量的客户端或app应用，所以他不是基于 web-RTC 平台的。
+> `这是因为 web-RTC 方案限制较大，无法实现客户所期望的优秀功能`。
+> 注意，虽然 Zoom 客户端需要下载安装，但是仅需要注册一个账号就能轻松入会（NOTE:不需要安装其他插件），
+> 因此，对于初始使用的新用户来说，这是很容易的。
+
 
 The Jitsi folks just did a  [comparison of the quality](https://jitsi.org/news/a-simple-congestion-test-for-zoom/)  recently in response to that. [Tsahi Levent-Levi had some useful comments](https://bloggeek.me/webrtc-vs-zoom-video-quality/)  on that as well.
 
-Jitsi 近期做了一个质量对比。
+Jitsi 近期做了一个质量评测。
 Tsahi Levent-Levi 对此也有一些评价。
 
 
 So let?s take a quick look at the ?excellent features? under quite interesting circumstances ? running in Chrome.
 
-我们赶快人看看这么优秀的功能是如何在 chrome 中运行的吧。
+我们赶快看看这么优秀的功能是如何在 chrome 中运行的吧。
 
 
 ## The Zoom Web client
 
 Chromes network developer tools quickly showed two things:
 
-Chrome 开发者工具的 network 标签显示以下两件事：
+在 Chrome 开发者工具中能看到以下信息：
 
 -   [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)  are used for data transfer
 -   there are workers loading  [WebAssembly](https://webassembly.org/)  (wasm) files
 
 - 使用 WebSockets 传输数据
-- 这其中加载了很多 WebAssembly 文件
+- 加载了很多 WebAssembly 文件
 
 [![](https://ltwus2ix28x10gixx34jeigv-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/zoom-workers.png)](https://ltwus2ix28x10gixx34jeigv-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/zoom-workers.png)
 
@@ -88,15 +99,16 @@ The overall design is quite interesting. It uses WebSockets to transfer the medi
 这个设计很有趣。
 使用 WebSocket 传输媒体数据肯定不是最佳选择。
 这有点像是在 WebRTC 中使用 TURN/TCP ？
-这会影响很多场景下的使用效果。
+但会影响很多场景下的使用效果。
 使用 TCP 传输实时音视频数据的常见问题是，丢包会导致重传和越来越高的时延。
-Tsahi 最近的一篇文章描述过这种用法对 bitrate 及其他方面的影响。
+Tsahi 最近的[一篇文章](https://testrtc.com/happens-webrtc-shifts-turn-tcp/)描述过这种用法对 bitrate 及其他方面的影响。
 
 
 The primary advantage of using media over WebSockets is that it might pass firewalls where even TURN/TCP and TURN/TLS could be blocked. And it certainly avoids the issue of WebRTC TURN connections not getting past authenticated proxies. That was a  [long-standing issue](https://bugs.chromium.org/p/chromium/issues/detail?id=439560)  in Chrome?s WebRTC implementation that was only resolved last year.
 
-使用 WebSocket 传输媒体数据的主要优势是，它能轻松穿越防火墙，而使用 TURN/TCP TURN/TLS 时常常被这些防火墙屏蔽。
-而且，使用 WebSocket 还能避免，在使用认证代理时引发的 WebRTC TURN 连接问题。
+使用 WebSocket 传输媒体数据的主要优势是，它能轻松穿越防火墙，
+但使用 TURN/TCP TURN/TLS 时就容易被防火墙屏蔽。
+而且，使用 WebSocket 还能避免在使用认证代理时引发的 WebRTC TURN 连接问题。
 [这里](https://bugs.chromium.org/p/chromium/issues/detail?id=439560)就描述了一个 Chrome WebRTC 去年才修复的一个问题。
 
 
@@ -133,14 +145,12 @@ WASM 文件中包含的编解码器与 Zoom Native Client 中一样。
 
 TODO 如何翻译 The encoded video is somewhat pixelated at times and Mr. Kranky even complained about staircase artifacts.
 
-即使编码器占用的CPU太高，也没关系，用户只会报怨一下 Chrome 浏览器，然后下次直接使用  native client 。
+即使编码器占用的CPU太高，也没关系，用户只会报怨一下 Chrome 浏览器，然后下次直接就换  native client 了 。
 
 
 ### H.264
 
 Delivering the media engine as WebAssembly is quite interesting, it allows for supporting codecs not supported by Chrome/WebRTC. This is not entirely novel ? [FFmpeg](https://www.ffmpeg.org/) compiled with  [emscripten](https://github.com/kripken/emscripten) has been done many times before and emscripten seems to have been used here as well. Delivering the encoded bytes via WebSockets allowed inspecting their content using Chrome?s excellent debugging tools and showed a H264 payload with an RTP header and some framing:
-
-raw RTP data sent over the Websocket
 
 将媒体引擎转换成 WebAssembly 很有趣。
 这样就能编码 Chrome/WebRTC 不支持的编码格式了。
@@ -149,20 +159,11 @@ raw RTP data sent over the Websocket
 这里似乎使用的就是 emscripten 。
 使用 Chrome 的 debug tool 能看到通过 WebSocket 发送的字节流数据就是 RTP header + H264 payload :
 
-通过 WebSocket 发送的就是原始 RTP 数据。
-
-
 ```txt
-1
-
-2
-
-3
+raw RTP data sent over the Websocket
 
 02000000
-
 9062ae85bb9c9d7801000401bede0004124000003588b8021302135000000000
-
 1c800000016764001eac1b1a68280bde54000000  ...
 ```
 
@@ -213,7 +214,7 @@ If we were to rebuild WebRTC in 2018, we might have taken a similar approach to 
 -   connect  RTCDataChannel feedback metrics to audio/video encoder somehow
 
 
-如果在 2018 年重新设计 WebRTC ，我可能会对以下组件重新拆分。基本步骤如下：
+如果在 2018 年重新设计 WebRTC ，我可能会按下面的步骤对一些组件重新拆分：
 
 - 将 webrtc.org 的编码解码器编译为 wasm
 - 支持解码器输出到 canvas WebAudio 播放
@@ -230,16 +231,15 @@ The approach is visualized on one of the slides from the working groups meeting 
 
 That proposal some has very obvious technical advantages over the Zoom approach. For instance, using  RTCDataChannels for transferring the data which gives a much much better congestion control properties than WebSockets, in particular if there is packet loss.
 
-这上方法比 Zoom 的明显更有技术优势。
+以上方法相比 Zoom 的方案明显更有技术优势。
 例如，使用 RTCDataChannels 传输数据比 WebSockets 提供了更好的拥塞控制能力，尤其是在丢包的情况下。
-
 
 The big advantage of the design is that it would be possible to to separate the Encoder and Decoder (as well as related things like the RTP packetization) from the browser, allowing custom versions. The main problem is finding a good way to get the data processing off the main thread in a high-performance way including hardware acceleration. This has been one of the big challenges in Chrome in the early days and I remember many complaints about the sandbox making things difficult. Zoom seems to work ok but we only tried a 1:1 chat and the typical WebRTC app is a bit more demanding than that. Reusing building blocks like  MediaStreamTrack  for data transfer from and to workers would also be preferable to fiddling with Canvas elements and WebAudio.
 
-该设计最大优点是，从浏览器中分离了编码器和解码器（还有打包 RTP 的过程），这样更容易使用自定义编解码器。
-最重要的问题是如何以更高性能的方式将处理媒体数据的过程从主线程分享出来，包括硬件加速。
-这是 Chrome 浏览器早期面临的一大挑战，我记得有许多人抱怨沙盒使得提高性能的方法复杂了很多。
-Zoom 在这方面表示还不错，但是我们只尝试了一对一的视频聊天场景，而典型的 WebRTC 应用程序要求一般比这种高一些。
+该设计最大优点是，从浏览器中分离了编码器和解码器（还有打包 RTP 的过程），这样更容易扩展自定义编解码器。
+最重要的问题是如何以更高性能的方式将处理媒体数据的过程从主线程分离出来，包括硬件加速。
+这是 Chrome 浏览器早期面临的一大挑战，我记得有许多人抱怨沙盒使得提高性能的过程复杂了很多。
+Zoom 在这方面表现还不错，但是我们只尝试了一对一的视频聊天场景，而典型的 WebRTC 应用程序要求一般比这种高一些。
 重复利用 MediaStreamTrack 这种基础组件进行数据传输可要比摆弄 Canvas 和 WebAudio 这些小玩意要好多了。
 
 
