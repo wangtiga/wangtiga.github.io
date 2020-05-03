@@ -12,12 +12,6 @@ tags:   todo
 
 ## LINK
 
-media-server-go
-  https://github.com/notedit/media-server-go
-
-翻译工具 ydict 
-  https://github.com/wangtiga/ydict
-
 翻译工具 trans
   https://github.com/soimort/translate-shell
   wget git.io/trans
@@ -53,12 +47,6 @@ golang io.Copy 与内存分配使用
 
   https://github.com/wangtiga/test/tgin/upload
 
-turn html to nice markdown
-  https://github.com/mdnice/sitdown
-
-Netgraph is a packet sniffer tool that captures all HTTP requests/responses, and display them in web page.
-  https://github.com/ga0/netgraph
-  
 
 
 ## TODO
