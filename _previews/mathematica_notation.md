@@ -10,15 +10,15 @@ tags:   math
 ### 数学符号读法 mathematical notation
 
 ```txt
-1 Α α alpha a:lf 阿尔法 角度；系数
-2 Β β beta bet 贝塔 磁通系数；角度；系数
-3 Γ γ gamma ga:m 伽马 电导系数（小写）
-4 Δ δ delta delt 德尔塔 变动；密度；屈光度
-5 Ε ε epsilon ep`silon 伊普西龙 对数之基数
-6 Ζ ζ zeta zat 截塔 系数；方位角；阻抗；相对粘度；原子序数
-7 Η η eta eit 艾塔 磁滞系数；效率（小写）
-8 Θ θ thet θit 西塔 温度；相位角
-9 Ι ι iot aiot 约塔 微小,一点儿
+01 Α α alpha a:lf 阿尔法 角度；系数
+02 Β β beta bet 贝塔 磁通系数；角度；系数
+03 Γ γ gamma ga:m 伽马 电导系数（小写）
+04 Δ δ delta delt 德尔塔 变动；密度；屈光度
+05 Ε ε epsilon ep`silon 伊普西龙 对数之基数
+06 Ζ ζ zeta zat 截塔 系数；方位角；阻抗；相对粘度；原子序数
+07 Η η eta eit 艾塔 磁滞系数；效率（小写）
+08 Θ θ thet θit 西塔 温度；相位角
+09 Ι ι iot aiot 约塔 微小,一点儿
 10 Κ κ kappa kap 卡帕 介质常数
 11 ∧ λ lambda lambd 兰布达波长（小写）；体积
 12 Μ μ mu mju 缪 磁导系数；微（千分之一）；放大因数（小写）
