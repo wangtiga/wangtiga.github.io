@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[译]GStream Basic tutorial 07: Basic tutorial 7: Multithreading and Pad Availability"
+title:  "[译]GStream Basic tutorial 07: Multithreading and Pad Availability"
 date:   2020-01-01 12:00:00 +0800
 tags:   tech
 ---

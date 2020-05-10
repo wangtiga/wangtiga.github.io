@@ -10,9 +10,43 @@ tags:   tech
 
 
 
-### SDP offer answer  中 ssrc 为什么不一样？以哪个为准 ？
+### 11.相关术语
+https://blog.csdn.net/DittyChen/article/details/78065974
 
-### 9. jitter buffer
+```txt
+SR：发送者报告，描述作为活跃发送者万岁的发送和接收统计数据
+RR：接收者报告，描述非活跃发送者成员的接收统计数据
+SDES：源描述项，其中包括规范名CNAME
+BYE：表明参与者将结束会话
+APP：应用描述功能
+
+关键帧请求
+
+PLI 是Picture LossIndication，SLI 是Slice Loss Indication。发送方接收到接收方反馈的PLI或SLI需要重新让编码器生成关键帧并发送给接收端。
+
+FIR：Full Intra Request，关键帧重传请求. Intra的含义是图像内编码，不需要其他图像信息即可解码；Inter指图像间编码，解码需要参考帧。故Intra Frame其实就是指I帧，Inter Frame指P帧或B帧。
+
+
+
+重传请求
+
+NACK：Negative Acknowledgemen 否定确认，NACK重传（丢包）
+
+RPSI：Reference Picture Selection Indication
+
+
+码率控制
+
+TMMBR是Temporal Max MediaBitrate Request，表示临时最大码率请求。表明接收端当前带宽受限，告诉发送端控制码率。
+
+REMB是ReceiverEstimatedMax Bitrate，接收端估计的最大码率。
+
+TMMBN是Temporal Max MediaBitrate Notification
+```
+
+### 10.SDP offer answer  中 ssrc 为什么不一样？以哪个为准 ？
+
+### 9.jitter buffer
 
 https://zhuanlan.zhihu.com/p/90094059
 
