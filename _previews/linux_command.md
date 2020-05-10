@@ -27,6 +27,14 @@ sudo lsof -nP -i  :443
 
 
 
+### ssh
+
+```shell
+# use public key autologin remote host, ref https://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html"
+
+ssh wangtiga@hostip 'mkdir -p .ssh && cat >> .ssh/authorized_keys' < ~/.ssh/id_rsa.pub "
+```
+
 #### tmux 持久化远程 ssh 会话
 ```shell
 # 启动
