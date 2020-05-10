@@ -117,14 +117,27 @@ decode 解码后，每个 buffer 就会包含一个 caps=raw 的原始视频帧�
 ### This tutorial 教程
 
 This tutorial expands  [Basic tutorial 7: Multithreading and Pad Availability](https://gstreamer.freedesktop.org/documentation/tutorials/basic/multithreading-and-pad-availability.html)  in two ways: 
-firstly, the  `audiotestsrc`  is replaced by an  `appsrc`  that will generate the audio data. Secondly, a new branch is added to the  `tee`  so data going into the audio sink and the wave display is also replicated into an  `appsink`. 
+firstly, the  `audiotestsrc`  is replaced by an  `appsrc`  that will generate the audio data.
+Secondly, a new branch is added to the  `tee`  so data going into the audio sink and the wave display is also replicated into an  `appsink`. 
 The  `appsink`  uploads the information back into the application, which then just notifies the user that data has been received, but it could obviously perform more complex tasks.
+
+本教程将详细展开在 [Basic tutorial 7: Multithreading and Pad Availability](https://gstreamer.freedesktop.org/documentation/tutorials/basic/multithreading-and-pad-availability.html) 的两方面内容：
+首先，使用 `appsrc` 替换 `audiotestsrc` 生成音频数据。
+
+其次，在 `tee` 新增一个分支，以便一份数据送到 audio sink ，还有一份数据用于显示音频波形，将会送到 `appsink` 。TODO 显示波形的应该是视频数据吧。
+
+送到 `appsink` 的数据，其实又回到 application 了，我们这里仅在收到数据时输出日志提示了一个，实现上，我们可以对这些数据做任何复杂的处理。
+
 
 ![](https://gstreamer.freedesktop.org/documentation/tutorials/basic/images/tutorials/basic-tutorial-8.png)
 
-## A crude waveform generator[](https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html#a-crude-waveform-generator)
+
+
+## A crude waveform generator 粗糙的波形生成器
 
 Copy this code into a text file named  `basic-tutorial-8.c`  (or find it in your GStreamer installation).
+
+将以下代码复制到文本文件，并命名为 `basic-tutorial-8.c` 。
 
 ```c
 #include <gst/gst.h>
