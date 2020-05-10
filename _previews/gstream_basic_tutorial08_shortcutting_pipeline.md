@@ -46,27 +46,79 @@ Applications can interact with the data flowing through a GStreamer pipeline in 
 应用程序可用多种方式与 GStreamer pipeline 的数据进行交互。
 此教程只用最简单的方式进行演示。
 
-The element used to inject application data into a GStreamer pipeline is  `appsrc`, and its counterpart, used to extract GStreamer data back to the application is  `appsink`. To avoid confusing the names, think of it from GStreamer's point of view:  `appsrc`  is just a regular source, that provides data magically fallen from the sky (provided by the application, actually).  `appsink`  is a regular sink, where the data flowing through a GStreamer pipeline goes to die (it is recovered by the application, actually).
+The element used to inject application data into a GStreamer pipeline is  `appsrc`, and its counterpart, used to extract GStreamer data back to the application is  `appsink`.
+To avoid confusing the names, think of it from GStreamer's point of view:  `appsrc`  is just a regular source, that provides data magically fallen from the sky (provided by the application, actually).  `appsink`  is a regular sink, where the data flowing through a GStreamer pipeline goes to die (it is recovered by the application, actually).
+
+用于向 GStreamer pipeline 注入数据的 element 是 `appsrc`，与之对应，
+用于从 GStreamer pipeline 提取数据的 element 是 `appsink` 。
+可以这样理解：
+`appsrc`是数据的源头，即数据来自 application ，流向GStreamer 。
+`appsink`是数据的目的地，即数据从 GStreamer 流出，最终流向水槽终止，实际上是流到了 application ，交由应用程序接收并处理媒体流数据）。
+
 
 `appsrc`  and  `appsink`  are so versatile that they offer their own API (see their documentation), which can be accessed by linking against the  `gstreamer-app`  library. In this tutorial, however, we will use a simpler approach and control them through signals.
 
+可以通过`gstreamer-app` 调用  `appsrc` 和  `appsink` 的完整功能。
+这篇教程中，我们仅通过信号实现一些简单的控制功能。
+
 `appsrc`  can work in a variety of modes: in  **pull**  mode, it requests data from the application every time it needs it. In  **push**  mode, the application pushes data at its own pace. Furthermore, in push mode, the application can choose to be blocked in the push function when enough data has already been provided, or it can listen to the  `enough-data`  and  `need-data`  signals to control flow. This example implements the latter approach. Information regarding the other methods can be found in the  `appsrc`  documentation.
 
-### Buffers[](https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html#buffers)
+
+`appsrc` 可工作在多种模式中。
+**pull** 模式，每次都从 application 中请求数据。
+**push** 模式，由 application 按自己的节奏向 GStreamer 推送数据。
+push 模式时，如果 GStreamer 所需要的数据已经足够， 可以让 application 调用 push 函数时阻塞，或者 application 监听 enough-data 与 need-data 信号，来调整推送数据的过程。
+下面的示例中，使用的第二种方案。
+其他方法可以在 `appsrc` 的文档中查看。
+
+
+
+### Buffers 缓冲
+
 
 Data travels through a GStreamer pipeline in chunks called  **buffers**. Since this example produces and consumes data, we need to know about  `GstBuffer`s.
 
+在 GStreamer pipeline 中分块处理的数据被称为 **buffers** 。
+在下面的示例中会产生和消费一些数据，所以我们要了解 GstBuffer 的概念。
+
+
 Source Pads produce buffers, that are consumed by Sink Pads; GStreamer takes these buffers and passes them from element to element.
+
+Source Pad 会产生 buffer ，这些 buffer 可以被 Sink Pad 消费掉。
+GStreamer 管理这些 buffer ，将他们从一个 element 传递到另外一个 element 中。
+
+
 
 A buffer simply represents a unit of data, do not assume that all buffers will have the same size, or represent the same amount of time. Neither should you assume that if a single buffer enters an element, a single buffer will come out. Elements are free to do with the received buffers as they please.  `GstBuffer`s may also contain more than one actual memory buffer. Actual memory buffers are abstracted away using  `GstMemory`  objects, and a  `GstBuffer`  can contain multiple  `GstMemory`  objects.
 
+一个 buffer 表示一个数据单元，每个 buffer 的大小，持续时长（媒体流的时间）都有可能是不同的。
+也不要假设输入一个 buffer 到 element 就一定会输出一个 buffer 。
+element 如何处理自己收到的 buffer 是不确定的。
+`GstBuffer`可以包含多个真实的 membory buffer 。
+真实的 memory buffer 是由 `GstMemory` 对象表示的， `GstBuffer`可以包含多个 `GstMemory` 对象。
+
+
 Every buffer has attached time-stamps and duration, that describe in which moment the content of the buffer should be decoded, rendered or displayed. Time stamping is a very complex and delicate subject, but this simplified vision should suffice for now.
 
-As an example, a  `filesrc`  (a GStreamer element that reads files) produces buffers with the “ANY” caps and no time-stamping information. After demuxing (see  [Basic tutorial 3: Dynamic pipelines](https://gstreamer.freedesktop.org/documentation/tutorials/basic/dynamic-pipelines.html)) buffers can have some specific caps, for example “video/x-h264”. After decoding, each buffer will contain a single video frame with raw caps (for example, “video/x-raw-yuv”) and very precise time stamps indicating when should that frame be displayed.
+每个 buffer 都附带时间戳和时长两种信息，用于在解码，渲染及显示时使用。
+时间戳是一个复杂又微妙的旆是，但我们这里仅关心最简单的用法。
 
-### This tutorial[](https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html#this-tutorial)
 
-This tutorial expands  [Basic tutorial 7: Multithreading and Pad Availability](https://gstreamer.freedesktop.org/documentation/tutorials/basic/multithreading-and-pad-availability.html)  in two ways: firstly, the  `audiotestsrc`  is replaced by an  `appsrc`  that will generate the audio data. Secondly, a new branch is added to the  `tee`  so data going into the audio sink and the wave display is also replicated into an  `appsink`. The  `appsink`  uploads the information back into the application, which then just notifies the user that data has been received, but it could obviously perform more complex tasks.
+As an example, a  `filesrc`  (a GStreamer element that reads files) produces buffers with the “ANY” caps and no time-stamping information. 
+After demuxing (see  [Basic tutorial 3: Dynamic pipelines](https://gstreamer.freedesktop.org/documentation/tutorials/basic/dynamic-pipelines.html)) buffers can have some specific caps, 
+for example “video/x-h264”. After decoding, each buffer will contain a single video frame with raw caps (for example, “video/x-raw-yuv”) and very precise time stamps indicating when should that frame be displayed.
+
+比如，`filesrc`（用于读取文件的 GStreamer element ）会产生 caps 为 "ANY" 且没有时间戳的  buffer 。
+但 demuxing buffers 后 （参考 [Basic tutorial 3: Dynamic pipelines](https://gstreamer.freedesktop.org/documentation/tutorials/basic/dynamic-pipelines.html)) 就会附带一些 caps ，比如，"video/x-h264" 。
+decode 解码后，每个 buffer 就会包含一个 caps=raw 的原始视频帧（比如 "video/x-raw-yuv" ），和表示视频帧显示时间的精确时间戳。
+
+
+
+### This tutorial 教程
+
+This tutorial expands  [Basic tutorial 7: Multithreading and Pad Availability](https://gstreamer.freedesktop.org/documentation/tutorials/basic/multithreading-and-pad-availability.html)  in two ways: 
+firstly, the  `audiotestsrc`  is replaced by an  `appsrc`  that will generate the audio data. Secondly, a new branch is added to the  `tee`  so data going into the audio sink and the wave display is also replicated into an  `appsink`. 
+The  `appsink`  uploads the information back into the application, which then just notifies the user that data has been received, but it could obviously perform more complex tasks.
 
 ![](https://gstreamer.freedesktop.org/documentation/tutorials/basic/images/tutorials/basic-tutorial-8.png)
 
