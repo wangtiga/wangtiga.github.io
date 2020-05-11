@@ -425,9 +425,9 @@ The first property that needs to be set on the  `appsrc`  is  `caps`. It specifi
 
 We then connect to the  `need-data`  and  `enough-data`  signals. These are fired by  `appsrc`  when its internal queue of data is running low or almost full, respectively. We will use these signals to start and stop (respectively) our signal generation process.
 
-如果我们设置监听了 `need-data` 和 `enough-data` 信号。
+如果我们监听了 `need-data` 和 `enough-data` 信号。
 一旦内部缓存数据的队列消费得过快或过慢的时候，就会收到相应的信号。
-我们会利用这一信号控制生成数据的启动和停止过程。
+可以利用这一信号控制生成数据的启动和停止过程。
 
 ```c
 /* Configure appsink */
@@ -439,10 +439,14 @@ gst_caps_unref (audio_caps);
 
 Regarding the  `appsink`  configuration, we connect to the  `new-sample`  signal, which is emitted every time the sink receives a buffer. Also, the signal emission needs to be enabled through the  `emit-signals`  property, because, by default, it is disabled.
 
-忽略 `appsink` 的配置过程，直接看监听 `new-sample` 的代码，每次收到 buffer 时都会触发此信号。
-另外，一定要启用 `emit-signals` 属性，因为默认是关闭的。
+先忽略 `appsink` 的配置过程，直接看监听 `new-sample` 的代码，每次收到 buffer 时都会触发此信号。
+另外，一定要启用 `emit-signals` 属性，因为默认是关闭的，不会触发 new-sample 信号。
+
 
 Starting the pipeline, waiting for messages and final cleanup is done as usual. Let's review the callbacks we have just registered:
+
+启动 pipeline ，执行消息处理循环，结束后会执行清理工作。
+我们再回顾下刚才注册的回调函数。
 
 ```c
 /* This signal callback triggers when appsrc needs data. Here, we add an idle handler
@@ -458,9 +462,23 @@ static void start_feed (GstElement *source, guint size, CustomData *data) {
 
 This function is called when the internal queue of  `appsrc`  is about to starve (run out of data). The only thing we do here is register a GLib idle function with  `g_idle_add()`  that feeds data to  `appsrc`  until it is full again. A GLib idle function is a method that GLib will call from its main loop whenever it is “idle”, this is, when it has no higher-priority tasks to perform. It requires a GLib  `GMainLoop`  to be instantiated and running, obviously.
 
+当 `appsrc` 的内部队列空闲时（饥饿，缺少数据），就会调用这个函数。
+但这个回调仅仅调用 `g_idle_add()` 注册一个向 `appsrc` 送数据的回调函数，这个函数会一直送数据，直到把内部队列填满。
+这个回调函数是 GLib idle function ， 它只会在 GLib 的主循环空闲时被调用，也就是说，没有其他更高优先级的任务执行时，都会调用 idle 函数。
+所以，必须初始化并运行 GLib 中的 `GMailLoop` 。
+
+
+
 This is only one of the multiple approaches that  `appsrc`  allows. In particular, buffers do not need to be fed into  `appsrc`  from the main thread using GLib, and you do not need to use the  `need-data`  and  `enough-data`  signals to synchronize with  `appsrc`  (although this is allegedly the most convenient).
 
+以上是运行 `appsrc` 的方法之一。
+实际上，可以不在 GLib 的 main thread 中向 `appsrc` 送 buffer 数据，
+也没必要非得用 `need-data` 和 `enough-data` 信号与 `appsrc` 进行同步（虽然，据说这是最方便的办法）。
+
+
 We take note of the sourceid that  `g_idle_add()`  returns, so we can disable it later.
+
+我们保存了 `g_idle_add()` 返回的 sourceid ，所以才能在后面关闭它。
 
 ```c
 /* This callback triggers when appsrc has enough data and we can stop sending.
@@ -476,6 +494,11 @@ static void stop_feed (GstElement *source, CustomData *data) {
 ```
 
 This function is called when the internal queue of  `appsrc`  is full enough so we stop pushing data. Here we simply remove the idle function by using  `g_source_remove()`  (The idle function is implemented as a  `GSource`).
+
+以上函数只在 `appsrc` 的内部队列满的时候被调用，所以此时，会停止推送数据。
+我们通过调用 `gsource_remove()` 将 idle 函数移除，就能达到停止推送数据的目的。（ idle 函数是由 GSource 实现的）
+
+
 
 ```c
 /* This method is called by the idle GSource in the mainloop, to feed CHUNK_SIZE bytes into appsrc.
@@ -504,17 +527,41 @@ static gboolean push_data (CustomData *data) {
 
 This is the function that feeds  `appsrc`. It will be called by GLib at times and rates which are out of our control, but we know that we will disable it when its job is done (when the queue in  `appsrc`  is full).
 
+这就是真正向 `appsrc` 送数据的函数。
+它由 Glib 调用，而且调用次数和频率我们都不能控制。
+但在 `appsrc` 内部队列满的时候，就不会调用这个函数了。
+
+
 Its first task is to create a new buffer with a given size (in this example, it is arbitrarily set to 1024 bytes) with  `gst_buffer_new_and_alloc()`.
+
+它的第一个动作是调用 `gst_buffer_new_and_alloc()` 创建一个指定大小的 buffer （示例中，简单将其设置为 1024 字节）。
 
 We count the number of samples that we have generated so far with the  `CustomData.num_samples`  variable, so we can time-stamp this buffer using the  `GST_BUFFER_TIMESTAMP`  macro in  `GstBuffer`.
 
+我们在 `CustomData.num_samples` 记录了目前为止收到的 sample 数量。
+所以能用 `GST_BUFFER_TIMESTAMP` 宏在 GstBuffer 打时间戳。
+
+
+
 Since we are producing buffers of the same size, their duration is the same and is set using the  `GST_BUFFER_DURATION`  in  `GstBuffer`.
+
+因为我们生产的 buffer 大小相同，所以用 `GST_BUFFER_DURATION` 向 GstBuffer 打上相同的时长。
+
 
 `gst_util_uint64_scale()`  is a utility function that scales (multiply and divide) numbers which can be large, without fear of overflows.
 
+`gst_util_uint64_scale` 是用于运行乘除上运算时保存去处结果的工具函数，它能保证不会有溢出的风险。
+
+
 The bytes that for the buffer can be accessed with GST_BUFFER_DATA in  `GstBuffer`  (Be careful not to write past the end of the buffer: you allocated it, so you know its size).
 
+可以通过 `GST_BUFFER_DATA` 访问在 GStBuffer 的原始 byte （但要小心越界，这是你分配的空间，大小你是清楚的）。
+
+
 We will skip over the waveform generation, since it is outside the scope of this tutorial (it is simply a funny way of generating a pretty psychedelic wave).
+
+我们路过生成波形图的地方，因为这超纲了（这个生成迷幻波形图的小伎俩还是挺有趣的）。
+
 
 ```c
 /* Push the buffer into the appsrc */
@@ -525,7 +572,13 @@ gst_buffer_unref (buffer);
 
 ```
 
-Once we have the buffer ready, we pass it to  `appsrc`  with the  `push-buffer`  action signal (see information box at the end of  [Playback tutorial 1: Playbin usage](https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html)), and then  `gst_buffer_unref()`  it since we no longer need it.
+Once we have the buffer ready, we pass it to  `appsrc`  with the  `push-buffer`  action signal 
+(see information box at the end of  [Playback tutorial 1: Playbin usage](https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html))
+, and then  `gst_buffer_unref()`  it since we no longer need it.
+
+一旦 buffer 数据整理完毕，就能用 `push-buffer` 信号将它送到 `appsrc` 中(查看 [Playback tutorial 1: Playbin usage](https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html) 一文的末尾了解详情)，
+然后调用 `gst_buffer_unref()` 就能释放这块用使用完毕的空间了。
+
 
 ```c
 /* The appsink has received a buffer */
@@ -546,9 +599,21 @@ static GstFlowReturn new_sample (GstElement *sink, CustomData *data) {
 
 Finally, this is the function that gets called when the  `appsink`  receives a buffer. We use the  `pull-sample`  action signal to retrieve the buffer and then just print some indicator on the screen. We can retrieve the data pointer using the  `GST_BUFFER_DATA`  macro and the data size using the  `GST_BUFFER_SIZE`  macro in  `GstBuffer`. Remember that this buffer does not have to match the buffer that we produced in the  `push_data`  function, any element in the path could have altered the buffers in any way (Not in this example: there is only a  `tee`  in the path between  `appsrc`  and  `appsink`, and it does not change the content of the buffers).
 
+当 `appsink` 收到 buffer 时，就会调用到这个函数。
+我们监听了 `pull-sample` 信号来接收 buffer ，并输出一些日志以便从屏幕上观测这一现象。
+我们可以使用 `GST_BUFFER_DATA` 宏从 GstBuffer 中获取数据指针，再使用 `GST_BUFFER_SIZE` 宏从 GstBuffer 中获取数据大小。
+记住，这里收到的 buffer 与我们在 `push_data` 函数生成的 buferr  是不同的。
+因为 pipeline 中任何 element 都可以修改 buffer 。
+（当然我们讲的这个示例中， appsrc 和  appsink 之间只有一个 tee ，所以 buffer 内容没有任何改变）。
+
+
 We then  `gst_buffer_unref()`  the buffer, and this tutorial is done.
 
-## Conclusion[](https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html#conclusion)
+最后调用 `gst_buffer_unref()` 释放 buffer 空间，我们的教程也结束了。
+
+
+
+## Conclusion 总结
 
 This tutorial has shown how applications can:
 
@@ -556,10 +621,26 @@ This tutorial has shown how applications can:
 -   Retrieve data from a pipeline using the  `appsink`  element.
 -   Manipulate this data by accessing the  `GstBuffer`.
 
-In a playbin-based pipeline, the same goals are achieved in a slightly different way.  [Playback tutorial 3: Short-cutting the pipeline](https://gstreamer.freedesktop.org/documentation/tutorials/playback/short-cutting-the-pipeline.html)  shows how to do it.
+In a playbin-based pipeline, the same goals are achieved in a slightly different way.  
+[Playback tutorial 3: Short-cutting the pipeline](https://gstreamer.freedesktop.org/documentation/tutorials/playback/short-cutting-the-pipeline.html)  shows how to do it.
 
 It has been a pleasure having you here, and see you soon!
 
+此教程讲解了 application 能做到的以下几件事：
+
+- 使用 appsrc element 向 pipeline 注入数据
+- 使用 appsink element 从 pipeline 获取数据
+- 访问 GstBuffer 来修改数据
+
+在 playbin-based pipeline 中，讲述了另一种实现以上功能的方法。
+[Playback tutorial 3: Short-cutting the pipeline](https://gstreamer.freedesktop.org/documentation/tutorials/playback/short-cutting-the-pipeline.html) 有具体的操作方法。
+
+很高兴与你相会，再见！
+
+
+> ## 说明
+> 虽然看着多数单词都认识，但用编辑器录入一遍，才感觉自己真正理解了这些文字。
+> 
 
 
 [^GStreamDoc]:[Short-cutting the pipeline](https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html#basic-tutorial-8-shortcutting-the-pipeline)
