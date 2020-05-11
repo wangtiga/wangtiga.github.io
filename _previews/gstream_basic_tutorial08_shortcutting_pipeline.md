@@ -195,6 +195,7 @@ static gboolean push_data (CustomData *data) {
   gst_buffer_unmap (buffer, &map);
   data->num_samples += num_samples;
 
+  // TODO 为什么不用  gst_app_src_push_buffer(GST_APP_SRC(src), buffer); 送媒体数据呢
   /* Push the buffer into the appsrc */
   g_signal_emit_by_name (data->app_source, "push-buffer", buffer, &ret);
 
@@ -387,14 +388,23 @@ int main(int argc, char *argv[]) {
 > If you need help to run this code, refer to the  **Running the tutorials**  section for your platform:  [Linux](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html#InstallingonLinux-Run),  [Mac OS X](https://gstreamer.freedesktop.org/documentation/installing/on-mac-osx.html#InstallingonMacOSX-Run)  or  [Windows](https://gstreamer.freedesktop.org/documentation/installing/on-windows.html#InstallingonWindows-Run).
 > 
 > This tutorial plays an audible tone for varying frequency through the audio card and opens a window with a waveform representation of the tone. The waveform should be a sinusoid, but due to the refreshing of the window might not appear so.
+>
+> 此示例播放一段不同频率的音频，并打开一个窗口显示音频的波形图。
+> 波形应该是正弦函数，但窗口显示的也许有一些差异。
 > 
 > Required libraries:  `gstreamer-1.0`
 
 ## Walkthrough[](https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html#walkthrough)
 
-The code to create the pipeline (Lines 131 to 205) is an enlarged version of  [Basic tutorial 7: Multithreading and Pad Availability](https://gstreamer.freedesktop.org/documentation/tutorials/basic/multithreading-and-pad-availability.html). It involves instantiating all the elements, link the elements with Always Pads, and manually link the Request Pads of the  `tee`  element.
+The code to create the pipeline (Lines 131 to 205) is an enlarged version of  [Basic tutorial 7: Multithreading and Pad Availability](https://gstreamer.freedesktop.org/documentation/tutorials/basic/multithreading-and-pad-availability.html).
+It involves instantiating all the elements, link the elements with Always Pads, and manually link the Request Pads of the  `tee`  element.
+
+从 131 到 205 行是创建 pipeline 的代码，它其实是由 [Basic tutorial 7: Multithreading and Pad Availability](https://gstreamer.freedesktop.org/documentation/tutorials/basic/multithreading-and-pad-availability.html) 的扩展而来。
+主要包含初始化 element 实例，链接 pad 与 element ，链接  request pad 到 tee element 的代码。
 
 Regarding the configuration of the  `appsrc`  and  `appsink`  elements:
+
+下面是配置 `appsrc` `appsink` element 相关的代码：
 
 ```c
 /* Configure appsrc */
@@ -408,7 +418,16 @@ g_signal_connect (data.app_source, "enough-data", G_CALLBACK (stop_feed), &data)
 
 The first property that needs to be set on the  `appsrc`  is  `caps`. It specifies the kind of data that the element is going to produce, so GStreamer can check if linking with downstream elements is possible (this is, if the downstream elements will understand this kind of data). This property must be a  `GstCaps`  object, which is easily built from a string with  `gst_caps_from_string()`.
 
+先设置到 `appsrc` 的属性是 `caps` 。
+用于表示此 element 将要产生的数据类型，以便GStreamer 检查后面的 element 是否合适（即，他们能否理解并处理这种类型的数据）。
+而且要求这些 caps 属性必须是能用 `gst_caps_from_string()` 函数生成的 `GstCaps` 对象。
+
+
 We then connect to the  `need-data`  and  `enough-data`  signals. These are fired by  `appsrc`  when its internal queue of data is running low or almost full, respectively. We will use these signals to start and stop (respectively) our signal generation process.
+
+如果我们设置监听了 `need-data` 和 `enough-data` 信号。
+一旦内部缓存数据的队列消费得过快或过慢的时候，就会收到相应的信号。
+我们会利用这一信号控制生成数据的启动和停止过程。
 
 ```c
 /* Configure appsink */
@@ -419,6 +438,9 @@ gst_caps_unref (audio_caps);
 ```
 
 Regarding the  `appsink`  configuration, we connect to the  `new-sample`  signal, which is emitted every time the sink receives a buffer. Also, the signal emission needs to be enabled through the  `emit-signals`  property, because, by default, it is disabled.
+
+忽略 `appsink` 的配置过程，直接看监听 `new-sample` 的代码，每次收到 buffer 时都会触发此信号。
+另外，一定要启用 `emit-signals` 属性，因为默认是关闭的。
 
 Starting the pipeline, waiting for messages and final cleanup is done as usual. Let's review the callbacks we have just registered:
 
