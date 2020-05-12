@@ -337,8 +337,14 @@ It has been a pleasure having you here, and see you soon!
 
 > ## 说明
 > 相同作用的 pipline 如下
-> gst-launch-1.0 audiotestsrc freq=215 ! tee name=t ! queue ! audioconvert ! audioresample ! autoaudiosink t. ! queue ! wavescope shader=0 style=1 ! videoconvert ! autovideosink
-> 
+>
+> ```txt
+> gst-launch-1.0 audiotestsrc freq=215 ! \
+>   tee name=t ! \
+>     queue ! audioconvert ! audioresample ! autoaudiosink \
+>   t. ! \
+>     queue ! wavescope shader=0 style=1 ! videoconvert ! autovideosink
+> ```
 > 
 
 

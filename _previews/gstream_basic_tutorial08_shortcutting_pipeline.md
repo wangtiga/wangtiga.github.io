@@ -641,6 +641,11 @@ It has been a pleasure having you here, and see you soon!
 > ## 说明
 > 虽然看着多数单词都认识，但用编辑器录入一遍，才感觉自己真正理解了这些文字。
 > 
+> record audio/video to mp4 file 
+> 
+> gst-launch-1.0 -vvv -e mp4mux name=mux ! filesink location=gtest1.mp4 videotestsrc ! queue ! x264enc ! mux.video_0 audiotestsrc ! audio/x-raw ! queue ! audioconvert ! voaacenc ! queue ! mux.audio_0
+> 
+> ref: https://www.jetsonhacks.com/2014/10/28/gstreamer-network-video-stream-save-file/
 
 
 [^GStreamDoc]:[Short-cutting the pipeline](https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html#basic-tutorial-8-shortcutting-the-pipeline)
