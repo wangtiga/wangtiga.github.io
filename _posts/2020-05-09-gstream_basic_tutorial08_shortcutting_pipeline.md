@@ -11,7 +11,7 @@ tags:   tech
 
 
 
-# Basic tutorial 8: Short-cutting the pipeline 简介 pipeline [^GStreamDoc]:
+# Basic tutorial 8: Short-cutting the pipeline 基础教程8: pipeline 快速上手 [^GStreamDoc]:
 
 ## Goal 目标
 
@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
 
 ```
 
-> ![Information](https://gstreamer.freedesktop.org/documentation/tutorials/basic/images/icons/emoticons/information.svg)Need help?
+> Need help?
 > 
 > If you need help to compile this code, refer to the  **Building the tutorials**  section for your platform:  [Linux](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html#InstallingonLinux-Build),  [Mac OS X](https://gstreamer.freedesktop.org/documentation/installing/on-mac-osx.html#InstallingonMacOSX-Build)  or  [Windows](https://gstreamer.freedesktop.org/documentation/installing/on-windows.html#InstallingonWindows-Build), or use this specific command on Linux:
 > 
@@ -394,7 +394,9 @@ int main(int argc, char *argv[]) {
 > 
 > Required libraries:  `gstreamer-1.0`
 
-## Walkthrough[](https://gstreamer.freedesktop.org/documentation/tutorials/basic/short-cutting-the-pipeline.html#walkthrough)
+
+
+## Walkthrough 逐行分析代码
 
 The code to create the pipeline (Lines 131 to 205) is an enlarged version of  [Basic tutorial 7: Multithreading and Pad Availability](https://gstreamer.freedesktop.org/documentation/tutorials/basic/multithreading-and-pad-availability.html).
 It involves instantiating all the elements, link the elements with Always Pads, and manually link the Request Pads of the  `tee`  element.
