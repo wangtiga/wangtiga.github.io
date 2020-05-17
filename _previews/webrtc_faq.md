@@ -13,12 +13,16 @@ tags:   tech
 ### 11.相关术语
 https://blog.csdn.net/DittyChen/article/details/78065974
 
-```txt
 SR：发送者报告，描述作为活跃发送者万岁的发送和接收统计数据
+
 RR：接收者报告，描述非活跃发送者成员的接收统计数据
+
 SDES：源描述项，其中包括规范名CNAME
+
 BYE：表明参与者将结束会话
+
 APP：应用描述功能
+
 
 关键帧请求
 
@@ -35,14 +39,37 @@ NACK：Negative Acknowledgemen 否定确认，NACK重传（丢包）
 RPSI：Reference Picture Selection Indication
 
 
-码率控制
+[码率控制](https://zhuanlan.zhihu.com/p/90094059)
 
 TMMBR是Temporal Max MediaBitrate Request，表示临时最大码率请求。表明接收端当前带宽受限，告诉发送端控制码率。
 
 REMB是ReceiverEstimatedMax Bitrate，接收端估计的最大码率。
 
 TMMBN是Temporal Max MediaBitrate Notification
-```
+
+JITTER 抖动时间间隔, 数据包传输时长的变化就是拌动. 上一个包传输耗时 10ms ,下一个包传输耗时 20ms ,抖动就是 20-10=10ms. 第三个包传输耗时 25ms, 抖动就是 25-20=5ms
+
+
+
+[关键帧](https://zhuanlan.zhihu.com/p/34162672)
+
+Intra Picture 关键帧，作为随机访问的参考点，当成静态图像
+
+Predictive Frame  参考帧，前向预测编码帧
+
+Bi-directionalinterpolated prediction frame 前后参考帧，双向预测内插编码帧
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### 10.SDP offer answer  中 ssrc 为什么不一样？以哪个为准 ？
 
