@@ -401,6 +401,8 @@ git commit --amend --author="wangtiga <wangtiga@gmail.com>"
 #### 8.如何查看git最近几次提交的差异？
 ```shell
 git diff @~7..@~6 -U1000
+git show @^0
+git show @^1
 ```
 
 
