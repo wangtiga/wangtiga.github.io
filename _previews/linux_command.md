@@ -405,8 +405,20 @@ git show @^0
 git show @^1
 ```
 
+#### 9.如何删除在 remote  中不存在的本地分支?
 
-#### 9.有哪些git参考资源？
+```shell
+# 在 hostA 上删除远程分支 serverfix 后,在 hostB 上也许还残留 serverfix 分支
+git push origin --delete serverfix
+
+# 可用以下命令清理本地缓存的远程分支信息
+git fetch --prune origin
+```
+
+[stackoverflow](https://stackoverflow.com/questions/32147093/git-delete-remotes-remote-refs-do-not-exist)
+
+
+#### 有哪些git参考资源？
 
 - stackoverflow
 
