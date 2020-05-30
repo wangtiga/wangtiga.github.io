@@ -10,6 +10,20 @@ tags:   tech
 
 
 
+
+### 12.RTP RTCP Multiplex SSRC 
+
+参考以下内容
+
+https://github.com/pion/webrtc/internal/mux/muxfunc.go
+
+[RFC 7983](https://tools.ietf.org/html/rfc7983)
+
+[RFC 5761](https://tools.ietf.org/html/rfc5761)
+
+[RFC 8108](https://tools.ietf.org/html/rfc8108)
+
+
 ### 11.相关术语
 https://blog.csdn.net/DittyChen/article/details/78065974
 

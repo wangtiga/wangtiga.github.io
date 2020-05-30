@@ -243,6 +243,14 @@ sudo supervisorctl start xxxserver
 
 ### golang
 
+#### install golang in ubuntu
+Install [recent Go](https://github.com/golang/go/wiki/Ubuntu):
+```txt
+
+$ sudo add-apt-repository ppa:longsleep/golang-backports
+$ sudo apt-get update
+$ sudo apt-get install golang-go
+```
 
 #### vim-go 插件提示   "No AST for file"
 
