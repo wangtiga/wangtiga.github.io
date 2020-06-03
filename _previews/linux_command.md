@@ -224,6 +224,26 @@ tcpdump -i any -C 100 -s 0 -w /tmp/ws/dump_any.pcap
 
 > [Linux Tools Quick Tutorial crontab ](https://linuxtools-rst.readthedocs.io/zh_CN/latest/tool/crontab.html)
 
+
+### nc netcat
+
+```shell
+# listen tcp
+$ nc -l 8080
+
+# connect tcp
+$ nc 192.168.1.100 80
+
+# listen udp
+$ nc -l -u 1234
+
+# connect udp
+# nc -v -u 192.168.105.150 53
+```
+
+[10 useful ncat (nc) Command Examples for Linux Systems](https://www.linuxtechi.com/nc-ncat-command-examples-linux-systems/)
+
+
 ### supervisorctl
 
 http://supervisord.org/introduction.html
