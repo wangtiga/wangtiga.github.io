@@ -113,6 +113,45 @@ echo "ewoJImNvbmZJZCI6CSI1Nzc1NjgiLAoJImFwcElkIjoJIjhhMmFmOTg4NTM2NDU4YzMwMTUzN2
 
 > [jq tutorial](https://stedolan.github.io/jq/tutorial/)
 
+#### 估算代码行数
+
+```shell
+$ find . -name "*.go" -not -path "./vendor/*" | xargs wc -l
+. 当前文件夹
+-name "*.go* 以 .go 结尾的文件
+-not -path "./vendor/*" 忽略 vendor 目录的文件
+xargs wc -l 统计 find 命令返回的文件行数
+
+$ find ./_posts/  | xargs wc -l
+wc: ./_posts/: Is a directory
+      0 ./_posts/
+    268 ./_posts/2019-07-14-datarate_bandwidth_datasize.md
+    679 ./_posts/2019-11-03-4735_2019_10.md
+     84 ./_posts/2019-10-12-grinder.md
+    251 ./_posts/2020-01-31-video_codec.md
+    463 ./_posts/2019-12-22-redis_distlock_redlock.md
+    410 ./_posts/2019-09-17-playing_with_go_module_proxies.md
+    543 ./_posts/2019-09-12-slow_down_go_faster.md
+    611 ./_posts/2019-06-17-computer-network.md
+     58 ./_posts/2019-10-01-english_bing_today.md
+    548 ./_posts/2019-10-01-english_word.md
+    177 ./_posts/2019-10-09-influxdb_practice.md
+    393 ./_posts/2020-01-01-gstream_basic_tutorial10_gstreamer_tools.md
+    363 ./_posts/2020-04-30-zoom_avoid_using_webrtc.md
+    601 ./_posts/2019-09-01-introduction_to_go_modules.md
+    426 ./_posts/2019-06-12-4751_2014_10.md
+    473 ./_posts/2019-11-03-4735_2019_10_sql.md
+    654 ./_posts/2020-05-09-gstream_basic_tutorial08_shortcutting_pipeline.md
+    986 ./_posts/2019-07-17-golang_intro.md
+    352 ./_posts/2020-01-01-gstream_basic_tutorial07_multithreading_and_pad_availability.md
+   3731 ./_posts/2019-06-01-effective-golang.md
+    375 ./_posts/2019-08-24-tproxy.md
+    650 ./_posts/2019-11-06-vim_faq.md
+    137 ./_posts/2019-12-22-redis_distlock_setnx.md
+    261 ./_posts/2019-08-13-mysql_utf8_utf8mb4.md
+    585 ./_posts/2019-06-12-4751_2014_04.md
+  14079 total
+```
 
 #### Linux查看实时网络速率
 
