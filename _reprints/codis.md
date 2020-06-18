@@ -260,9 +260,20 @@ NoSQL来了一茬又一茬，从HBase到Cassandra到MongoDB，解决的是数据
 -   曾在豌豆荚从事infrastructure相关的工作，现在在创业公司PingCAP，方向依然是分布式存储领域(NewSQL)。
 
 
+> ## 说明
+
+redis 中 pipeline 是为减少 RTT ,加快速度,所以仅保证响应有序,不保证事务的特性.
+
+redis 中 lua script 和 MULTI/EXEC 支持事务;
+
+> redis 中的[事务](https://redis.io/topics/transactions)  [与数据库的 ACID](https://zh.wikipedia.org/wiki/ACID)
+> 1. 满足   isolation   隔离性, 因为执行过程不会被中断,且 DISCARD 时,所有命令都不执行.
+> 2. 不满足 atomicity   原子性, 因为没有 rollback 概念(作者声称这是由于事务过程失败,多数原因是编程的bug,而非redis有问题).
+> 3. 不满足 consistency 一致性, 因为失败时,也会执行后续所有命令.但同样,失败时多是由于编程的bug,所以实际上严谨测试过的程序不会出这种问题.
+> 4. 满足   durability  持久性, 因为持久化日志里,事务中的所有命令都使用一个 write(2) syscall 调用写入 disk .
+> 
+
+
 [^CodisDeveloper]:[Codis作者黄东旭：细说分布式Redis架构设计和那些踩过的坑](https://dbaplus.cn/news-141-270-1.html)
 [^UnsupportedCmds]:[commands are disallowed in codis proxy](https://github.com/CodisLabs/codis/blob/release3.2/doc/unsupported_cmds.md)
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTExOTIxMTc2MDgsLTE0MTIyMDY2LC0xOT
-kwMTI1Njg4XX0=
--->
+
