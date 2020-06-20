@@ -264,6 +264,8 @@ NoSQL来了一茬又一茬，从HBase到Cassandra到MongoDB，解决的是数据
 
 redis 中 pipeline 是为减少 RTT ,加快速度,所以仅保证响应有序,不保证事务的特性.
 
+TODO pipeline 真得不能保证 isolation 吗？ 如果 key 都在一个节点上，也不能保证吗？看 redis 代码确认下此问题。
+
 redis 中 lua script 和 MULTI/EXEC 支持事务;
 
 > redis 中的[事务](https://redis.io/topics/transactions)  [与数据库的 ACID](https://zh.wikipedia.org/wiki/ACID)
