@@ -58,11 +58,37 @@ sudo lsof -nP -i  :443
 
 ### ssh
 
-```shell
-# use public key autologin remote host, ref https://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html"
+- use public key autologin remote host, ref https://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html"
 
+```shell
 ssh wangtiga@hostip 'mkdir -p .ssh && cat >> .ssh/authorized_keys' < ~/.ssh/id_rsa.pub "
 ```
+
+- enable
+
+```shell
+$ sudo vi /etc/ssh/sshd_config
+PubkeyAuthentication yes
+
+# The default is to check both .ssh/authorized_keys and .ssh/authorized_keys2
+# but this is overridden so installations will only check .ssh/authorized_keys
+AuthorizedKeysFile .ssh/authorized_keys
+
+
+$ sudo systemctl reload sshd
+```
+
+- faq
+
+```shell
+$  sudo tail -f /var/log/secure
+Jul 1 11:33:23 vm-19 sshd[123456]: Authentication refused: bad ownership or modes for file /home/tiga/.ssh/authorized_keys
+
+$ chmod 700 ~/.ssh
+$ chmod 600 ~/.ssh/authorized_keys
+```
+
+
 
 #### tmux 持久化远程 ssh 会话
 ```shell

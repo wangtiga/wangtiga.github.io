@@ -48,7 +48,7 @@ FIR：Full Intra Request，关键帧重传请求. Intra的含义是图像内编�
 
 重传请求
 
-NACK：Negative Acknowledgemen 否定确认，NACK重传（丢包）
+NACK：Negative Acknowledgement 否定确认，NACK重传（丢包）
 
 RPSI：Reference Picture Selection Indication
 
@@ -73,6 +73,18 @@ Predictive Frame  参考帧，前向预测编码帧
 
 Bi-directionalinterpolated prediction frame 前后参考帧，双向预测内插编码帧
 
+
+[两种源端编码策略 - Simulcast和SVC](https://zhuanlan.zhihu.com/p/130406233)
+
+当SFU只有一路视频可以转发时，如何根据各链路的带宽情况进行下发控制，有点巧妇难为无米之炊的感觉。
+
+Simulcast：
+同步广播，指的是同时编码/发送多路视频流，比如常规发送一路720p，外加一路180p的流，这样在SFU下发给接收端的时候，可以根据下行带宽的限制，选择下发不同分辨率的流，照顾到每个端的体验。
+
+SVC：
+可伸缩编码，使用基于层次的方法，提供时间或空间可伸缩编码组合。在RTC的应用中，通常会选用时域SVC，通过改变帧率来实现伸缩性。SFU可以根据下行的实际带宽，从同一路SVC视频流中解析出不同的时域分层，分别传输给各个接收端，同样可以实现差异化的视频流转发。
+
+Simulcast和SVC在实际应用中各有优劣，Simulcast多路流的分辨率跨度大，主观体验不佳；SVC的时域分层会影响帧率，容易出现卡顿。
 
 
 
