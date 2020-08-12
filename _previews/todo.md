@@ -47,6 +47,19 @@ golang io.Copy 与内存分配使用
 
   https://github.com/wangtiga/test/tgin/upload
 
+raspberry kodi
+  1. 显示中文要用特定字体
+  2. AirPl支持特定版本的 iOS
+
+hiwifi openwrt
+
+
+  https://openwrt.io/docs/gee/
+
+  https://imsqua.re/blog/post/squarefong/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE4B%E5%81%9A%E9%AB%98%E6%B8%85%E6%92%AD%E6%94%BE%E7%9A%84%E7%9B%92%E5%AD%90?nsukey=MvwqDANXxg2aLD2FFhPoMxDS8ZT7%2B6pFZfmbuqj8%2F1eTsrccJQFojPAY74LcFWLbRs9H2Kv7CEQjOf%2BsOnTzppJ%2Bc3e533kglwQI9%2F6XXaqZuRrBXJ8FAYh4wNQl83JaykKSUFnM322bTXpuEOJpPIQ19RbKqC0p6C528pVCaJdITb2BTIPwnA7WTj2CcSYCEoeIIm9zD34EIiiaWwUfFA%3D%3D
+
+  https://nyrra33.com/2019/08/10/unbrick-hc5661-router/
+
 
 
 ## TODO
