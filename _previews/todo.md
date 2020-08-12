@@ -47,49 +47,6 @@ golang io.Copy 与内存分配使用
 
   https://github.com/wangtiga/test/tgin/upload
 
-- Raspberry 4B + Kodi
-  1. Kodi 显示中文要用特定字体，否则中文会乱码
-  2. Raspberry 4B 仅在靠近 USB TypeC 接口的 MicroHDMI 才有音频输出。
-  2. AirPlay 支持特定版本的 iOS 。
-  3. Miracast 暂时不支持。
-  4. DLAN 必须播放软件运行。目前 Bilibili 支持。
-  5. Android 下载 Kore 快控遥控 Kodi 。
-  6. iOS 下载 Kodi Remote 遥控 Kodi 。
-  7. TODO 安装 HDV ，导入 m3u 地址观看电视台。
-  8. TODO 记录相关开源程序版本，记录 m3u 开源库地址。
-
-- hiwifi openwrt
-  1. 恢复成默认开启 ssh 的官方版本。
-  2. 刷砖后，恢复的方法。一台电脑与HIWIFI的Lan口网线直连；电脑设置固定的IP,开启 SFTP Server ，增加 Recover.bin 文件；开机HIWIFI过程，持续按信Reset键。
-  3. TODO 刷 Openwrt 的过程。
-
-
-  https://openwrt.io/docs/gee/
-
-  https://imsqua.re/blog/post/squarefong/%E7%94%A8%E6%A0%91%E8%8E%93%E6%B4%BE4B%E5%81%9A%E9%AB%98%E6%B8%85%E6%92%AD%E6%94%BE%E7%9A%84%E7%9B%92%E5%AD%90?nsukey=MvwqDANXxg2aLD2FFhPoMxDS8ZT7%2B6pFZfmbuqj8%2F1eTsrccJQFojPAY74LcFWLbRs9H2Kv7CEQjOf%2BsOnTzppJ%2Bc3e533kglwQI9%2F6XXaqZuRrBXJ8FAYh4wNQl83JaykKSUFnM322bTXpuEOJpPIQ19RbKqC0p6C528pVCaJdITb2BTIPwnA7WTj2CcSYCEoeIIm9zD34EIiiaWwUfFA%3D%3D
-
-  https://nyrra33.com/2019/08/10/unbrick-hc5661-router/
-
-- Boox Note Plus
-  1. 下载 Termux 终端模拟器， 安装 vim 编辑器，配合 vim-im 输入法，在 github.io 写日记。使用 ydict 实现终端内查词，且自动发音。
-  2. 使用 Markor Android App 预览本地 markdown 文件。
-  3. TypeC 口仅支持充电，无任何扩展功能，而且仅支持 USB TypeB + TypeC 的线充电，不支持 TypeC + TypeC 的线充电。
-  4. TODO 下载 PDF 资源。
-  5. send2boox.com 分发 pdf 等格式电子书资源。
-  6. 有音频，听个响的级别，但查词发音时非常有用。
-
-- BenQ 显示器 
-  1. USB TypeC 口支持接收4K视频，且支持TNT过程充电，但充电很慢。
-  2. 但无法与 Switch 直连，因为 Switch 官方限制，显示器必须有 dock 组件。主 GoBigger 这种三方小厂反而能直连 Switch TypeC 。
-  3. 有音频，听个响的级别。
-
-- Gobigger 显示器
-  1. MiniHDMI 不方便。
-  2. TypeC 充电 + 投屏 ＋ 十指触摸 使用 TNT 。
-  3. 显示器必须配合送的保护套才能立起来使用，但保护套是磁吸的，这个支撑过程很脆弱，感觉随时跨台。
-  4. 有音频，听个响的级别。
-
-
 ## TODO
 
 (B) dynamic program https://leetcode.com/problems/minimum-path-sum/
