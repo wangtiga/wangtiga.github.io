@@ -1449,13 +1449,17 @@ Run these benchmarks, what do you see?
 
 
 
-### 2.8. Profiling benchmarks
+### 2.8. Profiling benchmarks 带性能分析的基准测试
+
+> Profiling 是指在程序执行过程中，收集能够反映程序执行状态的数据。在软件工程中，性能分析（performance analysis，也称为 profiling），是以收集程序运行时信息为手段研究程序行为的分析方法，是一种动态程序分析的方法。[^qcraoPPROF]
 
 The  `testing`  package has built in support for generating CPU, memory, and block profiles.
 
+`testing` package 支持生成 CPU memory block profile 等类型的性能分析文件。
+
 -   `-cpuprofile=$FILE`  writes a CPU profile to  `$FILE`.
     
--   `-memprofile=$FILE`, writes a memory profile to  `$FILE`,  `-memprofilerate=N`  adjusts the profile rate to  `1/N`.
+-   `-memprofile=$FILE`, writes a memory profile to  `$FILE`,  `-memprofilerate=N`  adjusts the profile rate to  `1/N`.  设置内存采样速率。 [golang.org MemProfileRate](https://golang.org/pkg/runtime/#pkg-variables)
     
 -   `-blockprofile=$FILE`, writes a block profile to  `$FILE`.
     
@@ -1467,19 +1471,33 @@ Using any of these flags also preserves the binary.
 % go tool pprof c.p
 ```
 
-### 2.9. Discussion
+### 2.9. Discussion 讨论
 
 Are there any questions?
 
 Perhaps it is time for a break.
 
-## 3. Performance measurement and profiling
+
+
+## 3. Performance measurement and profiling 性能评估与分析
 
 In the previous section we looked at benchmarking individual functions which is useful when you know ahead of time where the bottlekneck is. However, often you will find yourself in the position of asking
 
 > Why is this program taking so long to run?
 
+
+上一节介绍的基准测试用于分析单个函数的性能瓶颈。
+但我们经常遇到的问题的
+
+> 为什么这个程序要运行这么长时间？
+
+
 Profiling  _whole_  programs which is useful for answering high level questions like. In this section we’ll use profiling tools built into Go to investigate the operation of the program from the inside.
+
+只有对 _整个_ 程序进行分析，才能回答这个问题。
+这一节，我们使用 Go 内置的 profile tool 来调整程序内部的运行情况。
+
+
 
 ### 3.1. pprof
 
@@ -1490,9 +1508,19 @@ The first tool we’re going to be talking about today is  _pprof_.  [pprof](htt
 -   `runtime/pprof`  package built into every Go program
     
 -   `go tool pprof`  for investigating profiles.
-    
 
-### 3.2. Types of profiles
+
+第一个要讨论的工具是 _pprof_ 。  [pprof](https://github.com/google/pprof)  来自 [Google Perf Tools](https://github.com/gperftools/gperftools) ，在首次公开发版时，就包集成到了 Go 运行时内。
+
+`pprof` 包含以下两部分：
+
+-   `runtime/pprof`  是一个可在 Go 程序代码中引用 package 。
+    
+-   `go tool pprof`  是进行性能分析的工具。
+
+
+
+### 3.2. Types of profiles 性能分析的种类
 
 pprof supports several types of profiling, we’ll discuss three of these today:
 
@@ -1502,10 +1530,19 @@ pprof supports several types of profiling, we’ll discuss three of these today:
     
 -   Block (or blocking) profiling.
     
--   Mutex contention profiling.
+-   Mutex contention profiling. 
     
+pprof 支持分析以下几种类型：
 
-#### 3.2.1. CPU profiling
+- CPU 性能分析
+- 内存性能分析
+- 阻塞分析
+- 锁（互斥量）争用分析
+
+
+
+
+#### 3.2.1. CPU profiling [^qcraoPPROF]
 
 CPU profiling is the most common type of profile, and the most obvious.
 
@@ -1515,17 +1552,42 @@ Once the profile is complete we can analyse it to determine the hottest code pat
 
 The more times a function appears in the profile, the more time that code path is taking as a percentage of the total runtime.
 
-#### 3.2.2. Memory profiling
+最常用的是 CPU profile。
+
+启用 CPU profile 后，runtime 每隔 10ms 中断一次，然后记录当前的堆栈。
+
+profile 完毕后，就能 analyse（分析） 出 hottest code path （热点代码）。
+
+在 profile 中出现次数越多的函数，在 code path 中所占比重就最大。
+
+
+
+
+#### 3.2.2. Memory profiling [^qcraoPPROF]
 
 Memory profiling records the stack trace when a  _heap_  allocation is made.
 
-Stack allocations are assumed to be free and are  _not_tracked_  in the memory profile.
+Stack allocations are assumed to be free and are  _not tracked_  in the memory profile.
 
 Memory profiling, like CPU profiling is sample based, by default memory profiling samples 1 in every 1000 allocations. This rate can be changed.
 
 Because of memory profiling is sample based and because it tracks  _allocations_  not  _use_, using memory profiling to determine your application’s overall memory usage is difficult.
 
-_Personal Opinion:_  I do not find memory profiling useful for finding memory leaks. There are better ways to determine how much memory your application is using. We will discuss these later in the presentation.
+> Personal Opinion:  I do not find memory profiling useful for finding memory leaks. There are better ways to determine how much memory your application is using. We will discuss these later in the presentation.
+
+
+
+Memory profile 是在堆(Heap)分配的时候，记录一下调用堆栈。
+
+栈(Stack)分配由于会随时释放，因此不会被内存分析所记录。
+
+与 CPU profile 类似，默认情况下，Memory profile 每 1000 次分配，取样一次，这个数值可以改变。
+
+由于内存分析是取样方式，并且也因为其记录的是分配的内存，而不是使用的内存。因此使用内存性能分析工具来准确判断程序具体的内存使用是比较困难的。
+
+> 个人观点:  Memory profile 不能用于查找内存泄漏。有其他更好的方法来跟踪程序占用的内存大小。我们后面讨论。
+
+
 
 #### 3.2.3. Block profiling
 
@@ -1542,15 +1604,39 @@ Block profiling can show you when a large number of goroutines  _could_  make pr
 -   Sending to a full channel, receiving from an empty one.
     
 -   Trying to  `Lock`  a  `sync.Mutex`  that is locked by another goroutine.
-    
 
 Block profiling is a very specialised tool, it should not be used until you believe you have eliminated all your CPU and memory usage bottlenecks.
+
+
+Block profile 是 Go 语言中特有的一种分析方法。
+
+Block profile 与 CPU profile 很像，但它记录的是 goroutine 等待共享资源所花费的时间。
+
+在分析程序 _并发_ 瓶颈时，十分有用。
+
+Block profile 可分析出哪些时间，出现了大量 goroutine 同时处于 block 状态的情况。
+
+可能引起 block 的原因如下：
+
+- 发送或接收无缓冲的 channel 时。
+- 向已满的 channel 中写数据，或从空的 channel 中读数据时。
+- 尝试 Lock 一个已经被其他 goroutine 锁住的 sync.Mutex 时。
+
+Block profile 很特殊，在排除 CPU 和 Memory 的性能瓶颈前，不要使用它来分析。
+
+
 
 #### 3.2.4. Mutex profiling
 
 Mutex profiling is simlar to Block profiling, but is focused exclusively on operations that lead to delays caused by mutex contention.
 
 I don’t have a lot of experience with this type of profile but I have built an example to demonstrate it. We’ll look at that example shortly.
+
+Mutex profile 与 Block profile 类似，但它专门分析互斥量争用所导致的延迟。
+
+我没有多少 Mutext profile 相关的使用经验，但后面会有一个示例演示具体用法。
+
+
 
 ### 3.3. One profile at at time
 
@@ -3507,4 +3593,6 @@ ehs.forEach ( e => {
 [^InterlCPUList]: [英特尔微处理器列表](https://zh.wikipedia.org/wiki/%E8%8B%B1%E7%89%B9%E5%B0%94%E5%BE%AE%E5%A4%84%E7%90%86%E5%99%A8%E5%88%97%E8%A1%A8)。
 
 [^CPUMax4GHz]: [为什么主流CPU的频率止步于4G?我们触到频率天花板了吗？](https://zhuanlan.zhihu.com/p/30409360)
+
+[^qcraoPPROF]: [深度解密Go语言之pprof](https://qcrao.com/2019/11/10/dive-into-go-pprof/)
 

@@ -57,12 +57,18 @@ RPSI：Reference Picture Selection Indication
 
 TMMBR是Temporal Max MediaBitrate Request，表示临时最大码率请求。表明接收端当前带宽受限，告诉发送端控制码率。
 
-REMB是ReceiverEstimatedMax Bitrate，接收端估计的最大码率。
-
 TMMBN是Temporal Max MediaBitrate Notification
 
 JITTER 抖动时间间隔, 数据包传输时长的变化就是拌动. 上一个包传输耗时 10ms ,下一个包传输耗时 20ms ,抖动就是 20-10=10ms. 第三个包传输耗时 25ms, 抖动就是 25-20=5ms
 
+
+REMB 是 ReceiverEstimatedMax Bitrate，接收端估计的最大码率。RTP头中包含发送端绝对时间戳,服务器利用GCC的基于时延的带宽估计算法,估算出用户上行带宽以后,通过REMB将带宽反馈回客户端.客户端根据反馈的带宽以及RR反馈的丢包进行综合拥塞控制
+
+Transport-CC 服务端不实现具体的GCC算法,仅把统计到的收包序列以及相关 delay 信息(即媒体流接收端的统计信息)封装在协议中,再传到发送端, 发送端根据这些信息利用 GCC 算法进行流量控制.
+
+> 因为 WebRTC 认为各端实现的GCC算法质量不可控,对发送方来说,本端GCC算法最符合本端的标准.所心 Transport-CC 是未来的趋势.
+
+FEC Forward Error Correction 前向纠错. 发送媒体包时,增加一定冗余,在一定丢包率的情况下,接收端也能正常解码.
 
 
 [关键帧](https://zhuanlan.zhihu.com/p/34162672)
