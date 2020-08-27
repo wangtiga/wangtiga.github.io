@@ -1638,23 +1638,39 @@ Mutex profile 与 Block profile 类似，但它专门分析互斥量争用所导
 
 
 
-### 3.3. One profile at at time
+### 3.3. One profile at at time 每次只分析一种类型
 
 Profiling is not free.
 
+profile 是有代价的。
+
 Profiling has a moderate, but measurable impact on program performance—especially if you increase the memory profile sample rate.
 
+执行 profile 的过程对程序有一定性能损耗，特别是在提高 memory profile 采样率时。
+
 Most tools will not stop you from enabling multiple profiles at once.
+
+但是多数工具都不禁止你同时开启多个 profile 。
 
 Do not enable more than one kind of profile at a time.
 
 If you enable multiple profile’s at the same time, they will observe their own interactions and throw off your results.
 
-### 3.4. Collecting a profile
+同时开启多种 profile 时，在分析结果会互相影响。
+
+
+### 3.4. Collecting a profile 收集分析结果
 
 The Go runtime’s profiling interface lives in the  `runtime/pprof`  package.  `runtime/pprof`  is a very low level tool, and for historic reasons the interfaces to the different kinds of profile are not uniform.
 
+Go 运行时 profile 接口位于 `runtime/pprof` package 中。
+这是一个很以的接口。
+由于历史原因，不同类型的 profile 接口也不统一。
+
 As we saw in the previous section, pprof profiling is built into the  `testing`  package, but sometimes its inconvenient, or difficult, to place the code you want to profile in the context of at  `testing.B`  benchmark and must use the  `runtime/pprof`  API directly.
+
+pprof profile 是内置在 `testing` package 中的，如果不方便在 `testing.B` 基准测试中放置 profile 代码时，可以直接调用 `runtime/pprof` API 。
+
 
 A few years ago I wrote a [small package][0], to make it easier to profile an existing application.
 
