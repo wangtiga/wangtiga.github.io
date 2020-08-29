@@ -1534,10 +1534,10 @@ pprof supports several types of profiling, we’ll discuss three of these today:
     
 pprof 支持分析以下几种类型：
 
-- CPU 性能分析
-- 内存性能分析
-- 阻塞分析
-- 锁（互斥量）争用分析
+- CPU 性能剖析
+- 内存性能剖析
+- 阻塞剖析
+- 锁（互斥量）争用剖析
 
 
 
@@ -1672,9 +1672,11 @@ As we saw in the previous section, pprof profiling is built into the  `testing` 
 pprof profile 是内置在 `testing` package 中的，如果不方便在 `testing.B` 基准测试中放置 profile 代码时，可以直接调用 `runtime/pprof` API 。
 
 
-A few years ago I wrote a [small package][0], to make it easier to profile an existing application.
+A few years ago I wrote a [pkg/profile](https://github.com/pkg/profile) package, to make it easier to profile an existing application.
 
-```
+几年前，我实现了一个生成 profile 的 package [pkg/profile](https://github.com/pkg/profile) 。
+
+```go
 import "github.com/pkg/profile"
 
 func main() {
@@ -1685,9 +1687,17 @@ func main() {
 
 We’ll use the profile package throughout this section. Later in the day we’ll touch on using the  `runtime/pprof`  interface directly.
 
-### 3.5. Analysing a profile with pprof
+本节我们就会用这个 pkg/profile package 进行演示。后面几天，才会直接使用 `runtime/pprof` 接口。
+
+
+
+
+### 3.5. Analysing a profile with pprof 使用 pprof 分析剖析结果 
 
 Now that we’ve talked about what pprof can measure, and how to generate a profile, let’s talk about how to use pprof to analyse a profile.
+
+刚才讨论过，pprof 能剖析哪些内容，以有如何生成 profile 文件。
+现在我们看看如何用 pprof 分析 profile 文件吧。
 
 The analysis is driven by the  `go pprof`  subcommand
 
@@ -1695,20 +1705,31 @@ go tool pprof /path/to/your/profile
 
 This tool provides several different representations of the profiling data; textual, graphical, even flame graphs.
 
+此工具可以：文本，图形，甚至火焰图等几种方式展现 profile 数据。
+
+
 If you’ve been using Go for a while, you might have been told that  `pprof`  takes two arguments. Since Go 1.9 the profile file contains all the information needed to render the profile. You do no longer need the binary which produced the profile. 🎉
 
-#### 3.5.1. Further reading
+如果你用过较早版本的 Go，可能遇到 `pprof` 命令要求提供两个参数的情况。即同时提供  profile 文件 与 生成 profile 时运行的二进制程序文件，才能输出分析结果。
+从 Go 1.9 版本开始，只需要一个 profile 文件中就能执行分析，并输出分析结果。
+
+
+
+#### 3.5.1. Further reading 延伸阅读
 
 -   [Profiling Go programs](http://blog.golang.org/profiling-go-programs)  (Go Blog)
     
 -   [Debugging performance issues in Go programs](https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs)
-    
+ 
 
-#### 3.5.2. CPU profiling (exercise)
+
+#### 3.5.2. CPU profiling (exercise) CPU profiling （练习）
 
 Let’s write a program to count words:
 
-```
+写一个计算单词个数的程序：
+
+```go
 package main
 
 import (
@@ -1757,7 +1778,9 @@ func main() {
 
 Let’s see how many words there are in Herman Melville’s classic  [Moby Dick](https://www.gutenberg.org/ebooks/2701)  (sourced from Project Gutenberg)
 
-```
+我们看看 赫尔曼·梅尔维尔经典小说 《Moby Dick白鲸记》 有多少个单词吧。
+
+```txt
 % go build && time ./words moby.txt
 "moby.txt": 181275 words
 
@@ -1768,7 +1791,9 @@ sys     0m0.944s
 
 Let’s compare that to unix’s  `wc -w`
 
-```
+再与 unix 中的标准单词计数程序 `wc -w` 比较一下
+
+```txt
 % time wc -w moby.txt
 215829 moby.txt
 
@@ -1777,15 +1802,25 @@ user    0m0.009s
 sys     0m0.002s
 ```
 
-So the numbers aren’t the same.  `wc`  is about 19% higher because what it considers a word is different to what my simple program does. That’s not important—​both programs take the whole file as input and in a single pass count the number of transitions from word to non word.
+So the numbers aren’t the same.  `wc`  is about 19% higher because what it considers a word is different to what my simple program does. That’s not important - both programs take the whole file as input and in a single pass count the number of transitions from word to non word.
 
 Let’s investigate why these programs have different run times using pprof.
 
-#### 3.5.3. Add CPU profiling
+`wc` 命令算出的单词数量比我们的多了 19% ， 这是因为两个程序识别单词的标准不一样导致。
+这个单独并不重启，我们主要关注的问题是：两个程序都从文件中读取所有数据然后计算单词数，为什么我们的程序花费的时间更长呢？
+
+我们用 pprof 工具分析一下看看。
+
+
+
+
+#### 3.5.3. Add CPU profiling 增加 CPU profile
 
 First, edit  `main.go`  and enable profiling
 
-```
+编辑 `main.go` 文件，启用 profile 
+
+```go
 import (
         "github.com/pkg/profile"
 )
@@ -1797,7 +1832,10 @@ func main() {
 
 Now when we run the program a  `cpu.pprof`  file is created.
 
-```
+现在，我们运行程序，一个 `cpu.pprof` 文件就会自动生成 。
+
+
+```txt
 % go run main.go moby.txt
 2018/08/25 14:09:01 profile: cpu profiling enabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile239941020/cpu.pprof
 "moby.txt": 181275 words
@@ -1806,7 +1844,9 @@ Now when we run the program a  `cpu.pprof`  file is created.
 
 Now we have the profile we can analyse it with  `go tool pprof`
 
-```
+现在我们就能用 `go tool pprof` 工具直接分析这个 profile 文件了。
+
+```txt
 % go tool pprof /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile239941020/cpu.pprof
 Type: cpu
 Time: Aug 25, 2018 at 2:09pm (AEST)
@@ -1828,11 +1868,22 @@ Showing nodes accounting for 1.42s, 100% of 1.42s total
 
 The  `top`  command is one you’ll use the most. We can see that 99% of the time this program spends in  `syscall.Syscall`, and a small part in  `main.readbyte`.
 
+最常用的命令是 `top` 。
+这个程序 99% 的时间用花在 `syscall.Syscall` 上，
+另一部分时间花在了 `main.readbyte` 。
+
+
 We can also visualise this call the with the  `web`  command. This will generate a directed graph from the profile data. Under the hood this uses the  `dot`  command from Graphviz.
+
+我们还可以用 `web` 命令观察剖析结果。这会根据 profile 中的数据生成一张图表。命令内部会调用 Graphviz 工具的 `dot` 命令生成的图表（译：所以在执行 pprof 分析的主机中，要安装 Graphviz 相关命令）。
+
 
 However, in Go 1.10 (possibly 1.11) Go ships with a version of pprof that natively supports a http sever
 
-```
+但是，在 Go 1.10 (也可能是 1.11）版本中， pprof 内置了一个 HTTP 服务器。
+
+
+```txt
 % go tool pprof -http=:8080 /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile239941020/cpu.pprof
 ```
 
@@ -1841,11 +1892,43 @@ Will open a web browser;
 -   Graph mode
     
 -   Flame graph mode
+
+执行上面的命令，就会自动打开浏览器，支持
+
+- 图表模式
+- 火焰图模式
     
 
-On the graph the box that consumes the  _most_  CPU time is the largest — we see  `sys call.Syscall`  at 99.3% of the total time spent in the program. The string of boxes leading to  `syscall.Syscall`  represent the immediate callers — there can be more than one if multiple code paths converge on the same function. The size of the arrow represents how much time was spent in children of a box, we see that from  `main.readbyte`  onwards they account for near 0 of the 1.41 second spent in this arm of the graph.
+On the graph the box that consumes the  _most_  CPU time is the largest — we see  `syscall.Syscall`  at 99.3% of the total time spent in the program. The string of boxes leading to  `syscall.Syscall`  represent the immediate callers — there can be more than one if multiple code paths converge on the same function. The size of the arrow represents how much time was spent in children of a box, we see that from  `main.readbyte`  onwards they account for near 0 of the 1.41 second spent in this arm of the graph.
+
+在图表中，方框最大的图形占用CPU也最多。
+方框上的连线，表示此函数的调用方。如果有多条代码路径调用相同的函数，就会出现多条线。
+箭头的大小表示被调用方（子方框）花费的时间。
+
+在本图中，可以观察到：
+占用程序 99.3% 时间的是`syscall.Syscall` 。
+`main.readbyte`方框占用了 1.41 秒，但`readbyte`函数本身只占用了 0 秒，其子函数 `File.Read() 占用了 1.41 秒。
+
 
 _Question_: Can anyone guess why our version is so much slower than  `wc`?
+
+_问题_： 谁知道为什么我们的程序比 `wc` 慢了这么多呢？
+
+
+> 深度解密Go语言之pprof[^qcraoPPROF]
+ 列名 | 含义
+----- | -------------------------------------------
+flat  | 本函数的执行耗时, the time in a function
+flat% | flat 占 CPU 总时间的比例。程序总耗时 16.22s, Eat 的 16.19s 占了 99.82%
+sum%  | 前面每一行的 flat 占比总和
+cum   | 累计量。指该函数加上该函数调用的函数总耗时。cumulative time a function and everything below it.
+cum%  | cum 占 CPU 总时间的比例
+
+> 方框 syscall.Syscall 760ms(84.44%) of 820ms(91.11%) 
+> 
+> 760ms 表示 flat 时间； 820ms 表示 cumulate 时间；
+
+
 
 #### 3.5.4. Improving our version
 
