@@ -1723,7 +1723,7 @@ If you’ve been using Go for a while, you might have been told that  `pprof`  t
  
 
 
-#### 3.5.2. CPU profiling (exercise) CPU profiling （练习）
+#### 3.5.2. CPU profiling (exercise)
 
 Let’s write a program to count words:
 
@@ -1930,13 +1930,23 @@ cum%  | cum 占 CPU 总时间的比例
 
 
 
-#### 3.5.4. Improving our version
+#### 3.5.4. Improving our version 优化我们的程序
 
 The reason our program is slow is not because Go’s  `syscall.Syscall`  is slow. It is because syscalls in general are expensive operations (and getting more expensive as more Spectre family vulnerabilities are discovered).
 
 Each call to  `readbyte`  results in a syscall.Read with a buffer size of 1. So the number of syscalls executed by our program is equal to the size of the input. We can see that in the pprof graph that reading the input dominates everything else.
 
-```
+我们的程序慢，并非由于 Go 的 `syscall.Syscall` 接口慢导致的。
+而是因为 syscall 系统调用原本就是开销巨大的一种操作（为了修复越来越多的安全漏洞，这种开销也会越来越大）。
+
+每次 `readbyte` 都会触发一次 syscall.Read 系统调用，而且 buffer size 是 1 ，所以系统调用的次数就是文件在字节数。
+所以能从 pprof 图表中看到，主要耗时都在读取数据的过程。
+
+> NOTE Spectre family vulnerabilities 幽灵是一个存在于分支预测实现中的硬件缺陷及安全漏洞，含有预测执行功能的现代微处理器均受其影响，漏洞利用是基于时间的旁路攻击，允许恶意进程获得其他程序在映射内存中的数据内容。 [维基百科](https://zh.wikipedia.org/zh-cn/%E5%B9%BD%E7%81%B5%E6%BC%8F%E6%B4%9E)
+
+
+
+```go
 func main() {
 	defer profile.Start(profile.MemProfile, profile.MemProfileRate(1)).Stop()
 	// defer profile.Start(profile.MemProfile).Stop()
@@ -1971,55 +1981,152 @@ By inserting a  `bufio.Reader`  between the input file and  `readbyte`  will
 
 Compare the times of this revised program to  `wc`. How close is it? Take a profile and see what remains.
 
+在文件内容与 `readbyte` 之间加一个 `bufio.Reader` 缓冲，减少系统调用的次数。
+将优化后的版本与 `wc` 比较下，看看还有多少差距？执行一次 profile 看看还有哪些可以改进的地方。
+
+> NOTE 还是比 wc 慢，开启 CPU profile 显示 10ms 时间都在 main ，找不到优化点。难道是 golang 本身就是慢？是慢在内存管理上吗？
+```txt
+~/tmp$ time wc -w ./2701-0.txt 
+215830 ./2701-0.txt
+
+real	0m0.018s
+user	0m0.018s
+sys	0m0.000s
+~/tmp$ time wc -w ./2701-0.txt 
+215830 ./2701-0.txt
+
+real	0m0.018s
+user	0m0.018s
+sys	0m0.000s
+~/tmp$ time wc -w ./2701-0.txt 
+215830 ./2701-0.txt
+
+real	0m0.018s
+user	0m0.018s
+sys	0m0.000s
+~/tmp$ time wc -w ./2701-0.txt 
+215830 ./2701-0.txt
+
+real	0m0.018s
+user	0m0.018s
+sys	0m0.000s
+~/tmp$ time wc -w ./2701-0.txt 
+215830 ./2701-0.txt
+
+real	0m0.032s
+user	0m0.032s
+sys	0m0.000s
+~/tmp$ time ./t4 ./2701-0.txt 
+"./2701-0.txt": 181276 words
+
+real	0m0.020s
+user	0m0.020s
+sys	0m0.000s
+~/tmp$ time ./t4 ./2701-0.txt 
+"./2701-0.txt": 181276 words
+
+real	0m0.022s
+user	0m0.023s
+sys	0m0.000s
+~/tmp$ time ./t4 ./2701-0.txt 
+"./2701-0.txt": 181276 words
+
+real	0m0.022s
+user	0m0.019s
+sys	0m0.004s
+~/tmp$ time ./t4 ./2701-0.txt 
+"./2701-0.txt": 181276 words
+
+real	0m0.033s
+user	0m0.033s
+sys	0m0.000s
+~/tmp$ time ./t4 ./2701-0.txt 
+"./2701-0.txt": 181276 words
+
+real	0m0.022s
+user	0m0.023s
+sys	0m0.000s
+```
+
+
+
 #### 3.5.5. Memory profiling
 
 The new  `words`  profile suggests that something is allocating inside the  `readbyte`  function. We can use pprof to investigate.
 
-```
+在 `readbyte` 函数内部还有内存分配的操作，我们可以用 pprof 分析下。
+
+```go
 defer profile.Start(profile.MemProfile).Stop()
 ```
 
 Then run the program as usual
 
-```
+```txt
 % go run main2.go moby.txt
 2018/08/25 14:41:15 profile: memory profiling enabled (rate 4096), /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile312088211/mem.pprof
 "moby.txt": 181275 words
 2018/08/25 14:41:15 profile: memory profiling disabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile312088211/mem.pprof
 ```
 
-Type: inuse_spaceTime: Mar 23, 2019 at 6:14pm (CET)Showing nodes accounting for 368.72kB, 100% of 368.72kB totalmainreadbyte368.72kB (100%)16B368.72kBruntimemain0 of 368.72kB (100%)mainmain0 of 368.72kB (100%)368.72kB368.72kB
+![pprof1](https://blog.zeromake.com/public/img/high-performance-go-workshop/pprof-1.svg)
+
 
 As we suspected the allocation was coming from  `readbyte` — this wasn’t that complicated, readbyte is three lines long:
 
+从上图中可看出来，内存分配操作确实来自 `readbyte` － 这个函数代码只有3行，所以分析起来也很容易。
+
 Use pprof to determine where the allocation is coming from.
 
-```
+通过 pprof 很容易发现内存分配操作来自这里。
+
+```go
 func readbyte(r io.Reader) (rune, error) {
-        var buf [1]byte 
+        var buf [1]byte // Allocation is here 就是这里在分配内存
         _, err := r.Read(buf[:])
         return rune(buf[0]), err
 }
 ```
 
-Allocation is here
 
 We’ll talk about why this is happening in more detail in the next section, but for the moment what we see is every call to readbyte is allocating a new one byte long  _array_  and that array is being allocated on the heap.
 
+现在我们能确定，每次 readbyte 调用都会在 堆(heap) 上分配一个字节长的 数组(array) 。
+后面我们会详细讨论为什么发生这种现象。
+
+
 What are some ways we can avoid this? Try them and use CPU and memory profiling to prove it.
 
-##### [](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#alloc_objects_vs_inuse_objects)[Alloc objects vs. inuse objects](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#alloc_objects_vs_inuse_objects)
+有什么办法能避免这次内存分配操作呢？
+试试优化一下，然后用 CPU 和 Memory profile 分析分析。
+
+
+
+##### Alloc objects vs. inuse objects
 
 Memory profiles come in two varieties, named after their  `go tool pprof`  flags
 
 -   `-alloc_objects`  reports the call site where each allocation was made.
     
 -   `-inuse_objects`  reports the call site where an allocation was made  _iff_  it was reachable at the end of the profile.
+
+Memory profile 中大概有两个类型，在 `go tool pprof` 将其命名为
+
+-   `-alloc_objects`  统计了所有执行内存分配操作的调用点。
+    
+-   `-inuse_objects`  统计了所有执行内存分配且"直到生成 profile 后，还能继续被访问的内存"的调用点。
+
+
+> 有两种内存分析策略：[^qcraoPPROF]
+> 一种是当前的（这一次采集）内存或对象的分配，称为 inuse；
+> 另一种是从程序运行到现在所有的内存分配，不管是否已经被 gc 过了，称为 alloc
     
 
 To demonstrate this, here is a contrived program which will allocate a bunch of memory in a controlled manner.
 
-```
+为了方便说明，制作了下面这个以特定方式控制内存分配过程的演示程序。
+
+```go
 const count = 100000
 
 var y []byte
@@ -2047,7 +2154,11 @@ func makeByteSlice() []byte {
 
 The program is annotation with the  `profile`  package, and we set the memory profile rate to  `1`--that is, record a stack trace for every allocation. This is slows down the program a lot, but you’ll see why in a minute.
 
-```
+我们会用 `profile` package 来解释这个程序。
+另外，我们将 memory profile rate 设置为 1 ，所以会记录每一次内存分配时的 stack trace 。
+这会使程序变慢，但你很快就会明白为什么要这样做了。
+
+```txt
 % go run main.go
 2018/08/25 15:22:05 profile: memory profiling enabled (rate 1), /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile730812803/mem.pprof
 2018/08/25 15:22:05 profile: memory profiling disabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile730812803/mem.pprof
@@ -2055,69 +2166,51 @@ The program is annotation with the  `profile`  package, and we set the memory pr
 
 Lets look at the graph of allocated objects, this is the default, and shows the call graphs that lead to the allocation of every object during the profile.
 
-```
+我们先看 allocate object 类型的分析结果。
+这里会显示所有执行内存分配操作的调用图表（调用栈关系）。
+
+
+```txt
 % go tool pprof -http=:8080 /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile891268605/mem.pprof
 ```
 
-Type: alloc_objectsTime: Mar 23, 2019 at 1:08pm (GMT)Showing nodes accounting for 43837, 99.83% of 43910 totalDropped 66 nodes (cum <= 219)mainmakeByteSlice43806 (99.76%)16B43806runtimemain0 of 43856 (99.88%)mainmain0 of 43856 (99.88%)43856mainallocate31 (0.071%)of 43837 (99.83%)4380643837
+![](https://blog.zeromake.com/public/img/high-performance-go-workshop/pprof-2.svg)
 
 Not surprisingly more than 99% of the allocations were inside  `makeByteSlice`. Now lets look at the same profile using  `-inuse_objects`
 
-```
+你可能会有些惊讶，有超过 99% 的内存分配都发生在 `makeByteSlice` 。
+现在再看 inuse object 类型的分析结果吧。
+
+
+```txt
 % go tool pprof -http=:8080 /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile891268605/mem.pprof
 ```
 
-```log
-Type: inuse_objectsTime: Mar 23, 2019 at 1:08pm (GMT)Showing nodes accounting for 60, 100% of 60 totalruntimemalg24 (40.00%)384B24runtimeallocm7 (11.67%)of 21 (35.00%)71kB7runtimemcommoninit0 of 7 (11.67%)7runtimemstart0 of 17 (28.33%)runtimesystemstack3 (5.00%)of 14 (23.33%)14runtimemstart10 of 3 (5.00%)3runtimegcBgMarkWorker8 (13.33%)16B8runtimeschedule0 of 18 (30.00%)runtimeresetspinning0 of 15 (25.00%)15runtimestoplockedm0 of 3 (5.00%)3profileStartfunc82 (3.33%)of 9 (15.00%)16B196B1signalNotify3 (5.00%)of 7 (11.67%)7runtimemcall0 of 15 (25.00%)runtimepark_m0 of 15 (25.00%)1564B248B1runtimenewprocfunc10 of 11 (18.33%)11runtimenewm0 of 21 (35.00%)21runtimeensureSigMfunc10 of 5 (8.33%)runtimeLockOSThread0 of 3 (5.00%)3runtimechansend10 of 1 (1.67%)1runtimeselectgo0 of 1 (1.67%)1runtimestartm0 of 18 (30.00%)18144B116B148B1signalNotifyfunc10 of 4 (6.67%)4signalsignal_enable4 (6.67%)96B4runtimeacquireSudog2 (3.33%)96B2runtimemain0 of 6 (10.00%)mainmain0 of 6 (10.00%)6profileStart1 (1.67%)of 5 (8.33%)48B1profileStartfunc20 of 4 (6.67%)4log(*Logger)Output1 (1.67%)of 4 (6.67%)144B1log(*Logger)formatHeader0 of 3 (5.00%)3runtimenewproc10 of 11 (18.33%)10runtimeallgadd1 (1.67%)1timeLoadLocationFromTZData2 (3.33%)of 3 (5.00%)224B14kB1timebyteString1 (1.67%)15mainallocate0 of 1 (1.67%)1mainmakeByteSlice1 (1.67%)16B1128B116B1logPrintf0 of 4 (6.67%)4timeTimeDate0 of 3 (5.00%)341signalenableSignal0 of 4 (6.67%)44runtimestartTemplateThread0 of 3 (5.00%)3runtimechansend0 of 1 (1.67%)11runtimehandoffp0 of 3 (5.00%)3runtimempreinit0 of 7 (11.67%)7731115runtimewakep0 of 15 (25.00%)1513315sync(*Once)Do0 of 3 (5.00%)timeinitLocal0 of 3 (5.00%)3time(*Location)get0 of 3 (5.00%)3Timedate0 of 3 (5.00%)3Timeabs0 of 3 (5.00%)33timeloadLocation0 of 3 (5.00%)33
-```
+![](https://blog.zeromake.com/public/img/high-performance-go-workshop/pprof-3.svg)
 
 What we see is not the objects that were  _allocated_  during the profile, but the objects that remain  _in use_, at the time the profile was taken — this ignores the stack trace for objects which have been reclaimed by the garbage collector.
+
+这张图中看不到多少 _allocated_ 的对象，只有一些还在 _in use_ 的对象（在 profile 结束前还在使用中的对象）。
+也就是说，那些已经被垃圾回收的对象，不会显示在这里。
+
+
 
 #### 3.5.6. Block profiling
 
 The last profile type we’ll look at is block profiling. We’ll use the  `ClientServer`  benchmark from the  `net/http`  package
 
-```
+最后一个介绍的是 block profile 类型。
+我们使用 net/http package 中的  ClientServer  基准测试来介绍。
+
+```txt
 % go test -run=XXX -bench=ClientServer$ -blockprofile=/tmp/block.p net/http
 % go tool pprof -http=:8080 /tmp/block.p
 ```
 
-```txt
-Type: delayTime: Mar 23, 2019 at 6:05pm (CET)Showing nodes accounting for 7.82s, 
-100% of 7.82s totalDropped 39 nodes (cum <= 0.04s)runtimeselectgo4.55s (58.18%)testing(*B)runN0 of 5.06s 
-(64.63%)http_testBenchmarkClientServer0 of 1.94s 
-(24.83%)1.94stestingrunBenchmarksfunc10 of 3.11s 
-(39.80%)3.11sruntimechanrecv13.23s (41.25%)runtimemain0 of 3.11s 
-(39.80%)mainmain0 of 3.11s 
-(39.80%)3.11shttp(*persistConn)writeLoop0 of 2.54s 
-(32.44%)2.54stesting(*B)launch0 of 1.94s 
-(24.82%)1.94sioutilReadAll0 of 0.11s
- (1.46%)0.11shttpGet0 of 1.83s (23.37%)1.83shttp(*persistConn)readLoop0 of 0.18s 
-(2.36%)0.18ssync(*Cond)Wait0.04s 
-(0.57%)http(*conn)serve0 of 0.04s (0.57%)http(*response)finishRequest0 of 0.04s 
-(0.57%)0.04stesting(*B)Run0 of 3.11s 
-(39.80%)testing(*B)run0 of 3.11s 
-(39.77%)3.11shttp(*Transport)roundTrip0 of 1.83s 
-(23.37%)http(*persistConn)roundTrip0 of 1.83s 
-(23.36%)1.83sbytes(*Buffer)ReadFrom0 of 0.11s 
-(1.46%)http(*bodyEOFSignal)Read0 of 0.11s 
-(1.46%)0.11sioutilreadAll0 of 0.11s 
-(1.46%)0.11s0.11shttp_testTestMain0 of 3.11s 
-(39.80%)3.11shttp(*Client)Do0 of 1.83s
-(23.37%)http(*Client)do0 of 1.83s 
-(23.37%)1.83shttp(*Client)Get0 of 1.83s 
-(23.37%)1.83shttp(*Client)send0 of 1.83s
-(23.37%)1.83shttpsend0 of 1.83s 
-(23.37%)1.83shttp(*Transport)RoundTrip0 of 1.83s 
-(23.37%)1.83shttp(*bodyEOFSignal)condfn0 of 0.11s 
-(1.46%)0.11shttp(*persistConn)readLoopfunc40 of 0.11s 
-(1.46%)0.11shttp(*connReader)abortPendingRead0 of 0.04s 
-(0.57%)0.04s0.11s1.83s0.04s1.83s1.83stesting(*M)Run0 of 3.11s 
-(39.80%)3.11stesting(*B)doBench0 of 3.11s 
-(39.77%)3.11stesting(*benchContext)processBench0 of 3.11s 
-(39.77%)3.11stestingrunBenchmarks0 of 3.11s 
-(39.80%)3.11s3.11s3.11s3.11s
-```
+![](https://blog.zeromake.com/public/img/high-performance-go-workshop/pprof-4.svg)
+
+
+
 
 #### 3.5.7. Thread creation profiling
 
@@ -2125,15 +2218,26 @@ Go 1.11 (?) added support for profiling the creation of operating system threads
 
 Add thread creation profiling to  `godoc`  and observe the results of profiling  `godoc -http=:8080 -index`.
 
+
+
+
 #### 3.5.8. Framepointers
 
 Go 1.7 has been released and along with a new compiler for amd64, the compiler now enables frame pointers by default.
 
+Go 1.7 与新版 amd64 编译器一起发布，新版本编译器默认支持 帧指针。
+
 The frame pointer is a register that always points to the top of the current stack frame.
+
+帧指针是一直指向当前堆栈帧顶部的寄存器。
 
 Framepointers enable tools like  `gdb(1)`, and  `perf(1)`  to understand the Go call stack.
 
+帧指针能帮助 gdb(1) perf(1) 这样的调试工具理解 Go 的调用栈。
+
 We won’t cover these tools in this workshop, but you can read and watch a presentation I gave on seven different ways to profile Go programs.
+
+这里不会介绍这些工具，下面的链接中有对 Go program 进行 profile 的详细介绍。
 
 -   [Seven ways to profile a Go program](https://talks.godoc.org/github.com/davecheney/presentations/seven.slide)  (slides)
     
@@ -2153,9 +2257,12 @@ We won’t cover these tools in this workshop, but you can read and watch a pres
     ```
     
 -   If you were to generate a profile on one machine and inspect it on another, how would you do it?
+
+- 尝试对熟悉的代码执行一次 profile 。如果找不到合适的代码进行测试，可以试试对 godoc 进行 profile 。
+- 如果要在一台机器上生成 profile ，而在另一台机器上分析，如果完成？
     
 
-## 4. Compiler optimisations
+## 4. Compiler optimisations 编译器优化
 
 This section covers some of the optimisations that the Go compiler performs.
 
@@ -2166,19 +2273,37 @@ For example;
 -   Inlining
     
 -   Dead code elimination
-    
 
 are all handled in the front end of the compiler, while the code is still in its AST form; then the code is passed to the SSA compiler for further optimisation.
 
-### 4.1. History of the Go compiler
+
+下面介绍 Go 编译器执行的一些优化。
+
+比如：
+
+- 逃逸分析
+- 内联
+- 去掉无效代码
+
+
+### 4.1. History of the Go compiler Go 编译器的历史
 
 The Go compiler started as a fork of the Plan9 compiler tool chain circa 2007. The compiler at that time bore a strong resemblance to Aho and Ullman’s  [_Dragon Book_](https://www.goodreads.com/book/show/112269.Principles_of_Compiler_Design).
 
+Go 编译器源于 Plan9 编译器工具链的分支。
+这时的编译器与[Dragon Book 龙书 编译器设计原理](https://www.goodreads.com/book/show/112269.Principles_of_Compiler_Design)十分相似。
+
 In 2015 the then Go 1.5 compiler was mechanically translated from  [C into Go](https://golang.org/doc/go1.5#c).
+
+2015 年时， Go 1.5 编译器，已经完成 [从 C 翻译到 Go 实现自举](https://golang.org/doc/go1.5#c) 。
 
 A year later, Go 1.7 introduced a  [new compiler backend](https://blog.golang.org/go1.7)  based on  [SSA](https://en.wikipedia.org/wiki/Static_single_assignment_form)  techniques replaced the previous Plan 9 style code generation. This new backend introduced many opportunities for generic and architecture specific optimistions.
 
-### 4.2. Escape analysis
+一年后, Go 1.7 基于 [SSA](https://en.wikipedia.org/wiki/Static_single_assignment_form) 技术实现了 [一个新的编译器后端](https://blog.golang.org/go1.7)  从而代替了此前 Plan 9 时代的代码风格。新的编译器后端能为通用体系架构及特定体系架构上提供很多优化空间。
+
+
+
+### 4.2. Escape analysis 逃逸分析
 
 The first optimisation we’re doing to discuss is  _escape analysis_.
 
