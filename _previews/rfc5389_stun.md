@@ -519,10 +519,19 @@ RFC 5389                          STUN                      October 2008
       The specific scope of a short-term credential is defined by the
       application usage.
 
+   短期密钥： client 与 server 之间共享的临时密钥对。
+              短期密钥一般在 client 和 server 进行 STUN 穿透前 ，通过其他协议协商而来。
+              短期密钥必须有明确的期限，可以是特定的时长（比如5分钟）或事件（比如 SIP 会议结束）。
+              具体期限可根据应用场景来设置。
+
    Short-Term Password:  The password component of a short-term
       credential.
 
+   短期密码： 短期密钥中的密码。
+
    STUN Indication:  A STUN message that does not receive a response.
+
+
 
    Attribute:  The STUN term for a Type-Length-Value (TLV) object that
       can be added to a STUN message.  Attributes are divided into two
