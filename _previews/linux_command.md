@@ -182,10 +182,11 @@ wc: ./_posts/: Is a directory
 #### Linux查看实时网络速率
 
 ```shell
+speedometer    # 命令行下实现了速率波形图
 iptraf-ng
 watch -n 1 "ifconfig eth0"
 sar -n DEV 1 2
-# nload
+nload
 ```
 
 > [cnblogs](https://www.cnblogs.com/klb561/articles/9080151.html)

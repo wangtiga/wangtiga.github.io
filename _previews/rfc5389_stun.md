@@ -331,6 +331,14 @@ RFC 5389                          STUN                      October 2008
    the public Internet through NAT 2.  The upper agent in the figure is
    the server, and resides on the public Internet.
 
+   图1展示了一种 STUN 的部署方案。
+   在这种部署方案中，有两个实现了 STUN 协议的实体（称为 STUN 代理）。
+   图中下方的代理是 client ，它位于一个私有网络 NET 1 中。
+   NET 1 又通过设备 NAT 1 连接到私有网络 NET 2 。
+   NET 2 又通过设备 NAT 2 连接到公网。
+   图中上方的代理是 server ，它侠于公网中。 
+    
+
    STUN is a client-server protocol.  It supports two types of
    transactions.  One is a request/response transaction in which a
    client sends a request to a server, and the server returns a
@@ -339,6 +347,14 @@ RFC 5389                          STUN                      October 2008
    response.  Both types of transactions include a transaction ID, which
    is a randomly selected 96-bit number.  For request/response
 
+   STUN 是 client 与 server 之间的网络协议。
+   它支持两种事务。
+   1. 一种是 request/response 请求响应事务，客户端发 request 到服务端，服务端返回 response 。
+   2. 另一种是 indication 指令事务。这种消息客户端服务端都能发，而且另一端不用回复响应。
+
+   两种事务都要包含一个 96 bit 长的随机事务ID 。
+   request/response 事务中，事务ID用于关联 response 对应的 request 。
+   indication 事务中，事务ID仅为方便调试问题使用。
 
 
 
@@ -362,6 +378,16 @@ RFC 5389                          STUN                      October 2008
    Type-Length-Value extensions that convey additional information for
    the specific message.
 
+   所有 STUN 消息都固定大小的头组成。头中包含 method 方法， class 类型， 和 transaction ID 事务ID 。
+
+   method 表示这是哪一类 request 或 indication ；
+   但本文档仅定义了一个 Binding 捆绑方法，其他类型的方法在别的文档中定义。
+
+   class 用于区分这是 request , 还是 success response ，或是  error response ， 或 indication 。
+  
+   紧接着固定头的部分是零个或多个属性。这些属性由 Type-Length-Value 格式组成，用于存放扩展信息。
+
+
    This document defines a single method called Binding.  The Binding
    method can be used either in request/response transactions or in
    indication transactions.  When used in request/response transactions,
@@ -369,6 +395,14 @@ RFC 5389                          STUN                      October 2008
    a NAT has allocated to a STUN client.  When used in either request/
    response or in indication transactions, the Binding method can also
    be used to keep these "bindings" alive.
+
+   本文档只定义了一个 Binding 方法。
+   这个方法可用在 request/response 事务 或 indication 事务中。
+   当在 request/response 中使用 Binding 方法时，能让 NAT 与 STUN client 建立绑定关系。
+   无论在 request/response 或 indication 中使用 Binding 方法，都能保持这种绑定关系。
+
+   TODO 这里 NAT 与 STUN client 的绑定关系，可能涉及 UDP 打洞相关知识。
+   
 
    In the Binding request/response transaction, a Binding request is
    sent from a STUN client to a STUN server.  When the Binding request
@@ -389,6 +423,18 @@ RFC 5389                          STUN                      October 2008
    In this way, the client can learn its reflexive transport address
    allocated by the outermost NAT with respect to the STUN server.
 
+   在 Binding request/response 事务中，一般从 STUN client 发送 Binding request 到 STUN 遥。
+   在 Binding request 到达 STUN server 过程中，一般会穿越多个 NAT （在图1中，穿过了两个NAT）。
+   每当 Binding request 穿越 NAT 时， NAT 都会修改数据包中的源IP和源端口。
+   所以到达 server 的数据包中，源IP和源端口其实是距离 server 最近一跳的 NAT 设备的 IP 和 Port 。
+   这个地址被称为 reflexive transport address （反射地址）。
+   STUN server 会将这个地址复制出来，并添加到 STUN Binding response 中的 XOR-MAPPED-ADDRESS 属性中，并发回 STUN client 中。
+   当这个 response 通过 NAT 原路返回时， NAT 会修改 response 所在数据包中的 IP 头的目的地址，
+   但位于 STUN response 包体中的 XOR-MAPPED-ADDRESS 属性则会原封不动的保留下来。
+   通过这种方法， client 就得到了自己的 reflexive transport address ，
+   这个地址就是最外层 NAT 设备所分配的，与 STUN server 通信时所用的地址。
+
+
    In some usages, STUN must be multiplexed with other protocols (e.g.,
    [MMUSIC-ICE], [SIP-OUTBOUND]).  In these usages, there must be a way
    to inspect a packet and determine if it is a STUN packet or not.
@@ -396,6 +442,11 @@ RFC 5389                          STUN                      October 2008
    can be used for this purpose.  If this is not sufficient, then STUN
    packets can also contain a FINGERPRINT value, which can further be
    used to distinguish the packets.
+
+   大部分场景下， STUN 消息必须与其他协议（[MMUSIC-ICE], [SIP-OUTBOUND] 等）共用一个端口（多路复用）。
+   这时，必须有一种方法能区分这个数据包是不是 STUN 数据包。
+   STUN 头中有三个字段使用了固定值，可用来识别 STUN 消息。
+   如果这样还不能识别 STUN 消息，在 STUN 包中还可以包含 FINGERPRINT 值，专门用来识别 STUN 数据包。
 
 
 
@@ -413,6 +464,10 @@ RFC 5389                          STUN                      October 2008
    mechanisms, the long-term credential mechanism and the short-term
    credential mechanism, are defined in this specification.  Each usage
    specifies the mechanisms allowed with that usage.
+
+   STUN 还定义了几种机制，可根据实际需要使用。
+   这几种机制是 DNS 发现， server 转移，用于解复用的 fingerprint 属性。
+   还有用于
 
    In the long-term credential mechanism, the client and server share a
    pre-provisioned username and password and perform a digest challenge/
@@ -531,6 +586,7 @@ RFC 5389                          STUN                      October 2008
 
    STUN Indication:  A STUN message that does not receive a response.
 
+   STUN 指示：表示"未收到信息"的一种 STUN 信息。
 
 
    Attribute:  The STUN term for a Type-Length-Value (TLV) object that
@@ -541,9 +597,16 @@ RFC 5389                          STUN                      October 2008
       contains comprehension-required attributes that are not
       understood.
 
+   属性： 一种可以在 STUN 协议中追加 TLV （类型，长度，值）格式的信息的术语。
+          分为可选和必选两类属性。
+          STUN agent 可以忽略不认识的可选属性，
+          但如果遇到未知的必选属性，就无法处理了。
+
    RTO:  Retransmission TimeOut, which defines the initial period of
       time between transmission of a request and the first retransmit of
       that request.
+
+   RTO: 重传超时时间，定义了发送 request 后，到首次重传之间的时间间隔。
 
 
 
@@ -565,6 +628,10 @@ RFC 5389                          STUN                      October 2008
    or more Attributes.  The STUN header contains a STUN message type,
    magic cookie, transaction ID, and message length.
 
+   所有  STUN 消息必须以 20-byte 头，加零个或多个属性组成。
+   STUN 头由消息类型，魔法字，事务ID和消息长度组成。
+
+
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -583,6 +650,9 @@ RFC 5389                          STUN                      October 2008
    This can be used to differentiate STUN packets from other protocols
    when STUN is multiplexed with other protocols on the same port.
 
+   所有 STUN 消息的前两位必须是 0 。
+   这样可以在单端口多路复用时与其他协议进行区分。
+
    The message type defines the message class (request, success
    response, failure response, or indication) and the message method
    (the primary function) of the STUN message.  Although there are four
@@ -592,6 +662,20 @@ RFC 5389                          STUN                      October 2008
    single indication message).  Response classes are split into error
    and success responses to aid in quickly processing the STUN message.
 
+   message type 定义了 STUN 消息的类别：
+     1. request, 
+     2. success response, 
+     3. failure response,
+     4. or indiction
+   和消息方法（主函数）。
+
+   虽然定义了以上四种消息类别，但只定义了两种事务：
+     1. request/response 事务（由 request response 消息组成）
+     2. indication 事务（由一个 indication 消息组成）
+
+   为了快速处理 STUN 消息，把 STUN 响应又分为以下两类：
+     1. error 
+     2. success
 
 
 
