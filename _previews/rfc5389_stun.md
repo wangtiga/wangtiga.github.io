@@ -423,7 +423,7 @@ RFC 5389                          STUN                      October 2008
    In this way, the client can learn its reflexive transport address
    allocated by the outermost NAT with respect to the STUN server.
 
-   在 Binding request/response 事务中，一般从 STUN client 发送 Binding request 到 STUN 遥。
+   在 Binding request/response 事务中，一般从 STUN client 发送 Binding request 到 STUN server 。
    在 Binding request 到达 STUN server 过程中，一般会穿越多个 NAT （在图1中，穿过了两个NAT）。
    每当 Binding request 穿越 NAT 时， NAT 都会修改数据包中的源IP和源端口。
    所以到达 server 的数据包中，源IP和源端口其实是距离 server 最近一跳的 NAT 设备的 IP 和 Port 。
@@ -466,8 +466,12 @@ RFC 5389                          STUN                      October 2008
    specifies the mechanisms allowed with that usage.
 
    STUN 还定义了几种机制，可根据实际需要使用。
-   这几种机制是 DNS 发现， server 转移，用于解复用的 fingerprint 属性。
-   还有用于
+   这几种机制是 DNS 发现， 用于 server 转移的重定向技术，用于解复用的 fingerprint 属性，
+   还有两个认证机制和消息完整性交换机制。
+   认证机制与 username, password 和消息完整性有关。
+   两个认证机制是 长期密钥机制 和 短期密钥机制 。
+   每种机制都有其特定的使用场景。
+
 
    In the long-term credential mechanism, the client and server share a
    pre-provisioned username and password and perform a digest challenge/
@@ -479,6 +483,17 @@ RFC 5389                          STUN                      October 2008
    signaling to exchange a username and password.  These are used to
    integrity protect and authenticate the request and response.  There
    is no challenge or nonce used.
+
+   长期密钥机制中， client 与 server 双方有一对预先共享的 username password ，
+   还会执行 digest challenge 和  response exchange （与 HTTP [RFC2617] 类似，但细节有差异）。
+
+   短期密钥机制中， client 与 server 通过其他通信协议预先交换 username password （先于 STUN 交换之前）。
+
+   比如在 ICE 的使用场景中，两端一般使用信令服务器交换 username password 。
+   用于对 request 和 response 进行完整性保护和认证。
+   这个过程没有使用 challenge 或 nonce 。
+
+
 
 4.  Terminology
 
@@ -784,6 +799,14 @@ RFC 5389                          STUN                      October 2008
    situations.  Other documents may define other extensions to STUN, by
    adding new methods, new attributes, or new error response codes.
 
+   本节描述 STUN 协议的基本过程。
+   包含如何组装消息，如何发送，如何处理，如何接收。
+   还会定义 Binding 方法的详细处理过程。
+   其他章节还会描述一些特定场景下才会使用的过程。
+   其他文档中也许还会对 STUN 进行一些扩展，
+   比如增加一个新的 method ，新的 attribute ， 或定义新的 error reponse code 。
+   
+
 7.1.  Forming a Request or an Indication
 
    When formulating a request or indication message, the agent MUST
@@ -792,10 +815,18 @@ RFC 5389                          STUN                      October 2008
    appropriate), and the method must be either Binding or some method
    defined in another document.
 
+   组装 request 或 indication 消息时，agent 必须按第6节的规则创建 header 。
+   另外，消息的 class 只能是  Request 或 Indication ，
+   而且 method 必须是 Binding 或者其他文档中有必须的 method 类型。
+
    The agent then adds any attributes specified by the method or the
    usage.  For example, some usages may specify that the agent use an
    authentication method (Section 10) or the FINGERPRINT attribute
    (Section 8).
+
+   然后 agent 可根据实际需要增加一些 attribute 。
+   比如有时可能需要 agent 使用 authentication 方法（第十节）。
+   有时要使用 FINGERPRINT attribute （第八节）
 
 
 
@@ -810,8 +841,15 @@ RFC 5389                          STUN                      October 2008
    indications, depending on the method.  Extensions to STUN should
    discuss whether SOFTWARE is useful in new indications.
 
+   如果 agent 发送的是 request ，则应该添加一个 SOFTWARE attribute 。
+   当然，根据具体的 method ，也可以在  indication 中添加 SOFTWARE 。
+
+   在扩展 STUN 消息时，要讨论清楚 SOFTWARE 在 indication 的具体用途。 TODO 更好的翻译
+
    For the Binding method with no authentication, no attributes are
    required unless the usage specifies otherwise.
+
+   对于不需要认证的 Binding method ，没有特殊情况时，也不需要添加 attribute 。
 
    All STUN messages sent over UDP SHOULD be less than the path MTU, if
    known.  If the path MTU is unknown, messages SHOULD be the smaller of
@@ -827,6 +865,19 @@ RFC 5389                          STUN                      October 2008
    being used to probe for MTU characteristics [BEHAVE-NAT].  Outside of
    this or similar applications, the MTU constraint MUST be followed.
 
+   所有 STUN 消息通过 UDP 发送时，数据包长度必须小于（消息所途经的网络路径中的） MTU 。
+   如果不知道 MTU ，则在 IPv4 网络中，消息长度必须小于 576 字节。
+   在 IPv6 网络中，消息长度必须小于 1280 字节。
+   这里的长度是指整个 IP 包的长度。
+   所以， IPv4 中，实际的 STUN 消息长度要小于 548 字节
+  （576 减 20字节IP头，再减 8字节UDP头，如果有附加 IP option 时，长度还要减小）。
+   STUN 暂时还没有办法解决 request 不超过 MTU ，但 response 超过 MTU 长度的情况。
+   STUN 并没有打算要解决这个问题。
+   STUN 应该（而非必须）探测 MTU 限制 [BEHAVE-NAT]。 TODO 更好的翻译
+   其他应用则必须遵守 MTU 的限制。
+
+   
+
 7.2.  Sending the Request or Indication
 
    The agent then sends the request or indication.  This document
@@ -839,6 +890,13 @@ RFC 5389                          STUN                      October 2008
    anycast addresses, but only with UDP and in usages where
    authentication is not used.
 
+   这个文档会描述 agent 如何通过 UDP TCP TLS-over-TCP 发送 STUN 消息。
+   未来还可能支持其他的传输层协议。
+   使用 STUN 时必须指定传输层的协议类型，以及接收方的 IP 地址和端口。
+   第9节会介绍一种基于 DNS 的方法来确定 server 端 IP 地址和端口的方法。
+   STUN 也可能使用 anycast （任播，多播，组播）地址，但仅限于关闭认证，且使用 UDP 协议时。
+   
+
    At any time, a client MAY have multiple outstanding STUN requests
    with the same STUN server (that is, multiple transactions in
    progress, with different transaction IDs).  Absent other limits to
@@ -847,13 +905,18 @@ RFC 5389                          STUN                      October 2008
    space new transactions to a server by RTO and SHOULD limit itself to
    ten outstanding transactions to the same server.
 
+   任何情况下， client 都有可能向同一个 STUN server 发送多个 STUN request 消息
+   （每个消息是各自独立的事务，使用不同的 transaction ID ）。
+   在忽略其他限制的情况（比如 ICE 中有关连接检查的要求，或者通过 TCP 发送 STUN 消息的要求），
+   client 至少要间隔一个 RTO （Retransmission TimeOut）才能使用新的事务给 server 发消息，
+   并且发往同一个 server 的请求不能超过10个。
+
+
 7.2.1.  Sending over UDP
 
    When running STUN over UDP, it is possible that the STUN message
    might be dropped by the network.  Reliability of STUN request/
    response transactions is accomplished through retransmissions of the
-
-
 
 
 Rosenberg, et al.           Standards Track                    [Page 13]
@@ -864,6 +927,11 @@ RFC 5389                          STUN                      October 2008
    request message by the client application itself.  STUN indications
    are not retransmitted; thus, indication transactions over UDP are not
    reliable.
+
+   当通过 UDP 发送 STUN 时，STUN message 有可能在网络中丢掉。
+   STUN 的 request/response 事务的可靠性是由 client 重传数据来实现的。
+   STUN 的 indication 不会重传，因此通过 UDP 发送 indication 事务是不可靠的。
+
 
    A client SHOULD retransmit a STUN request message starting with an
    interval of RTO ("Retransmission TimeOut"), doubling after each
@@ -882,11 +950,31 @@ RFC 5389                          STUN                      October 2008
    that RTT estimates SHOULD NOT be computed from STUN transactions that
    result in the retransmission of a request.
 
+   client 端应该在一个 RTO(Retransmission TimeOut) 周期后重传 STUN request ，每次重传周期都要加倍。
+   RTO 就是数据往反的时延(Round-Trip Time) ，在 RFC 2988 中描述了详细的估算方法。
+   但是有两种特殊情况。
+
+   首先， RTO 初始值应该是可配置的（ 不是 RFC 2988 中建议的 3s ）而且应该是大于 500ms 的值。
+   当使用其他机制推导拥塞阀值（比如 ICE 中定义的固定码率的情况）时，
+   或者在一个已知网络带宽容量的非 Internet 环境中使用 STUN 时。
+   在固网接入的链路，推值是 500ms 。
+
+   其次，RTO 的值不应该四舍五入到秒。相反，应该保持到毫秒级的精度。
+   TCP中推荐使用 Karn 算法[KARN87]。
+   在使用 STUN 协议时，不要使用已经发生重传请求的 STUN 数据包计算 RTT 。
+   
+   
+
+
+
    The value for RTO SHOULD be cached by a client after the completion
    of the transaction, and used as the starting value for RTO for the
    next transaction to the same server (based on equality of IP
    address).  The value SHOULD be considered stale and discarded after
    10 minutes.
+
+   Client 应该缓存推导而来的 RTO 值，在向同一个 server （同一个IP）发起下一次事务时使用。
+   缓存值超过10分钟后，应该被丢弃。
 
    Retransmissions continue until a response is received, or until a
    total of Rc requests have been sent.  Rc SHOULD be configurable and
@@ -901,6 +989,19 @@ RFC 5389                          STUN                      October 2008
    ms, 15500 ms, and 31500 ms.  If the client has not received a
    response after 39500 ms, the client will consider the transaction to
    have timed out.
+
+   在收到 response 前或重传未超过 Rc 次时，要持续不停地重传。
+   Rc 值也应该是可配置的，默认值是 7 。
+
+   如果最后一次重传后，等待了 Rm 乘以 RTO 的时长后也没有收到 response 
+   （也许要等待足够长的时间，才能收到最后一次重传成功的 response）
+   才能认为这次 transaction 是失败的。
+   Rm 值也应该是可配置的，默认值是 16 。
+   通过 UDP 发送 STUN 事务时，如果收到 ICMP error [RFC1122] ，也可以认为这次 transaction 失败。
+
+   举例来说，如果 RTO 是 500ms ，那么发送 request 的时间点应该是 0ms, 500ms, 1500ms, 3500ms, 7500ms, 155000ms, 31500ms 。
+   如果在 31500ms 后都没收到 response ，client 就可认为这次 transaction 超时。
+
 
 7.2.2.  Sending over TCP or TLS-over-TCP
 
@@ -1021,6 +1122,8 @@ RFC 5389                          STUN                      October 2008
    followed by class-specific processing, described in the subsections
    that follow.
 
+   本节描述 STUN 消息的处理过程。
+   这里只说明本文档定义的处理规则，为了兼容旧版本而制定的规则将会在第 12 节描述。
 
 
 
