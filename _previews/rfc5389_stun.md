@@ -1124,6 +1124,9 @@ RFC 5389                          STUN                      October 2008
 
    本节描述 STUN 消息的处理过程。
    这里只说明本文档定义的处理规则，为了兼容旧版本而制定的规则将会在第 12 节描述。
+   附加规则是可选的，根据需要选择使用。
+   每种 class 都有一组不同的处理操作。
+   按各自 class 的规格描述文档处理，下面会具体描述。
 
 
 
@@ -1147,9 +1150,31 @@ RFC 5389                          STUN                      October 2008
    not really a STUN message; in this case, the agent should try to
    parse the message as a different protocol.
 
+   当 STUN agent 收到 STUN 消息时，首先检查是否遵守了第六节描述的规则。
+
+   前两个字节必须是0, magic cookie 的取值也必须正确。
+
+   message length 取值必须合理，而且 method 必须是当前 agent 支持的类型。
+   class 也必须与 method 相对应。
+
+   如果消息的 class 是 "Success Response" 或 "Error Response" 
+   则 agent 要检查对应 Request 的 transaction ID 是否一致。
+
+   如果使用了 FINGERPRINT 扩展字段，agent 会检查 FINGERPRINT 属性取值。
+
+   一旦检查出任何错误，消息都会被静默丢弃。
+   当 STUN 与其他协议复用一个连接时，
+   有可能是因为当前数据并非是真正的 STUN 消息才导致检查出错；
+   这种情况， agent 要尝试将使用其他协议格式解析消息。
+
+
+
    The STUN agent then does any checks that are required by a
    authentication mechanism that the usage has specified (see
    Section 10).
+
+   然后 STUN agent 还会按 authentication 机制要求进行检查（详见第10节）。
+
 
    Once the authentication checks are done, the STUN agent checks for
    unknown attributes and known-but-unexpected attributes in the
@@ -1158,8 +1183,20 @@ RFC 5389                          STUN                      October 2008
    the agent.  Unknown comprehension-required attributes cause
    processing that depends on the message class and is described below.
 
+   一旦 authentication 检查通过， STUN agent 还会检查一些未知属性，
+   或者已知但非预期属性。
+   MUST 必须直接忽略未知属性。
+   SHOULD 应该忽略已知但非预期属性。
+
+   未知但必选属性如何处理，与具体的 class 有关，下面详细描述。
+
+
    At this point, further processing depends on the message class of the
    request.
+
+   更进一步如何处理，要根据 request 的 class 类型决定。
+
+
 
 7.3.1.  Processing a Request
 
@@ -1169,9 +1206,16 @@ RFC 5389                          STUN                      October 2008
    attribute in the response that lists the unknown comprehension-
    required attributes.
 
+   如果 request 中包含未知的必选属性，
+   server 必须回复一个 420 （未知属性）的 error response ，
+   并且包含一个 UNKNOW-ATTRIBUTES 属性，其中包含所有未知的属性。
+
    The server then does any additional checking that the method or the
    specific usage requires.  If all the checks succeed, the server
    formulates a success response as described below.
+
+   随后 server 根据具体 method 和场景做一些附加检查。
+   如果所有检查成功， server 会组装一个 success response 返回。
 
    When run over UDP, a request received by the server could be the
    first request of a transaction, or a retransmission.  The server MUST
@@ -1180,6 +1224,15 @@ RFC 5389                          STUN                      October 2008
    and not the response that was sent to the original request, the
    overall state on the client and server is identical to the case where
    only the response to the original retransmission is received, or
+
+   当使用 UDP 协议发送 STUN 时，server 端收到的可能是 transaction 的 request ，
+   也可能是这个 transaction 的重传包。
+
+   client 收到重传包时，server 端必须再次回复响应。
+   这是为了在以下情况发生时， client 与 server 状态一致：
+   1. client 端只收到重传包的 response ；
+   2. client 端只收到原始 request 的 response ；
+   3. client 端收到了两种 response （不论先后）；
 
 
 
@@ -1205,6 +1258,23 @@ RFC 5389                          STUN                      October 2008
    success responses.  Extensions to STUN MUST discuss the implications
    of request retransmissions on servers that do not store transaction
    state.
+
+   达到以上目的的另一种方法是，
+   server 记住所有最近40秒内的 transaction ID 和对应的 response 。
+   但这就要求 server 端记住所有状态信息，甚至包括没有谁通过的 request ，
+   这就不太合理了。
+
+   另外，必须保证每个 request 都是幂等的，
+   而且相同的 request 要返回相同的 success response 。
+   （幂等表示，相同的请求重复多次与仅执行一次，系统整体状态是一致的）。
+   Binding method 就要保证幂等。
+   注意，确实有小概率的网络事件会导致 reflexive 地址变化。
+   所以不同的 success response 可能会出现不同的 map 地址。
+
+   在扩展 STUN 时，MUST 必须明确 server 端不保存状态的情况，
+   重传 request 时，应该出现什么样的结果。
+   
+
 
 7.3.1.1.  Forming a Success or Error Response
 
