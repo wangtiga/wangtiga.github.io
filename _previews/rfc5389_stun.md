@@ -1272,7 +1272,7 @@ RFC 5389                          STUN                      October 2008
    所以不同的 success response 可能会出现不同的 map 地址。
 
    在扩展 STUN 时，MUST 必须明确 server 端不保存状态的情况，
-   重传 request 时，应该出现什么样的结果。
+   在重传 request 时，应该出现什么样的结果。
    
 
 
@@ -1282,6 +1282,10 @@ RFC 5389                          STUN                      October 2008
    rules of Section 6.  The method of the response is the same as that
    of the request, and the message class is either "Success Response" or
    "Error Response".
+
+   当组装 response （success 或 error) 时，server 必须遵守第6节的规则。
+   response 的 method 与 request 一样，都是 Binding ，但 class 分为
+   "Success Response" 或 "Error Response" 两种。
 
    For an error response, the server MUST add an ERROR-CODE attribute
    containing the error code specified in the processing above.  The
@@ -1294,19 +1298,39 @@ RFC 5389                          STUN                      October 2008
    attributes to be added (see Section 10).  Extensions may define other
    errors and/or additional attributes to add in error cases.
 
+   server 必须 MUST 在 error response 中添加 ERROR-CODE 属性，
+   其中包含上一节所述的错误码。
+   错误原因应该 SHOULD 与 error code 相匹配。
+   某些错误还可以附加一些属性。
+   附加属性可以直接描述错误原因。
+   比如， 420(Unknown attribute) 错误发生时， server 必须 MUST 包含 UNKNOWN-ATTRIBUTES 属性。
+   必须的认证错误，也可以可能会有附加属性（详见第10节）。
+   扩展 STUN 时也可能定义新的附加属性，以说明错误原因。
+
+ 
    If the server authenticated the request using an authentication
    mechanism, then the server SHOULD add the appropriate authentication
    attributes to the response (see Section 10).
 
+   如果 server 端使用 authentication 机制认证 request ，
+   那么 server 应该 SHOULD 在 response 中添加对应的 authentication 属性到 response 
+   （详见第10节）。
+
    The server also adds any attributes required by the specific method
    or usage.  In addition, the server SHOULD add a SOFTWARE attribute to
    the message.
+
+   特定的 method 或 场景中， server 端还要添加一些必选的附加属性。
+   另外 server 应该SHOULD 添加  SOFTWARE 属性到消息中。 TODO 这个属性有什么用？
 
    For the Binding method, no additional checking is required unless the
    usage specifies otherwise.  When forming the success response, the
    server adds a XOR-MAPPED-ADDRESS attribute to the response, where the
    contents of the attribute are the source transport address of the
 
+   对于 Binding method ，除非特定场景需要，否则不会进行附加检查。
+   当组装 success response 时，server 要添加 XOR-MAPPED-ADDRESS 属性到 response 。
+   其中包含发送 request 请求的源地址。
 
 
 Rosenberg, et al.           Standards Track                    [Page 18]
@@ -1319,6 +1343,9 @@ RFC 5389                          STUN                      October 2008
    the source IP address and source TCP port of the TCP connection as
    seen by the server.
 
+   在 UDP 协议中，这就是 request 消息的源IP和源端口。
+   在 TCP 和 TLS-overTCP 协议中，这就是 server 所看到的 TCP 连接中的源IP和源端口。
+
 7.3.1.2.  Sending the Success or Error Response
 
    The response (success or error) is sent over the same transport as
@@ -1330,24 +1357,48 @@ RFC 5389                          STUN                      October 2008
    received over TCP or TLS-over-TCP, the response is sent back on the
    same TCP connection as the request was received on.
 
+   response 消息(success 或者 error)会沿接收 request 的连接原路发送回去。
+
+   如果通过 UDP 发送的 request ，
+   则发送 response 的目的IP和目的端口，
+   就是收到的 request 消息的源IP和源端口。
+   而发送 response 的源IP和源端口，
+   就是收到的 request 消息的目的IP和目的端口。
+
+   如果通过 TCP 或 TLS-over-TCP 发送的 request ，
+   则直接在同一个 TCP 连接回复 response 。
+
+
 7.3.2.  Processing an Indication
 
    If the indication contains unknown comprehension-required attributes,
    the indication is discarded and processing ceases.
+
+   如果 indication 中包含未知的必选属性，则直接忽略这个 indication 消息。
 
    The agent then does any additional checking that the method or the
    specific usage requires.  If all the checks succeed, the agent then
    processes the indication.  No response is generated for an
    indication.
 
+   agent 随后中会按 method 或 特定场景的需要执行一些附加检查。
+   如果所有检查通过， agent 会继续处理 indication 。
+   没有任何 response 返回。
+
    For the Binding method, no additional checking or processing is
    required, unless the usage specifies otherwise.  The mere receipt of
    the message by the agent has refreshed the "bindings" in the
    intervening NATs.
 
+   Binding method 中不会有任何附加检查，除非特定场景需要。
+   agent 接收 indication 消息的目的仅仅是维持 NAT 设备中的 "binding" 状态。
+
    Since indications are not re-transmitted over UDP (unlike requests),
    there is no need to handle re-transmissions of indications at the
    sending agent.
+
+   所以，通过 UDP 发送 indication 时，不需要像 request 一样重传。
+   发送端自然也不会有 indication 的重传逻辑。
 
 7.3.3.  Processing a Success Response
 
@@ -1355,13 +1406,23 @@ RFC 5389                          STUN                      October 2008
    attributes, the response is discarded and the transaction is
    considered to have failed.
 
+   如果 success response 包含 未知的必选属性，
+   则 response 会被丢弃，而这次 transaction 也当作失败处理。
+
    The client then does any additional checking that the method or the
    specific usage requires.  If all the checks succeed, the client then
    processes the success response.
 
+   client 会按 method 或特定场景的需要执行一些附加检查。
+   如果所有检查通过， agent 会继续处理 success response 。
+
    For the Binding method, the client checks that the XOR-MAPPED-ADDRESS
    attribute is present in the response.  The client checks the address
    family specified.  If it is an unsupported address family, the
+
+   Binding method 中， client 要确保 response 存在 XOR-MAPPED-ADDRESS 属性。
+   client 还要检查 address family （地址协议簇）。
+   如果是不支持的 address family ，这个属性应该 SHOULD 被忽略。
 
 
 
@@ -1374,6 +1435,10 @@ RFC 5389                          STUN                      October 2008
    address family (for example, the Binding transaction was sent over
    IPv4, but the address family specified is IPv6), then the client MAY
    accept and use the value.
+
+   如果是未期望，但支持的 address family 。
+   比如， Binding transaction 通过 IPv4 发送，
+   但 address family 却指定为 IPv6 ），那么 client 可以 MAY 改用 IPv6 通信。
 
 7.3.4.  Processing an Error Response
 
