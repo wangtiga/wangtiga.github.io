@@ -1406,7 +1406,7 @@ RFC 5389                          STUN                      October 2008
    attributes, the response is discarded and the transaction is
    considered to have failed.
 
-   如果 success response 包含 未知的必选属性，
+   如果 success response 包含未知的必选属性，
    则 response 会被丢弃，而这次 transaction 也当作失败处理。
 
    The client then does any additional checking that the method or the
@@ -1446,12 +1446,22 @@ RFC 5389                          STUN                      October 2008
    attributes, or if the error response does not contain an ERROR-CODE
    attribute, then the transaction is simply considered to have failed.
 
+   如果 error response 包含未知的必选属性，
+   或者没有 ERROR-CODE 属性，
+   则这次 transaction 也当作失败处理。
+
    The client then does any processing specified by the authentication
    mechanism (see Section 10).  This may result in a new transaction
    attempt.
 
+   client 端随后有可能进行一次认证（详见第10节）。
+   这可能会开启一次新的 transaction 。
+
    The processing at this point depends on the error code, the method,
    and the usage; the following are the default rules:
+
+   具体的处理过程跟 error code ，method 和具体使用场景有关。
+   下面是一些详细规则：
 
    o  If the error code is 300 through 399, the client SHOULD consider
       the transaction as failed unless the ALTERNATE-SERVER extension is
@@ -1466,8 +1476,19 @@ RFC 5389                          STUN                      October 2008
       request; clients that do so MUST limit the number of times they do
       this.
 
+   * error code 是 300~399 ，则 client 应该 SHOULD 认为 transaction 失败了。
+     除非使用了 ALTERNATE-SERVER 扩展属性。 详细参考第11节。
+   * error code 是 400~499 ，则 client 认为 transaction 失败；
+     如果是 420 （未知属性），则 respons 中应该包含 UNKNOWN-ATTRIBUTES 字段，
+     提供更详细的错误信息。
+   * error code 是 500~599 ，则 client 也许 MAY 要重传 request ；
+     client 重传过程必须限制重传次数。
+
    Any other error code causes the client to consider the transaction
    failed.
+
+   出现其他任何错误码，client 都可直接认为 transaction 失败。
+
 
 8.  FINGERPRINT Mechanism
 
@@ -1517,6 +1538,17 @@ RFC 5389                          STUN                      October 2008
    NOT RECOMMENDED in case the domain name is lost or needs to change
    for legal or other reasons.
 
+   本节描述的是 STUN 的一个可选功能。
+   这个功能可以让 client 使用 DNS 确定 server 的IP地址和端口。
+   STUN 使用手册要说清，什么时候使用这个扩展功能。
+   为使用此功能， client 必须知道 server 的 domain name 和 service name ；
+   所以 STUN 使用手册还要说明 client 如何获取这些信息。
+   不建议 NOT RECOMMENDED 在程序代码中硬编码 Hard coding 进 server 的 domain name ，
+   因为 domain name 可能丢失或者法规限制等各种原因必须更换。
+
+   TODO STUN usage 使用手册指的是 RFC5389 文档吗？
+
+
    When a client wishes to locate a STUN server in the public Internet
    that accepts Binding request/response transactions, the SRV service
    name is "stun".  When it wishes to locate a STUN server that accepts
@@ -1524,12 +1556,22 @@ RFC 5389                          STUN                      October 2008
    service name is "stuns".  STUN usages MAY define additional DNS SRV
    service names.
 
+   client 要在公网中查找 STUN server （用于处理 Binding request/response transaction) 时，
+   SRV service name 是 "stun" 。
+   当 client 要查找通过 TLS 协议访问的 STUN server 时， 
+   SRV service name 是 "stuns" 。
+   STUN usage 还可能 MAY 定义新的 DNS SRV service name 。
+
+
    The domain name is resolved to a transport address using the SRV
    procedures specified in [RFC2782].  The DNS SRV service name is the
    service name provided as input to this procedure.  The protocol in
    the SRV lookup is the transport protocol the client will run STUN
    over: "udp" for UDP and "tcp" for TCP.  Note that only "tcp" is
    defined with "stuns" at this time.
+
+   通过 SRV （ 详见 RFC2782 ） 把 domain name 翻译成传输地址(IP Port) 。
+
 
    The procedures of RFC 2782 are followed to determine the server to
    contact.  RFC 2782 spells out the details of how a set of SRV records
