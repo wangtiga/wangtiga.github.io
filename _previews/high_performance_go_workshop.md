@@ -1664,7 +1664,7 @@ If you enable multiple profile’s at the same time, they will observe their own
 The Go runtime’s profiling interface lives in the  `runtime/pprof`  package.  `runtime/pprof`  is a very low level tool, and for historic reasons the interfaces to the different kinds of profile are not uniform.
 
 Go 运行时 profile 接口位于 `runtime/pprof` package 中。
-这是一个很以的接口。
+这是一个很低层的接口。
 由于历史原因，不同类型的 profile 接口也不统一。
 
 As we saw in the previous section, pprof profiling is built into the  `testing`  package, but sometimes its inconvenient, or difficult, to place the code you want to profile in the context of at  `testing.B`  benchmark and must use the  `runtime/pprof`  API directly.
@@ -1916,6 +1916,7 @@ _问题_： 谁知道为什么我们的程序比 `wc` 慢了这么多呢？
 
 
 > 深度解密Go语言之pprof[^qcraoPPROF]
+
  列名 | 含义
 ----- | -------------------------------------------
 flat  | 本函数的执行耗时, the time in a function
@@ -1924,7 +1925,7 @@ sum%  | 前面每一行的 flat 占比总和
 cum   | 累计量。指该函数加上该函数调用的函数总耗时。cumulative time a function and everything below it.
 cum%  | cum 占 CPU 总时间的比例
 
-> 方框 syscall.Syscall 760ms(84.44%) of 820ms(91.11%) 
+> 方框中文字的含义 syscall.Syscall 760ms(84.44%) of 820ms(91.11%) 
 > 
 > 760ms 表示 flat 时间； 820ms 表示 cumulate 时间；
 
@@ -1984,7 +1985,9 @@ Compare the times of this revised program to  `wc`. How close is it? Take a prof
 在文件内容与 `readbyte` 之间加一个 `bufio.Reader` 缓冲，减少系统调用的次数。
 将优化后的版本与 `wc` 比较下，看看还有多少差距？执行一次 profile 看看还有哪些可以改进的地方。
 
+
 > NOTE 还是比 wc 慢，开启 CPU profile 显示 10ms 时间都在 main ，找不到优化点。难道是 golang 本身就是慢？是慢在内存管理上吗？
+
 ```txt
 ~/tmp$ time wc -w ./2701-0.txt 
 215830 ./2701-0.txt
