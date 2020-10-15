@@ -2310,17 +2310,41 @@ A year later, Go 1.7 introduced a  [new compiler backend](https://blog.golang.or
 
 The first optimisation we’re doing to discuss is  _escape analysis_.
 
+首先要讨论的优化手段是 _逃逸分析_ 。
+
 To illustrate what escape analysis does recall that the  [Go spec](https://golang.org/ref/spec)  does not mention the heap or the stack. It only mentions that the language is garbage collected in the introduction, and gives no hints as to how this is to be achieved.
+
+在具体介绍逃逸分析前，可回顾下[GO语言编程规范 Go spec](https://golang.org/ref/spec) ，会发现其中完全没有提到 heap 和 stack 。
+它仅在引言中提到这一门自动垃圾回收的语言，至于如何实现自动垃圾回收，则全未提及。
 
 A compliant Go implementation of the Go spec  _could_  store every allocation on the heap. That would put a lot of pressure on the the garbage collector, but it is in no way incorrect — for several years, gccgo had very limited support for escape analysis so could effectively be considered to be operating in this mode.
 
+把所有分配的变量都保存到 heap 中，也是一种符合 Go 语文编程规范的实现。
+这种方案对垃圾回收器的压力很大，但也不能说这种方案不对 －－ 很多年以来 gccgo 对逃逸分析的支持非常有限，基本可认为 Go 语文就是这样工作的。
+
 However, a goroutine’s stack exists as a cheap place to store local variables; there is no need to garbage collect things on the stack. Therefore, where it is safe to do so, an allocation placed on the stack will be more efficient.
 
-In some languages, for example C and C++, the choice of allocating on the stack or on the heap is a manual exercise for the programmer—​heap allocations are made with  `malloc`  and  `free`, stack allocation is via  `alloca`. Mistakes using these mechanisms are a common cause of memory corruption bugs.
+但是在 goroutine 的 stack 空间保存本地变量太方便了（开销小）；stack 中没有垃圾回收。
+因此，在确定安全的情况下，在 stack 中分配变量会更有效率。
+
+In some languages, for example C and C++, the choice of allocating on the stack or on the heap is a manual exercise for the programmer—heap allocations are made with  `malloc`  and  `free`, stack allocation is via  `alloca`. Mistakes using these mechanisms are a common cause of memory corruption bugs.
+
+在某些语文中，比如 C 和 C++ ，变量在 stack 还是在 heap 中分配，是由程序员决定的：
+
+调用  `malloc` 或 `free` 函数分配的空间在 heap 分配；
+
+调用 `alloca` 函数分配的空间在 stack 分配。
+
+大量内存损坏的 bug 都是由于这一机制导致的。
+
+
 
 In Go, the compiler automatically moves a value to the heap if it lives beyond the lifetime of the function call. It is said that the value  _escapes_  to the heap.
 
-```
+在 Go 语文中，一个变量的生命周期超出函数调用的范围后，编译器会自动把变量移动到 heap 中。
+也就是说，变量 _逃逸_ 到 heap 了。
+
+```go
 type Foo struct {
 	a, b, c, d int
 }
@@ -2332,13 +2356,25 @@ func NewFoo() *Foo {
 
 In this example the  `Foo`  allocated in  `NewFoo`  will be moved to the heap so its contents remain valid after  `NewFoo`  has returned.
 
+在上面的示例中， `NewFoo` 函数中分配了 `Foo` 变量，随后变量又被移动到 heap 中，以便在函数返回后，继续使用这个变量的值。
+
 This has been present since the earliest days of Go. It isn’t so much an optimisation as an automatic correctness feature. Accidentally returning the address of a stack allocated variable is not possible in Go.
+
+这种特性在 Go 语言发展的早期就实现了。
+与其说这是一种优化，不如说这是一种自动纠错功能。
+因为，在 Go 语言中，再也不会意外返回一个 stack 的变量地址（而造成 bug 了）。
+
 
 But the compiler can also do the opposite; it can find things which would be assumed to be allocated on the heap, and move them to stack.
 
+实际是，编译器还会反其道而行之；
+它也会找到那些原本分配在 heap 的变量，移动到 stack 上分配。
+
 Let’s have a look at an example
 
-```
+我们看个例子：
+
+```go
 func Sum() int {
 	const count = 100
 	numbers := make([]int, count)
@@ -2361,7 +2397,14 @@ func main() {
 
 `Sum`  adds the `int`s between 1 and 100 and returns the result.
 
+`Sum` 返回 1 到 100 的 int 值累加到一起的 和。
+
 Because the  `numbers`  slice is only referenced inside  `Sum`, the compiler will arrange to store the 100 integers for that slice on the stack, rather than the heap. There is no need to garbage collect  `numbers`, it is automatically freed when  `Sum`  returns.
+
+因为 `numbers` slice 只在 `Sum` 函数中使用，所以编译器会把保存这 100 个整数的 slick 变量分配到 stack 上，而不是 heap 上。
+所以，这里不需要垃圾回收 `numbers` ，因为在 `Sum` 函数返回后，stack 的变量会自动销毁。
+
+
 
 #### 4.2.1. Prove it!
 

@@ -1611,6 +1611,7 @@ map[string]int{"CST":-21600, "EST":-18000, "MST":-25200, "PST":-28800, "UTC":0}
 另外，`%x`也可用于 strings, byte arrays, byte slices, integers，其输出为十六进制字符串。如果在格式化符号前增加空格（`% x`），则输出的每个 bytes 之间也会以空格分隔。
 
 > 译：以下示例是译者增加，参考： https://blog.golang.org/strings
+
 ```go
 package main
 import"fmt"
@@ -1629,6 +1630,7 @@ fmt.Printf("%q, %#q, %x, % x\n", rne, rne, rne, rne)
 ```
 
 > 输出
+
 ```go
 18, 12, 18
 '\x12', '\x12', 12,  12
@@ -1783,6 +1785,7 @@ func Min(a ...int) int {
 ### Append 追加
  
 > NOTE append 会修改 slice 的特性是有坑的。 比如下面这种情况，
+
 ```go
 a := []int{1}
 b = append(a, 2,3,4,5) // a b 两个 slice 有可能指向一个底层 array 也有可以指向两个不同 array
@@ -2049,9 +2052,14 @@ By the way, the idea of using  `Write`  on a slice of bytes is central to the im
 
 顺便一提，以上通过`Write`方法操作 slice bytes 的想法，已经在内置类`bytes.Buffer`中实现。
 
+
+
 #### 译 有关 Pointer 与 Value 的问题总结
+
 ##### 1.为什么下面的代码没有复现此处所说问题？如果是因为 addressable ，那怎么样才能复现出上述问题呢？ TODO
+
 参考[在线演示](https://play.golang.org/p/fCGBoXTD3wq)
+
 ```go
 package main
 
@@ -2083,7 +2091,9 @@ func main() {
 	tPointer1.WriteByValue("t4")
 }
 ```
+
 输出
+
 ```go
 WriteByPointer tVal1 t1
 WriteByValue tVal1 t1 t2

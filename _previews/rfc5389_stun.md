@@ -817,7 +817,7 @@ RFC 5389                          STUN                      October 2008
 
    组装 request 或 indication 消息时，agent 必须按第6节的规则创建 header 。
    另外，消息的 class 只能是  Request 或 Indication ，
-   而且 method 必须是 Binding 或者其他文档中有必须的 method 类型。
+   而且 method 必须是 Binding 或者其他文档中有定义的 method 类型。
 
    The agent then adds any attributes specified by the method or the
    usage.  For example, some usages may specify that the agent use an
@@ -1165,7 +1165,7 @@ RFC 5389                          STUN                      October 2008
    一旦检查出任何错误，消息都会被静默丢弃。
    当 STUN 与其他协议复用一个连接时，
    有可能是因为当前数据并非是真正的 STUN 消息才导致检查出错；
-   这种情况， agent 要尝试将使用其他协议格式解析消息。
+   这种情况， agent 要尝试使用其他协议格式解析消息。
 
 
 
