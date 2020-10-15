@@ -609,7 +609,7 @@ RFC 5389                          STUN                      October 2008
       types: comprehension-required and comprehension-optional.  STUN
       agents can safely ignore comprehension-optional attributes they
       don't understand, but cannot successfully process a message if it
-      contains comprehension-required attributes that are not
+      ontains comprehension-required attributes that are not
       understood.
 
    属性： 一种可以在 STUN 协议中追加 TLV （类型，长度，值）格式的信息的术语。
@@ -1543,7 +1543,7 @@ RFC 5389                          STUN                      October 2008
    STUN 使用手册要说清，什么时候使用这个扩展功能。
    为使用此功能， client 必须知道 server 的 domain name 和 service name ；
    所以 STUN 使用手册还要说明 client 如何获取这些信息。
-   不建议 NOT RECOMMENDED 在程序代码中硬编码 Hard coding 进 server 的 domain name ，
+   不建议 NOT RECOMMENDED 在程序代码中硬编码进 server 的 domain name ，
    因为 domain name 可能丢失或者法规限制等各种原因必须更换。
 
    TODO STUN usage 使用手册指的是 RFC5389 文档吗？
