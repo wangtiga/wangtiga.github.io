@@ -3314,27 +3314,56 @@ Let’s take a look at its operation using the execution tracer.
 -   Francesc Campoy,  [Using the Go execution tracer](https://www.youtube.com/watch?v=ySy3sR1LFCQ)
     
 
-## 6. Memory and Garbage Collector
+## 6. Memory and Garbage Collector 内存和垃圾回收器 GC
 
 Go is a garbage collected language. This is a design principle, it will not change.
 
+Go 是一门自动垃圾回收的语言。
+这是设计原则，不会改变。
+
 As a garbage collected language, the performance of Go programs is often determined by their interaction with the garbage collector.
+
+作为一门垃圾回收的语言，Go 程序的性能常常是由垃圾回收器决定的。
 
 Next to your choice of algorithms, memory consumption is the most important factor that determines the performance and scalability of your application.
 
+使用的算法与内存消费是决定程序的性能与扩展性的主要因素。
+
+
 This section discusses the operation of the garbage collector, how to measure the memory usage of your program and strategies for lowering memory usage if garbage collector performance is a bottleneck.
 
-### 6.1. Garbage collector world view
+本节讨论垃圾收集器的工作方法，
+以及 如何测试程序的内存使用情况，
+还有 当垃圾收集器性能成为瓶颈时，如何降低内存使用量的策略。
+
+
+
+### 6.1. Garbage collector world view 垃圾收集器面面观
 
 The purpose of any garbage collector is to present the illusion that there is an infinite amount of memory available to the program.
 
+垃圾收集器的作用是，给程序造成一种错觉，以为有无限内存可用。
+
 You may disagree with this statement, but this is the base assumption of how garbage collector designers work.
+
+你有可能不同意这种观点，但垃圾收集器的作者就是以此为目标来设计的。
+
 
 A stop the world, mark sweep GC is the most efficient in terms of total run time; good for batch processing, simulation, etc. However, over time the Go GC has moved from a pure stop the world collector to a concurrent, non compacting, collector. This is because the Go GC is designed for low latency servers and interactive applications.
 
-The design of the Go GC favors  _lower_latency_  over  _maximum_throughput_; it moves some of the allocation cost to the mutator to reduce the cost of cleanup later.
+> stop the world STW 暂停时间，GC时要暂停整个程序。
 
-### 6.2. Garbage collector design
+标记清除的GC方案，其总STW时间最短；适用于 batch processing, simulation 等场景。
+但现在 Go 的 GC 方案已经从纯粹的 STW 后执行垃圾收集优化为 concurrent, non compacting 的垃圾收集。
+这是因为， Go 的 GC 主要为低延迟服务器和交互式应用程序而设计。
+
+The design of the Go GC favors  _lower latency_  over  _maximum throughput_; it moves some of the allocation cost to the mutator to reduce the cost of cleanup later.
+
+Go 的 GC 设计目标是 最大吞吐量 上 降低延迟 ；
+它把分配资源的开销转稼到修改过程(mutator)，以此来降低清理资源时的开销。
+
+
+### 6.2. Garbage collector design 垃圾回收器的设计
 
 The design of the Go GC has changed over the years
 
@@ -3350,16 +3379,45 @@ The design of the Go GC has changed over the years
     
 -   Go 1.8, further work to reduce STW times, now down to the 100 microsecond range.
     
--   Go 1.10+,  [move away from pure cooprerative goroutine scheduling](https://github.com/golang/proposal/blob/master/design/24543-non-cooperative-preemption.md)  to lower the latency when triggering a full GC cycle.
+-   Go 1.10+,  [move away from pure cooperative goroutine scheduling](https://github.com/golang/proposal/blob/master/design/24543-non-cooperative-preemption.md)  to lower the latency when triggering a full GC cycle.
     
 
-### 6.3. Garbage collector monitoring
+Go GC 的设计一直在改进。
+
+- Go 1.0 基于 tcmalloc 实现的 STW 标记清除。
+- Go 1.3 更精确的垃圾收集器，能处理 heap 上的大数指针，避免内存泄露问题。
+- Go 1.5 全新 GC 设计，改善大吞量下延迟表现。
+- Go 1.6 GC 改进，处理大 heap 时，延迟更低。
+- Go 1.7 小副 GC 改进，主要是重构。
+- Go 1.8 进一步降低 STW 时间为 100 微秒。
+- Go 1.10+ 去除 完全协作式 Goroutine 调度，降低触发 full GC cycle 时的延迟。
+
+> 协作式调度 与 抢占式调度
+>
+> - 协作：被调度方主动弃权；
+>   还细分为 主动出让 和 抢战标记 几种方法。
+>   缺点：
+>       对用户不友好。
+>       易出现长久无法停止的代码，无法及时垃圾回收，其他 Goroutine 无法调度。
+>
+> - 抢占：调试器强制将被调试方被动中断；
+>
+
+
+
+
+### 6.3. Garbage collector monitoring  观察垃圾收集器的工作过程
 
 A simple way to obtain a general idea of how hard the garbage collector is working is to enable the output of GC logging.
 
+打开 GC 日志开关，就能看到垃圾收集器的工作过程。
+
 These stats are always collected, but normally suppressed, you can enable their display by setting the  `GODEBUG`  environment variable.
 
-```
+这些统计信息是持续在收集的，但通常不会显示出来，
+您也可以通过 `GODEBUG` 环境变量打开显示开关。
+
+```log
 % env GODEBUG=gctrace=1 godoc -http=:8080
 gc 1 @0.012s 2%: 0.026+0.39+0.10 ms clock, 0.21+0.88/0.52/0+0.84 ms cpu, 4->4->0 MB, 5 MB goal, 8 P
 gc 2 @0.016s 3%: 0.038+0.41+0.042 ms clock, 0.30+1.2/0.59/0+0.33 ms cpu, 4->4->1 MB, 5 MB goal, 8 P
@@ -3374,13 +3432,24 @@ gc 9 @0.045s 6%: 0.047+0.38+0.042 ms clock, 0.37+0.94/0.61/0+0.33 ms cpu, 4->4->
 
 The trace output gives a general measure of GC activity. The output format of  `gctrace=1`  is described in  [the  `runtime`  package documentation](https://golang.org/pkg/runtime/#hdr-Environment_Variables).
 
+根据输出的追踪日志就能判断 GC 的工作状态。
+在 [`runtime`  package 文档](https://golang.org/pkg/runtime/#hdr-Environment_Variables) 中会描述 `gctrace=1` 的输出格式。
+
+
 DEMO: Show  `godoc`  with  `GODEBUG=gctrace=1`  enabled
 
-Use this env var in production, it has no performance impact.
+DEMO: 启用 `GODEBUG=gctrace=1` 时查看 godoc
+
+> Use this env var in production, it has no performance impact.
+
+> 可以在生产环境中使用这个环境变量，它对性能没有影响。
 
 Using  `GODEBUG=gctrace=1`  is good when you  _know_  there is a problem, but for general telemetry on your Go application I recommend the  `net/http/pprof`  interface.
 
-```
+当你十分了解问题时，可通过 `GODEBUG=gctrace=1` 分析。
+但我更建议你用  `net/http/pprof` 接口检测自己的 Go 程序。
+
+```go
 import _ "net/http/pprof"
 ```
 
@@ -3389,13 +3458,30 @@ Importing the  `net/http/pprof`  package will register a handler at  `/debug/ppr
 -   A list of all the running goroutines,  `/debug/pprof/heap?debug=1`.
     
 -   A report on the memory allocation statistics,  `/debug/pprof/heap?debug=1`.
-    
 
 `net/http/pprof`  will register itself with your default  `http.ServeMux`.
 
 Be careful as this will be visible if you use  `http.ListenAndServe(address, nil)`.
 
 DEMO:  `godoc -http=:8080`, show  `/debug/pprof`.
+
+ 
+引用 `net/http/pprof` 包会在 HTTP 处理器中注册 `/debug/pprof` 开头的地址，其中包含各种运行时指标信息。
+
+TODO pprof/heap 地址可能写错了。
+
+- 访问  `/debug/pprof/heap?debug=1` 返回所有运行中的 goroutine 列表。
+
+- 访问  `/debug/pprof/heap?debug=1` 返回内存分配的统计信息报告。
+
+
+注意：
+`net/http/pprof`  会注册到默认的 `http.ServeMux` 上。
+只要调用了 `http.ListenAndServe(address, nil)` 代码，这些统计信息就能获取到。
+
+DEMO:  `godoc -http=:8080`, show  `/debug/pprof`.
+
+
 
 #### 6.3.1. Garbage collector tuning
 
@@ -3414,7 +3500,7 @@ For example, if we currently have a 256MB heap, and  `GOGC=100`  (the default), 
 -   Values of  `GOGC`  less than 100 cause the heap to grow slowly, increasing the pressure on the GC.
     
 
-The default value of 100 is  _just_a_guide_. you should choose your own value  _after profiling your application with production loads_.
+The default value of 100 is  _just a guide_. you should choose your own value  _after profiling your application with production loads_.
 
 ### 6.4. Reducing allocations
 
