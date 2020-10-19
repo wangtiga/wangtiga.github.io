@@ -3483,75 +3483,127 @@ DEMO:  `godoc -http=:8080`, show  `/debug/pprof`.
 
 
 
-#### 6.3.1. Garbage collector tuning
+#### 6.3.1. Garbage collector tuning  微调垃圾回收器
 
 The Go runtime provides one environment variable to tune the GC,  `GOGC`.
 
+Go 运行时提供了一个环境变量 `GOGC` 来微调 GC 。
+
 The formula for GOGC is
 
-goal=reachable⋅(1+GOGC100)goal=reachable⋅(1+GOGC100)
+微调的公式是 
+
+`goal=reachable⋅(1+GOGC/100)`
 
 For example, if we currently have a 256MB heap, and  `GOGC=100`  (the default), when the heap fills up it will grow to
 
-512MB=256MB⋅(1+100100)512MB=256MB⋅(1+100100)
+比如，如果我当前堆大小是 256MB ，而 `GOGC=100` （默认值），当堆空间用尽后，会扩容到
+
+`512MB=256MB⋅(1+100/100)`
 
 -   Values of  `GOGC`  greater than 100 causes the heap to grow faster, reducing the pressure on the GC.
     
 -   Values of  `GOGC`  less than 100 cause the heap to grow slowly, increasing the pressure on the GC.
-    
+
+- `GOGC` 取值大于 100 ，会让堆增涨得更快，增大 GC 垃圾回收的压力。
+- `GOGC` 取值小于 100 ，会让堆增涨得更慢，减少 GC 垃圾回收的压力。
+
 
 The default value of 100 is  _just a guide_. you should choose your own value  _after profiling your application with production loads_.
 
-### 6.4. Reducing allocations
+默认值 100 仅做参考。
+你应该根据应用在生产环境的 profile 结果，选取适当的 GOGC 取值。
+
+### 6.4. Reducing allocations 减少内存分配
 
 Make sure your APIs allow the caller to reduce the amount of garbage generated.
 
+API 应该尽量设计成"允许调用方减少内存分配次数（减少垃圾产量）"的样子。
+
 Consider these two Read methods
 
-```
+比如下面两个 Read method
+
+```go
 func (r *Reader) Read() ([]byte, error)
 func (r *Reader) Read(buf []byte) (int, error)
 ```
 
 The first Read method takes no arguments and returns some data as a  `[]byte`. The second takes a  `[]byte`  buffer and returns the amount of bytes read.
 
+第一个 Read method 没有输入参数，但返回 `[]byte` 类型的数据。
+第二个 Read method 接收一个 `[]byte] 类型的 buffer ，返回读取到的字节数量。
+
 The first Read method will  _always_  allocate a buffer, putting pressure on the GC. The second fills the buffer it was given.
 
+第一个 Read method 每次都要分配一个 buffer 空间，
+给 GC 制造了很大压力。
+第二个 Read method 只要向 buffer 中填充数据就行。
+
 Can you name examples in the std lib which follow this pattern?
+
+你知道标准库中哪里的代码与示例中一样吗？
+
+
 
 ### 6.5. strings and []bytes
 
 In Go  `string`  values are immutable,  `[]byte`  are mutable.
 
+在 Go 中 string 值是不可变量， []byte 值是可变量。
+
 Most programs prefer to work  `string`, but most IO is done with  `[]byte`.
+
+程序中使用 string 较多，但 IO 操作一般使用 []byte 。
 
 Avoid  `[]byte`  to string conversions wherever possible, this normally means picking one representation, either a  `string`  or a  `[]byte`  for a value. Often this will be  `[]byte`  if you read the data from the network or disk.
 
+尽可能只使用 string 或 []byte 的一种类型，避免 []byte 与 string 间频繁转换。
+从网络或磁盘中读取数据时，一般使用 []byte 类型。
+
+
 The  [`bytes`](https://golang.org/pkg/bytes/)  package contains many of the same operations — `Split`,  `Compare`,  `HasPrefix`,  `Trim`, etc — as the  [`strings`](https://golang.org/pkg/strings/)  package.
+
+[`bytes`](https://golang.org/pkg/bytes/)  package 与 [`strings`](https://golang.org/pkg/strings/)  package 包含很多相同的操作，比如 `Split`,  `Compare`,  `HasPrefix`,  `Trim`, 等等。
 
 Under the hood  `strings`  uses same assembly primitives as the  `bytes`  package.
 
-### 6.6. Using  `[]byte`  as a map key
+strings 与 bytes 的底层实现也会使用很多相同的汇编原语。
+
+
+### 6.6. Using  `[]byte`  as a map key 使用 []byte 作为 map 的 key 
 
 It is very common to use a  `string`  as a map key, but often you have a  `[]byte`.
 
+我们常在拿到 []byte 变量时，却使用 string 类型作为 map 的 key 。
+
 The compiler implements a specific optimisation for this case
 
-```
+编译器会对下面这样的代码执行特殊的优化。
+
+```go
 var m map[string]string
 v, ok := m[string(bytes)]
 ```
 
 This will avoid the conversion of the byte slice to a string for the map lookup. This is very specific, it won’t work if you do something like
 
-```
+上面的代码能避免在 map 查找过程执行 byte slice 与 string 的转换。
+这是很特殊的优化，如果你像下面这样写代码，就没有这种优化效果了。
+
+```go
 key := string(bytes)
 val, ok := m[key]
 ```
 
 Let’s see if this is still true. Write a benchmark comparing these two methods of using a  `[]byte`  as a  `string`  map key.
 
-### 6.7. Avoid string concatenation
+可以试试是否真是这样。
+TODO 分别使用 []byte 与 string 作为 map 的 key ，写一个 benchmark 比较下结果。
+
+
+
+### 6.7. Avoid string concatenation 避免字符串拼接
 
 Go strings are immutable. Concatenating two strings generates a third. Which of the following is fastest?
 
