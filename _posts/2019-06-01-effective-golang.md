@@ -1371,6 +1371,7 @@ text := LinesOfText{
 	[]byte("for all good gophers"),
 	[]byte("to bring some fun to the party."),
 }
+```
 
 Sometimes it's necessary to allocate a 2D slice, a situation that can arise when processing scan lines of pixels, for instance. There are two ways to achieve this. One is to allocate each slice independently; the other is to allocate a single array and point the individual slices into it. Which to use depends on your application. If the slices might grow or shrink, they should be allocated independently to avoid overwriting the next line; if not, it can be more efficient to construct the object with a single allocation. For reference, here are sketches of the two methods. First, a line at a time:
 

@@ -3542,7 +3542,7 @@ The first Read method will  _always_  allocate a buffer, putting pressure on the
 
 Can you name examples in the std lib which follow this pattern?
 
-你知道标准库中哪里的代码与示例中一样吗？
+你知道标准库中哪里的代码与示例中一样遵守了这个原则吗？
 
 
 
@@ -3607,24 +3607,28 @@ TODO 分别使用 []byte 与 string 作为 map 的 key ，写一个 benchmark �
 
 Go strings are immutable. Concatenating two strings generates a third. Which of the following is fastest?
 
-```
+Go 的 string 是不可变量。
+将两个 string 连接到一起，会生成第三个 string 。
+下面的代码，哪种更快一些？
+
+```go
 		s := request.ID
 		s += " " + client.Addr().String()
 		s += " " + time.Now().String()
 		r = s
 ```
 
-```
+```go
 		var b bytes.Buffer
 		fmt.Fprintf(&b, "%s %v %v", request.ID, client.Addr(), time.Now())
 		r = b.String()
 ```
 
-```
+```go
 		r = fmt.Sprintf("%s %v %v", request.ID, client.Addr(), time.Now())
 ```
 
-```
+```go
 		b := make([]byte, 0, 40)
 		b = append(b, request.ID...)
 		b = append(b, ' ')
@@ -3634,7 +3638,7 @@ Go strings are immutable. Concatenating two strings generates a third. Which of 
 		r = string(b)
 ```
 
-```
+```go
 		var b strings.Builder
 		b.WriteString(request.ID)
 		b.WriteString(" ")
@@ -3646,13 +3650,22 @@ Go strings are immutable. Concatenating two strings generates a third. Which of 
 
 DEMO:  `go test -bench=. ./examples/concat`
 
-### 6.8. Preallocate slices if the length is known
+> `make([]byte, 0, 40)` 是耗时最短的
+
+
+### 6.8. Preallocate slices if the length is known 已知长度时，可以预分配 slice
 
 Append is convenient, but wasteful.
 
+使用 Append 很方便，但会浪费资源。
+
 Slices grow by doubling up to 1024 elements, then by approximately 25% after that. What is the capacity of  `b`  after we append one more item to it?
 
-```
+slice 扩容规则，小于等于 1024 元素时，每次增长两倍；大于 1024 元素时，每次增加 1.25 倍，还有内存对齐的操作。
+
+数组 b 中增加一个元素后，它的 capacity 容量是多少？
+
+```go
 func main() {
 	b := make([]int, 1024)
 	b = append(b, 99)
@@ -3662,11 +3675,15 @@ func main() {
 
 If you use the append pattern you could be copying a lot of data and creating a lot of garbage.
 
+使用 append 的过程，有可能复制大量数据，创造大量需要回收的垃圾。
+
 If know know the length of the slice beforehand, then pre-allocate the target to avoid copying and to make sure the target is exactly the right size.
+
+如果事先知道 slice 的长度，可以预先分配适合的空间大小来存放数据。
 
 Before
 
-```
+```go
 var s []string
 for _, v := range fn() {
         s = append(s, v)
@@ -3676,7 +3693,7 @@ return s
 
 After
 
-```
+```go
 vals := fn()
 s := make([]string, len(vals))
 for i, v := range vals {
