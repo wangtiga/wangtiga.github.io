@@ -3068,6 +3068,29 @@ Before we go on there are some things we should talk about the usage of the trac
 -   If you’ve installed Go from an OS distribution like Fedora, the support files for the trace viewer may not be part of the main  `golang`  deb/rpm, they might be in some  `-extra`  package.
     
 
+
+> Go Execution Tracer [^GoExecutionTracer]
+>
+> wget http://localhost:6060/debug/pprof/trace
+>
+> go tool trace -http=:7000 ./trace.out
+>
+
+
+> 使用 pprof 格式查看  trace 信息[Command Trace](https://golang.org/cmd/trace/)
+
+```txt
+ go tool trace -pprof=net 7000ms_trace > 7000ms_trace.pprof.net
+ go tool trace -pprof=sync 7000ms_trace > 7000ms_trace.pprof.sync
+ go tool trace -pprof=syscall 7000ms_trace > 7000ms_trace.pprof.syscall
+ go tool trace -pprof=sched 7000ms_trace > 7000ms_trace.pprof.sched
+
+ go tool pprof -http=:7001 ./7000ms_trace.pprof.net
+```
+
+
+
+
 ### 5.5. Using more than one CPU
 
 We saw from the previous trace that the program is running sequentially and not taking advantage of the other CPUs on this machine.
@@ -4020,4 +4043,7 @@ ehs.forEach ( e => {
 [^CPUMax4GHz]: [为什么主流CPU的频率止步于4G?我们触到频率天花板了吗？](https://zhuanlan.zhihu.com/p/30409360)
 
 [^qcraoPPROF]: [深度解密Go语言之pprof](https://qcrao.com/2019/11/10/dive-into-go-pprof/)
+
+[^GoExecutionTracer]: [Go Execution Tracer](https://docs.google.com/document/u/1/d/1FP5apqzBgr7ahCCgFO-yoVhk4YZrNIDNf9RybngBc14/pub)
+
 
