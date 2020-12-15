@@ -9,6 +9,32 @@ tags:   tech
 {:toc}
 
 
+
+### 14. RTP Protocol
+
+https://tools.ietf.org/html/rfc3550#section-5.1
+
+```txt
+   The RTP header has the following format:
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |V=2|P|X|  CC   |M|     PT      |       sequence number         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           timestamp                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |           synchronization source (SSRC) identifier            |
+   +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+   |            contributing source (CSRC) identifiers             |
+   |                             ....                              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
+
+timestamp: RTP Payload 中第一字节的采样时刻
+
+
+
 ### 13.mdns mDNS MDNS 
 
 mDNS , multicast DNS, 可以理解为局域网内部的 DNS 系统，它和 DNS 有很多相似的地方，通过它可以实现局域网内部的服务发现、查找和广播。同时它是基于组播的协议。
@@ -46,48 +72,52 @@ https://github.com/pion/webrtc/internal/mux/muxfunc.go
 
 
 ### 11.相关术语
+
 https://blog.csdn.net/DittyChen/article/details/78065974
 
-SR：发送者报告，描述作为活跃发送者万岁的发送和接收统计数据
+SR SenderReport 发送者报告，描述作为活跃发送者成员的发送和接收统计数据
 
-RR：接收者报告，描述非活跃发送者成员的接收统计数据
+RR ReceiverReport 接收者报告，描述非活跃发送者成员的接收统计数据
 
-SDES：源描述项，其中包括规范名CNAME
+SDES 源描述项，其中包括规范名CNAME
 
-BYE：表明参与者将结束会话
+BYE 表明参与者将结束会话
 
-APP：应用描述功能
+APP 应用描述功能
 
 
 关键帧请求
 
-PLI 是Picture LossIndication，SLI 是Slice Loss Indication。发送方接收到接收方反馈的PLI或SLI需要重新让编码器生成关键帧并发送给接收端。
+PLI Picture LossIndication，SLI 是Slice Loss Indication。发送方接收到接收方反馈的PLI或SLI需要重新让编码器生成关键帧并发送给接收端。
 
-FIR：Full Intra Request，关键帧重传请求. Intra的含义是图像内编码，不需要其他图像信息即可解码；Inter指图像间编码，解码需要参考帧。故Intra Frame其实就是指I帧，Inter Frame指P帧或B帧。
+FIR Full Intra Request，关键帧重传请求. Intra的含义是图像内编码，不需要其他图像信息即可解码；Inter指图像间编码，解码需要参考帧。故Intra Frame其实就是指I帧，Inter Frame指P帧或B帧。
 
 
 
 重传请求
 
-NACK：Negative Acknowledgement 否定确认，NACK重传（丢包）
+NACK Negative Acknowledgement 否定确认，NACK重传（丢包）
 
-RPSI：Reference Picture Selection Indication
+RPSI Reference Picture Selection Indication
 
 
 [码率控制](https://zhuanlan.zhihu.com/p/90094059)
 
-TMMBR是Temporal Max MediaBitrate Request，表示临时最大码率请求。表明接收端当前带宽受限，告诉发送端控制码率。
+TMMBR Temporal Max MediaBitrate Request，表示临时最大码率请求。表明接收端当前带宽受限，告诉发送端控制码率。
 
-TMMBN是Temporal Max MediaBitrate Notification
+TMMBN Temporal Max MediaBitrate Notification
 
 JITTER 抖动时间间隔, 数据包传输时长的变化就是拌动. 上一个包传输耗时 10ms ,下一个包传输耗时 20ms ,抖动就是 20-10=10ms. 第三个包传输耗时 25ms, 抖动就是 25-20=5ms
 
 
-REMB 是 ReceiverEstimatedMax Bitrate，接收端估计的最大码率。RTP头中包含发送端绝对时间戳,服务器利用GCC的基于时延的带宽估计算法,估算出用户上行带宽以后,通过REMB将带宽反馈回客户端.客户端根据反馈的带宽以及RR反馈的丢包进行综合拥塞控制
+REMB ReceiverEstimatedMax Bitrate，接收端估计的最大码率。RTP头中包含发送端绝对时间戳,服务器利用GCC的基于时延的带宽估计算法,估算出用户上行带宽以后,通过REMB将带宽反馈回客户端.客户端根据反馈的带宽以及RR反馈的丢包进行综合拥塞控制
 
-Transport-CC 服务端不实现具体的GCC算法,仅把统计到的收包序列以及相关 delay 信息(即媒体流接收端的统计信息)封装在协议中,再传到发送端, 发送端根据这些信息利用 GCC 算法进行流量控制.
+TransportCC 服务端不实现具体的GCC算法,仅把统计到的收包序列以及相关 delay 信息(即媒体流接收端的统计信息)封装在协议中,再传到发送端, 发送端根据这些信息利用 GCC 算法进行流量控制.
 
-> 因为 WebRTC 认为各端实现的GCC算法质量不可控,对发送方来说,本端GCC算法最符合本端的标准.所心 Transport-CC 是未来的趋势.
+> 因为 WebRTC 认为各端实现的GCC算法质量不可控,对发送方来说,本端GCC算法最符合本端的标准.所心 TransportCC 是未来的趋势.
+
+> [WebRTC研究：Transport-cc之RTP及RTCP](https://blog.jianchihu.net/webrtc-research-transport-cc-rtp-rtcp.html)
+
 
 FEC Forward Error Correction 前向纠错. 发送媒体包时,增加一定冗余,在一定丢包率的情况下,接收端也能正常解码.
 
@@ -105,11 +135,9 @@ Bi-directionalinterpolated prediction frame 前后参考帧，双向预测内插
 
 当SFU只有一路视频可以转发时，如何根据各链路的带宽情况进行下发控制，有点巧妇难为无米之炊的感觉。
 
-Simulcast：
-同步广播，指的是同时编码/发送多路视频流，比如常规发送一路720p，外加一路180p的流，这样在SFU下发给接收端的时候，可以根据下行带宽的限制，选择下发不同分辨率的流，照顾到每个端的体验。
+Simulcast 同步广播，指的是同时编码/发送多路视频流，比如常规发送一路720p，外加一路180p的流，这样在SFU下发给接收端的时候，可以根据下行带宽的限制，选择下发不同分辨率的流，照顾到每个端的体验。
 
-SVC：
-可伸缩编码，使用基于层次的方法，提供时间或空间可伸缩编码组合。在RTC的应用中，通常会选用时域SVC，通过改变帧率来实现伸缩性。SFU可以根据下行的实际带宽，从同一路SVC视频流中解析出不同的时域分层，分别传输给各个接收端，同样可以实现差异化的视频流转发。
+SVC 可伸缩编码，使用基于层次的方法，提供时间或空间可伸缩编码组合。在RTC的应用中，通常会选用时域SVC，通过改变帧率来实现伸缩性。SFU可以根据下行的实际带宽，从同一路SVC视频流中解析出不同的时域分层，分别传输给各个接收端，同样可以实现差异化的视频流转发。
 
 Simulcast和SVC在实际应用中各有优劣，Simulcast多路流的分辨率跨度大，主观体验不佳；SVC的时域分层会影响帧率，容易出现卡顿。
 
