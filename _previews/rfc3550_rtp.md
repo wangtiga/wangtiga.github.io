@@ -2207,6 +2207,53 @@ RFC 3550                          RTP                          July 2003
       if all packets from that source sent during the last reporting
       interval have been lost.
 
+      自从上次发送 SR 或 RR 后， SSRC 相关的 RTP 数据丢失的包个数比率。
+      这是一个用 binary point 表示的浮点数，可理解为 Q8 格式，
+      即 8 bit 全部表示小数部分，相当于 8bit 整型值除以 256 的值。
+
+      丢包率表示，实际丢失的包数量 与 期望接收的包数量 的比值。
+
+      附录 A.3 中有一个示例实现。
+      如果因为重复包导致丢包率是负数，
+      可以把这个值设置成0.
+      注意，在接收方收到最一个包前，无法说明具体丢失的是哪个包。
+
+
+      
+      > NOTE Fixed-Point Representation: The Q Format and Addition Examples 
+
+      https://www.allaboutcircuits.com/technical-articles/fixed-point-representation-the-q-format-and-addition-examples/
+
+      为了降低数字信号处理器的实现成本，许多数字信号处理器只能执行整数运算，
+      为了在这种处理器中表示浮点数，使用了一种 binary point 法。
+
+      8bit 长的数值 a = 01010110 ，
+      当把 a 当作整数时， 它的十进制值是 86 ，十六进制值是 0x56  。
+      
+      a 当成分数时，假设第 4 到第 5 bit 之间是小数点 binary point 的位置。
+      
+      则 a 的取值是 0101.0110 , 
+      前 4 bit 表示浮点数的整数部分，
+      后 4 bit 表示浮点数的小数部分。
+
+      可以用下面的方法转换成十进制数：
+
+      a = 0*2^3 + 1*2^2 + 0*2^1 + 1*2^0   + 0*2^(-1) + 1*2^(-2) + 1*2^(-3) + 0*2^(-4)
+        = 5.375
+
+      也可以用前 3 bit 表示整数，后 5 bit 表示小数，
+      即 a ＝ 010.10110 ＝ 2.6875
+
+
+      用 Q Format 表示法，描述 binary point 小数点所在位置。
+      
+      前 3 bit 表示整数，后 4 bit 表示小数，则称为  Q3.4 。
+      
+      假设处理器字长 16 bit ， Q15 表示含义与 Q1.15 相同，
+      都是 前 1 bit 整数， 后 15 bit 小数。
+
+
+
    cumulative number of packets lost: 24 bits
       The total number of RTP data packets from source SSRC_n that have
       been lost since the beginning of reception.  This number is
@@ -2218,6 +2265,18 @@ RFC 3550                          RTP                          July 2003
       defined to be the extended last sequence number received, as
       defined next, less the initial sequence number received.  This may
       be calculated as shown in Appendix A.3.
+
+      累积总丢包数，
+      从收到 SSRC 第一个 RTP 包开始，到现在总共丢失的数据包个数。
+      这个数值是，期望接收到的包个数 减去 实际收到的包个数 。
+
+      注意，收到的包个数中，包含迟到和重传的包。
+      迟到的包不会计入丢包个数中，
+      所以如果出现重传的包，那丢包数量可能是负的。
+
+      期望接收到的包个数，是上次收到的包序列号 减 第一个收到的包序列号。
+      具体算法在附录 A.3 中有示例。
+
 
    extended highest sequence number received: 32 bits
       The low 16 bits contain the highest sequence number received in an
@@ -2237,6 +2296,10 @@ RFC 3550                          RTP                          July 2003
       of packets.  As shown in the equation below, this is equivalent to
       the difference in the "relative transit time" for the two packets;
 
+      抖动是 RTP 包到达时间间隔的一种估量值。
+
+      jitter J 是包间隔 D  的平均值。
+
 
 
 Schulzrinne, et al.         Standards Track                    [Page 39]
@@ -2248,11 +2311,18 @@ RFC 3550                          RTP                          July 2003
       timestamp and the receiver's clock at the time of arrival,
       measured in the same units.
 
+      相对传输时间
+
       If Si is the RTP timestamp from packet i, and Ri is the time of
       arrival in RTP timestamp units for packet i, then for two packets
       i and j, D may be expressed as
 
+      包 i j 的间隔时间使用以下公式计算 ：
+
          D(i,j) = (Rj - Ri) - (Sj - Si) = (Rj - Sj) - (Ri - Si)
+
+      NOTE 可简单理解为 接收时间 减 发送时间 ，但只保留传输延时，
+      NOTE 为了忽略发送延时，计算过程要减去发送方的发送延时。
 
       The interarrival jitter SHOULD be calculated continuously as each
       data packet i is received from source SSRC_n, using this
@@ -2273,6 +2343,10 @@ RFC 3550                          RTP                          July 2003
       implementation is shown in Appendix A.8.  See Section 6.4.4 for a
       discussion of the effects of varying packet duration and delay
       before transmission.
+
+      NOTE 为了减少抖动值 J 的变化幅度， 
+      NOTE 将当前传输时间与上一次累加过程，要除以 16  。
+
 
    last SR timestamp (LSR): 32 bits
       The middle 32 bits out of 64 in the NTP timestamp (as explained in
@@ -4672,6 +4746,14 @@ A.3 Determining Number of Packets Expected and Lost
    (s->cycles).  Both the received packet count and the count of cycles
    are maintained the RTP header validity check routine in Appendix A.1.
 
+   received 的包数量就是接收到的包数量，包括迟到和重复的包。
+   expected 的包数量就是当前收到的最大的包序号减收到的第一个包的序号，
+
+   但是包序号只占 16 bit ，并且可以循环使用。
+   所以需要记录包序号的循环次数。
+   接收的包数量和包序号的循环次数由 RTP 头合法性检查来保证。
+   详细内容参考 Appendix A.1 。
+
       extended_max = s->cycles + s->max_seq;
       expected = extended_max - s->base_seq + 1;
 
@@ -4689,6 +4771,13 @@ A.3 Determining Number of Packets Expected and Lost
    differences in the expected and received packet counts across the
    interval, where expected_prior and received_prior are the values
    saved when the previous reception report was generated:
+
+   自上次发送 SR 或 RR 包后，
+   如果 expected 数量增加或 lost 数量增加，就要重新计算丢包率。
+   计算方法就是，增加的 lost 数量除以 增加的 expected 数量。
+   即丢包率是 lost_interval / expected_interval ，
+   再将此结果左移 8bit ，是为了转换成 binary point 浮点数格式后。
+
 
       expected_interval = expected - s->expected_prior;
       s->expected_prior = expected;

@@ -94,13 +94,68 @@ Metrics can also be grouped together into reusable metric sets using the  `Metri
 
 
 ## 说明
-1. 设计监控数据的表格结构与设计业务数据表结构不同
-监控数据更多用于统计分析，所以每种数据放一个独立的表即可。
-2. 善于使用业界通用的库
-通用库归纳了一些常用统计方法，避免重复踩坑。
-比如， 
-统计并发量，只要 recv 时记录数量即可，短期内的数据可以聚合。
-统计接口延迟，只要取样采集数据即可，记录所有请求的耗时意义不大。
+
+- 设计监控数据的表格结构与设计业务数据表结构不同
+
+  监控数据更多用于统计分析，所以每种数据放一个独立的表即可。
+
+- 善于使用业界通用的库
+
+  通用库归纳了一些常用统计方法，避免重复踩坑。
+
+  比如， 
+  统计并发量，只要 recv 时记录数量即可，短期内的数据可以聚合。
+  统计接口延迟，只要取样采集数据即可，记录所有请求的耗时意义不大。
+
+
+
+The five metric types: Gauges, Counters, Histograms, Meters, and Timers.
+
+#### Guages
+A gauge is the simplest metric type. It just returns a value. If, for example, your application has a value which is maintained by a third-party library, you can easily expose it by registering a Gauge instance which returns that value
+:
+
+#### Counters
+A counter is a simple incrementing and decrementing 64-bit integer:
+
+#### Histograms
+
+`Histogram`  metrics allow you to measure not just easy things like the min, mean, max, and standard deviation of values, but also  [quantiles](http://en.wikipedia.org/wiki/Quantile)  like the median or 95th percentile.
+
+The solution for this is to sample the data as it goes through. By maintaining a small, manageable reservoir which is statistically representative of the data stream as a whole, we can quickly and easily calculate quantiles which are v
+alid approximations of the actual quantiles. This technique is called  **reservoir sampling**.
+
+#### Metric Sets
+
+Metrics can also be grouped together into reusable metric sets using the  `MetricSet`  interface. This allows library authors to provide a single entry point for the instrumentation of a wide variety of functionality.
+
+
+### TelegrafStatsdSink
+
+SetGaugeWithLabels 直接记录统计的数据。
+
+IncrCounterWithLabels 会自动缓存并聚合数据。通过 inc() 或 dec() 实现
+
+AddSampleWithLabels() 中什么意思？与 Histograms 类似 ？
+
+
+
+### 1.接口并发请求量
+
+IncrCounterWithLabels
+
+### 2.接口耗时
+
+AddSampleWithLabels
+
+### 3.ERROR信息，启动停止事件
+
+SetGaugeWithLabels
+
+### 4.成员数量，时长
+
+SetGaugeWithLabels
+
 
 
 

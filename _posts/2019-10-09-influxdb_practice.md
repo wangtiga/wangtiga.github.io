@@ -128,6 +128,47 @@ InfluxDB 提供了两种功能 - 自动查询(CQ) 和 自动删除(RP) - 两者�
 
 > 设置 CQ 和 RP 策略，就能自动归档数据。也就能间接保证不超过 max-values-per-tag limit，而且保留了旧数据
 
+```log
+
+
+influx -precision rfc3339 -port 8086
+
+> show databases;
+name: databases
+----
+_internal
+wsdb
+mydb
+
+> use mydb;
+Using database mydb
+
+
+> show measurements;
+name: measurements                                                                                                             │                                                                                                                               
+name                                                                                                                           │                                                                                                                               
+----                                                                                                                           │                                                                                                                               
+shapes                                                                                                                         │                                                                                                                               
+tab_monitor_cpu                                                                                                                │                                                                                                                               
+tab_monitor_net 
+
+
+# 自动归档策略
+> SHOW RETENTION POLICIES;
+> CREATE RETENTION POLICY "auto_delete" ON "mydb" DURATION 5d REPLICATION 1;
+> DROP RETENTION POLICY "auto_delete" ON "mydb";
+
+# 选取第一条记录
+> SELECT * FROM tab_monitor_cpu GROUP BY * ORDER BY DESC LIMIT 1
+> SELECT * FROM tab_monitor_cpu GROUP BY * ORDER BY ASC  LIMIT 1
+
+
+# 修改归档策略
+> ALTER RETENTION POLICY autogen ON telegraf DURATION 0s REPLICATION 1 SHARD DURATION 168h0m0s default
+> CREATE RETENTION POLICY autogen ON telegraf DURATION 0s REPLICATION 1 SHARD DURATION 168h0m0s default
+> DROP RETENTION POLICY autogen ON telegraf 
+```
+
 
 
 ### 5.InfluxDB 不支持 order by tag 
