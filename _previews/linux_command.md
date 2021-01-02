@@ -13,6 +13,82 @@ tags: linux
 
 ### shell
 
+
+#### gstreamer
+
+- install
+
+  ```shell
+  # install gstreamer pkg-config
+  # https://gstreamer.freedesktop.org/documentation/installing/on-linux.html?gi-language=c
+  # https://github.com/notedit/media-server-go-demo
+  # brew install gst-plugins-ugly to use x264enc
+  # gstreamer1.0.plugins-bad gstreamer1.0.plugins-good 的区别参考
+  # sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-libav gstreamer1.0-plugins-bad libgstreamer-plugins-bad1.0-dev
+  # sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-libav gstreamer1.0-plugins-good libgstreamer-plugins-good1.0-dev
+  ```
+
+-  video
+
+  ```shell
+  # mkv to rtp h264 video
+  gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.mkv"  ! decodebin ! \
+      videoconvert ! x264enc !  \
+      rtph264pay ssrc=3494657 mtu=1400 config-interval=-1 ! \
+      udpsink  host=127.0.0.1 port=5000
+  
+  # videotestsrc rtp h264 video
+  gst-launch-1.0 videotestsrc ! \
+      videoconvert ! x264enc !  \
+      rtph264pay ssrc=3494657 mtu=1400 config-interval=-1 ! \
+      udpsink  host=127.0.0.1 port=5000
+  
+  
+  # play rtp h264
+  gst-launch-1.0 -v udpsrc port=5000 address=127.0.0.1 caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! autovideosink
+  
+  
+  
+  # mkv to rtp vp8 video
+  gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.mkv"  ! decodebin ! \
+      videoscale ! video/x-raw, width=320, height=240 ! queue ! \
+      vp8enc error-resilient=partitions keyframe-max-dist=10 auto-alt-ref=true cpu-used=5 deadline=1 ! \
+      rtpvp8pay ssrc=3494657 mtu=1400 ! \
+      udpsink  host=127.0.0.1 port=5000
+  
+  # play rtp vp8
+  gst-launch-1.0 -v udpsrc port=5000 address=127.0.0.1 caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)VP8,payload=(int)96" ! rtpvp8depay ! decodebin ! videoconvert ! autovideosink
+  ```
+
+- audio
+
+  ```shell
+  # mkv to rtp opus audio
+  gst-launch-1.0 filesrc location="/Users/tiga/tool/resource/sintel_trailer-480p.mkv"  ! decodebin ! \
+      queue ! audioconvert  ! \
+      opusenc bitrate=20000 ! \
+      rtpopuspay ssrc=3494656 mtu=1400 pt=122 ! \
+      udpsink host=127.0.0.1 port=5001
+  
+  # play rtp opus
+  gst-launch-1.0 -v udpsrc port=5001 address=127.0.0.1 caps="application/x-rtp, encoding-name=OPUS, payload=96" ! rtpopusdepay ! decodebin ! autoaudiosink
+  ```
+
+- pcap
+
+  ```shell
+  # pcap to rtp 
+  gst-launch-1.0 -v filesrc location=test11.pcap ! pcapparse dst-port=37904 ! application/x-rtp,payload=96 ! udpsink host=172.18.202.22 port=%d
+  
+  # play rtp h264 from pcap file
+  gst-launch-1.0 filesrc location=264ffmpeg.pcap ! pcapparse caps="application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,payload=(int)96" ! \
+      rtph264depay ! decodebin ! videoconvert ! autovideosink
+  
+  # play rtp opus from pcap file
+  gst-launch-1.0 filesrc location="srcport_5000_rtptype_122.pcap" ! pcapparse caps="application/x-rtp,encoding-name=(string)OPUS,payload=(int)122" ! rtpopusdepay ! decodebin ! audioconvert ! audioresample ! autoaudiosink
+  ```
+
+
 #### protoc
 
 ```shell
