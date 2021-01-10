@@ -211,6 +211,9 @@ echo "ewoJImNvbmZJZCI6CSI1Nzc1NjgiLAoJImFwcElkIjoJIjhhMmFmOTg4NTM2NDU4YzMwMTUzN2
 
 # 无参数时，表示格式化后输出
 echo "ewoJImNvbmZJZCI6CSI1Nzc1NjgiLAoJImFwcElkIjoJIjhhMmFmOTg4NTM2NDU4YzMwMTUzN2Q3MTk3MzIwMDA0IiwKCSJ1c2VySWQiOgkiODEwMzEwMzciLAoJInJlY29yZCI6CSJubyIsCgkibW9kZWwiOgkic2luZ2xlIiwKCSJtZW1iZXJJZCI6CSI3MjgxMTUyIgp9" | base64 -d | jq '.' -c | jq '.'
+
+# vim 中使用 python 格式化 json
+!%python -m json.tool
 ```
 
 > [jq tutorial](https://stedolan.github.io/jq/tutorial/)
