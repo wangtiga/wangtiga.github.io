@@ -10,6 +10,11 @@ tags:   tech
 
 
 
+### 15. SDP 详细格式说明？
+
+[https://webrtchacks.com/sdp-anatomy/](https://webrtchacks.com/sdp-anatomy/)
+
+
 ### 14. RTP Protocol
 
 https://tools.ietf.org/html/rfc3550#section-5.1
