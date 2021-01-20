@@ -55,7 +55,36 @@ A state machine consists of a set of **states**, e.g:
   fsm.state;             // 'gas'
 ```
 
-## Multiple states for a transition 一个动作与多种不同状态间的转换
+```go
+        fsm := fsm.NewFSM(
+                "solid",
+                fsm.Events{
+                        {Name: "melt", Src: []string{"solid"}, Dst: "liquid"},
+                        {Name: "freeze", Src: []string{"liquid"}, Dst: "solid"},
+                        {Name: "vaporize", Src: []string{"liquid"}, Dst: "gas"},
+                        {Name: "condense", Src: []string{"gas"}, Dst: "liquid"},
+                },  
+                fsm.Callbacks{
+                        "enter_solid": func(e *fsm.Event) {
+                                fmt.Println("enter_solid: " + e.FSM.Current())
+                        },  
+                        "enter_liquid": func(e *fsm.Event) {
+                                fmt.Println("enter_liquid: " + e.FSM.Current())
+                        },  
+                        "enter_gas": func(e *fsm.Event) {
+                                fmt.Println("enter_gas: " + e.FSM.Current())
+                        },  
+                },  
+        )   
+
+        fmt.Println(fsm.Current()) // 'solid'
+        fsm.Event("melt")
+        fmt.Println(fsm.Current()) // 'liquid'
+        fsm.Event("vaporize")
+        fmt.Println(fsm.Current()) // 'gas'
+```
+
+## Multiple states for a transition 一个动作与多种状态间的转换
 
 ![wizard state machine](https://raw.githubusercontent.com/jakesgordon/javascript-state-machine/master/examples/wizard.png)
 
@@ -69,6 +98,12 @@ If a transition is allowed `from` multiple states then declare the transitions w
   { name: 'step',  from: 'C', to: 'D' }  //当前状态为 C 时，执行 step 动作后，状态转换为 D ;
 ```
 
+```go
+ {Name: "step", Src: []string{"A"}, Dst: "B"}, //当前状态为 A 时，执行 step 动作后，状态转换为 B ;
+ {Name: "step", Src: []string{"B"}, Dst: "C"}, //当前状态为 B 时，执行 step 动作后，状态转换为 C ;
+ {Name: "step", Src: []string{"C"}, Dst: "D"}, //当前状态为 C 时，执行 step 动作后，状态转换为 D ;
+```
+
 If a transition with multiple `from` states always transitions `to` the same state, e.g:
 
 同一个动作名称，也可以从不同的状态转换到固定的一个状态：
@@ -79,12 +114,22 @@ If a transition with multiple `from` states always transitions `to` the same sta
   { name: 'reset', from: 'D', to: 'A' }
 ```
 
+```go
+  {Name: "reset1", Src: []string{"B"}, Dst: "A"},
+  {Name: "reset1", Src: []string{"C"}, Dst: "A"},
+  {Name: "reset1", Src: []string{"D"}, Dst: "A"},
+```
+
 ... then it can be abbreviated using an array of `from` states:
 
 上述定义也能像下面这样更简便的方法定义：
 
 ```javascript
   { name: 'reset', from: [ 'B', 'C', 'D' ], to: 'A' }
+```
+
+```go
+  {Name: "reset2", Src: []string{"B", "C", "D"}, Dst: "A"}, // same as reset1
 ```
 
 Combining these into a single example:
@@ -101,6 +146,32 @@ Combining these into a single example:
       { name: 'reset', from: [ 'B', 'C', 'D' ], to: 'A' }
     ]
   })
+```
+
+```go
+        fsm := fsm.NewFSM(
+                "A",
+                fsm.Events{
+                        {Name: "step", Src: []string{"A"}, Dst: "B"},
+                        {Name: "step", Src: []string{"B"}, Dst: "C"},
+                        {Name: "step", Src: []string{"C"}, Dst: "D"},
+                        {Name: "reset", Src: []string{"B", "C", "D"}, Dst: "A"},
+                },      
+                fsm.Callbacks{ 
+                        "enter_A": func(e *fsm.Event) {
+                                fmt.Println(e.FSM.Current())
+                        },
+                        "enter_B": func(e *fsm.Event) {
+                                fmt.Println(e.FSM.Current())
+                        },      
+                        "enter_C": func(e *fsm.Event) {
+                                fmt.Println(e.FSM.Current())
+                        },      
+                        "enter_D": func(e *fsm.Event) {
+                                fmt.Println(e.FSM.Current())
+                        },      
+                },      
+        )               
 ```
 
 This example will create an object with 2 transition methods:
@@ -131,6 +202,7 @@ If a transition is appropriate from **any** state, then a wildcard `*` `from` st
     ]
   });
 ```
+
 
 ## Conditional Transitions 根据条件执行状态转换
 

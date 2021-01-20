@@ -4018,6 +4018,53 @@ ehs.forEach ( e => {
 });
 ```
 
+# 说明
+
+自用 mainpprof.go
+
+```go
+package main
+
+import (
+        "log"
+        "net/http"
+        _ "net/http/pprof"
+        "runtime"
+)
+
+// https://qcrao.com/2019/11/10/dive-into-go-pprof/
+//
+//# 下载 cpu profile，默认从当前开始收集 30s 的 cpu 使用情况，需要等待 30s
+//go tool pprof http://47.93.238.9:8080/debug/pprof/profile
+//go tool pprof http://47.93.238.9:8080/debug/pprof/profile?seconds=120   # wait 120s
+//
+//# 下载 heap profile
+//go tool pprof http://47.93.238.9:8080/debug/pprof/heap
+//
+//# 下载 goroutine profile
+//go tool pprof http://47.93.238.9:8080/debug/pprof/goroutine
+//
+//# 下载 block profile
+//go tool pprof http://47.93.238.9:8080/debug/pprof/block
+//
+//# 下载 mutex profile
+//go tool pprof http://47.93.238.9:8080/debug/pprof/mutex
+//
+// go tool pprof -http=0.0.0.0:8080 /home/ws/pprof/pprof.mms.contentions.delay.017.pb.gz
+// go tool pprof -http=0.0.0.0:8080 /home/ws/pprof/pprof.mms.contentions.delay.018.pb.gz
+// open chorme http://localhost:8080/ui/flamegraph
+//
+func initPPROF() {
+        runtime.SetMutexProfileFraction(2)
+        runtime.SetBlockProfileRate(1)
+
+        listenAddr := "0.0.0.0:6060"
+        log.Println("pprof listen ", listenAddr)
+        go func() {
+                log.Println(http.ListenAndServe(listenAddr, nil))
+        }()
+}
+```
 
 [^HighPerformanceWorkShopEN]:[High Performance Work Shop](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#mechanical_sympathy)
 
