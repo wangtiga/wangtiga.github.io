@@ -134,7 +134,7 @@ sudo lsof -nP -i  :443
 
 ### ssh
 
-- use public key autologin remote host, ref https://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html"
+- use public key autologin remote host, ref [ruanyifeng](https://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html)
 
 ```shell
 ssh wangtiga@hostip 'mkdir -p .ssh && cat >> .ssh/authorized_keys' < ~/.ssh/id_rsa.pub "
@@ -222,12 +222,20 @@ echo "ewoJImNvbmZJZCI6CSI1Nzc1NjgiLAoJImFwcElkIjoJIjhhMmFmOTg4NTM2NDU4YzMwMTUzN2
 
 ```shell
 $ find . -name "*.go" -not -path "./vendor/*" | xargs wc -l
+```
+
+```txt
 . 当前文件夹
 -name "*.go* 以 .go 结尾的文件
 -not -path "./vendor/*" 忽略 vendor 目录的文件
 xargs wc -l 统计 find 命令返回的文件行数
+```
 
+```shell
 $ find ./_posts/  | xargs wc -l
+```
+
+```txt
 wc: ./_posts/: Is a directory
       0 ./_posts/
     268 ./_posts/2019-07-14-datarate_bandwidth_datasize.md
