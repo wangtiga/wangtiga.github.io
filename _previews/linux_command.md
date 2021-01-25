@@ -222,12 +222,20 @@ echo "ewoJImNvbmZJZCI6CSI1Nzc1NjgiLAoJImFwcElkIjoJIjhhMmFmOTg4NTM2NDU4YzMwMTUzN2
 
 ```shell
 $ find . -name "*.go" -not -path "./vendor/*" | xargs wc -l
+```
+
+```txt
 . 当前文件夹
 -name "*.go* 以 .go 结尾的文件
 -not -path "./vendor/*" 忽略 vendor 目录的文件
 xargs wc -l 统计 find 命令返回的文件行数
+```
 
+```shell
 $ find ./_posts/  | xargs wc -l
+```
+
+```txt
 wc: ./_posts/: Is a directory
       0 ./_posts/
     268 ./_posts/2019-07-14-datarate_bandwidth_datasize.md

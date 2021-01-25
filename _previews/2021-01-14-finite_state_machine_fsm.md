@@ -10,12 +10,7 @@ tags:   todo
 
 
 
-[golang looplab/fsm](https://github.com/looplab/fsm)
-
-[Javascript Finite State Machine](https://github.com/jakesgordon/javascript-state-machine)
-
-
-# States and Transitions 状态与转换
+# States and Transitions 状态与转换 [^looplabFSM] [^jsFSM]
 
 ![matter state machine](https://raw.githubusercontent.com/jakesgordon/javascript-state-machine/master/examples/matter.png)
 
@@ -269,4 +264,11 @@ arbitrary `goto` behavior:
 ```
 
 A full set of [Lifecycle Events](https://raw.githubusercontent.com/jakesgordon/javascript-state-machine/master/docs/lifecycle-events.md) still apply when using `goto`.
+
+
+
+[^looplabFSM]: [golang looplab/fsm](https://github.com/looplab/fsm)
+
+[^jsFSM]: [Javascript Finite State Machine](https://github.com/jakesgordon/javascript-state-machine)
+
 
