@@ -134,7 +134,7 @@ sudo lsof -nP -i  :443
 
 ### ssh
 
-- use public key autologin remote host, ref https://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html"
+- use public key autologin remote host, ref [ruanyifeng](https://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html)
 
 ```shell
 ssh wangtiga@hostip 'mkdir -p .ssh && cat >> .ssh/authorized_keys' < ~/.ssh/id_rsa.pub "
