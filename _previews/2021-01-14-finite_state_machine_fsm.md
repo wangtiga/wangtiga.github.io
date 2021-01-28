@@ -14,6 +14,15 @@ tags:   todo
 
 ![matter state machine](https://raw.githubusercontent.com/jakesgordon/javascript-state-machine/master/examples/matter.png)
 
+
+<div class="mermaid">
+graph LR
+A((solid)) -- melt --> B((liquid))
+B -- freeze --> A
+B -- vaporize --> C((gas))
+C -- condense--> B
+</div>
+
 A state machine consists of a set of **states**, e.g:
 
 状态机一般会包含一组 **状态** ，比如：

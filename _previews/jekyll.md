@@ -6,6 +6,30 @@ tags:   tech
 ---
 
 
+## termux
+
+Install Termux from F-Droid.
+
+F-Droid is AppStore 
+
+
+pkg upgrade 
+pkg install openssh
+sshd
+passwd
+
+- how to ssh from external ip?
+
+- how to add user in termux?
+
+- install jekyll
+
+pkg install ruby
+gem install jekyll
+
+
+
+## jeykll
 
 ```shell
 #gem list --local  | grep jekyll
