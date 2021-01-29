@@ -1,32 +1,65 @@
 ---
 layout: post
-title:  "Jekyll"
+title:  "Jekyll In Termux"
 date:   2021-01-24 09:22:00 +0800
 tags:   tech
 ---
 
 
+* category
+{:toc}
+
+
+
+
 ## termux
 
-Install Termux from F-Droid.
+Install Termux from [F-Droid](https://f-droid.org/).
 
-F-Droid is AppStore 
+F-Droid 是一个 Android 平台上 FOSS（Free and Open Source Software，自由开源软件）的目录，
+并提供下载安装支持。
+使用客户端可以更轻松地浏览、安装及跟进设备上的程序更新。
 
 
+### install & [Remote_Access] https://wiki.termux.com/wiki/Remote_Access)
+
+```sh
 pkg upgrade 
-pkg install openssh
+pkg install openssh git vim
 sshd
 passwd
+ssh anyname@host -p 8022
+```
 
 - how to ssh from external ip?
 
+  默认端口是 8022 ；
+  默认能从外部IP访问到SSH,如果异常，可能VPN相关软件影响，关闭并重启手机解决；
+
 - how to add user in termux?
+
+  termux 是单用户，所以使用任意用户名都能登录
 
 - install jekyll
 
-pkg install ruby
-gem install jekyll
+  ```sh
+  pkg install ruby
+  gem install jekyll
+  # gem install "all extention in _config.yaml"
+  ```
 
+
+#### .bashrc
+
+```sh
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+
+alias ll='ls -alFh'
+alias gll='git branch -avv'
+alias gpush='git add . && git commit -m "updated from newdevice" && git push'
+alias y='ydict -q -v -v -c '
+```
 
 
 ## jeykll
@@ -75,15 +108,17 @@ bundle exec jekyll serve
   但是为什么要在 Gemfile 与 `_config.yml` 两个地方分别记录第三方库呢？
 
 
-https://jekyllrb.com/docs/ruby-101/
 
-https://docs.github.com/en/github/working-with-github-pages/setting-up-a-github-pages-site-with-jekyll
 
 https://stackoverflow.com/questions/58195772/how-can-fix-the-jekyll-installation-error-in-termux
 
 https://wiki.termux.com/wiki/List_of_Ruby_packages_known_to_work
 
-https://wiki.termux.com/wiki/Jekyll
+[setting-up-a-github-pages-site-with-jekyll](https://docs.github.com/en/github/working-with-github-pages/setting-up-a-github-pages-site-with-jekyll)
+
+[Jekyll ruby 101](https://jekyllrb.com/docs/ruby-101/)
+
+[termux wiki Jekyll](https://wiki.termux.com/wiki/Jekyll)
 
 [一个功能较全面的 jekyll 主题](https://github.com/professordeng/log)
 
