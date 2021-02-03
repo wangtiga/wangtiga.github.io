@@ -3,6 +3,7 @@ layout: post
 title:  "有限状态机"
 date:   2021-01-14 12:00:00 +0800
 tags:   todo
+mermaid: true
 ---
 
 * category
@@ -91,6 +92,18 @@ A state machine consists of a set of **states**, e.g:
 ## Multiple states for a transition 一个动作与多种状态间的转换
 
 ![wizard state machine](https://raw.githubusercontent.com/jakesgordon/javascript-state-machine/master/examples/wizard.png)
+
+<div class="mermaid">
+graph LR
+A((A)) -- step --> B((B))
+B -- step --> C((C))
+C -- step --> D((D))
+D -- reset --> A
+C -- reset --> A
+B -- reset --> A
+</div>
+
+
 
 If a transition is allowed `from` multiple states then declare the transitions with the same name:
 

@@ -1,0 +1,26 @@
+<head>
+
+  {% seo %}
+  
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  
+  {% feed_meta %}
+
+  <link rel="shortcut icon" href="{{ site.baseurl }}/favicon.ico" />
+  
+  <link rel="stylesheet" href="{{ site.css }}/log.css" />
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13/css/all.min.css" />
+  
+  {% if page.mathjax %}
+    {% include mathjax.html %}
+  {% endif %}
+  
+  {% if page.mermaid %}
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.5.0/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({startOnLoad:true});</script>
+  {% endif %}  
+  
+</head>
