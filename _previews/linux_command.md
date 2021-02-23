@@ -13,6 +13,41 @@ tags: linux
 
 ### shell
 
+#### rsync
+
+```shell
+#!/bin/sh
+
+set -x
+
+
+echo ""
+echo ""
+echo "I will upload ccmserver to targethost, and restart it!" 
+echo "  usage: deplay.sh hostitem"
+echo ""
+
+for hostitem in $@
+do
+        case $hostitem in
+                149bus)
+                        SOURCEDIR=/home/tiga/src/bserver/cmd/bin
+                        TARGETDIR=/app/bserver/bin/
+                        TARGETHOST=tiga@192.168.0.101
+                        /bin/ls -alh $SOURCEDIR
+                        rsync -azv $SOURCEDIR $TARGETHOST:$TARGETDIR
+                        ssh $TARGETHOST sudo supervisorctl restart bserver 
+                        ;;
+                *)
+                        echo "Sorry, I don't understand"
+                        exit 1
+                        ;;
+        esac
+done
+
+echo 
+echo "That's all done!"
+```
 
 #### gstreamer
 
