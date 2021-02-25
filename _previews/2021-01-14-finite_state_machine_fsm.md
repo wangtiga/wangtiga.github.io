@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "有限状态机"
+title:  "[译]有限状态机"
 date:   2021-01-14 12:00:00 +0800
 tags:   todo
 mermaid: true
@@ -286,6 +286,15 @@ arbitrary `goto` behavior:
 ```
 
 A full set of [Lifecycle Events](https://raw.githubusercontent.com/jakesgordon/javascript-state-machine/master/docs/lifecycle-events.md) still apply when using `goto`.
+
+
+## 说明
+
+本文译自 Javascript Finite State Machine 文档，
+这是我在使用 golang looplab/fsm 库的时候，无意发现的资料。
+
+文章内容不多，但对状态机的使用方法描述非常简洁，
+尤其是 固态 液态 气态 互相转换的示例，来源于生活，又完全符合状态机的使用逻辑。
 
 
 

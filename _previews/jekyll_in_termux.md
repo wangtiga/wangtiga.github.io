@@ -34,7 +34,7 @@ ssh anyname@host -p 8022
 - how to ssh from external ip?
 
   默认端口是 8022 ；
-  默认能从外部IP访问到SSH,如果异常，可能VPN相关软件影响，关闭并重启手机解决；
+  默认能从外部IP访问到SSH,如果异常，可能VPN相关软件影响，关闭VPN即可解决；
 
 - how to add user in termux?
 
