@@ -2,7 +2,7 @@
 layout: post
 title:  "Linux 命令记录"
 date:   2019-09-17 18:17:00 +0800
-tags: linux
+tags:  linux
 ---
 
 * category

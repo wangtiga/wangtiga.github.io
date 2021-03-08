@@ -36,5 +36,5 @@ tags:   math
 24 Ω ω omega o`miga 欧米伽 欧姆（大写）；角速（小写）；角
 ```
 
-[分享自知乎网]:(http://www.zhihu.com/question/20208222/answer/70795842)
+[分享自知乎网](http://www.zhihu.com/question/20208222/answer/70795842)
 

@@ -41,52 +41,33 @@ A state machine consists of a set of **states**, e.g:
   * 蒸发 vaporize
   * 凝结 condense
 
-
-```javascript
-  var fsm = new StateMachine({
-    init: 'solid',
-    transitions: [
-      { name: 'melt',     from: 'solid',  to: 'liquid' },
-      { name: 'freeze',   from: 'liquid', to: 'solid'  },
-      { name: 'vaporize', from: 'liquid', to: 'gas'    },
-      { name: 'condense', from: 'gas',    to: 'liquid' }
-    ]
-  });
-
-  fsm.state;             // 'solid'
-  fsm.melt();
-  fsm.state;             // 'liquid'
-  fsm.vaporize();
-  fsm.state;             // 'gas'
-```
-
 ```go
-        fsm := fsm.NewFSM(
-                "solid",
-                fsm.Events{
-                        {Name: "melt", Src: []string{"solid"}, Dst: "liquid"},
-                        {Name: "freeze", Src: []string{"liquid"}, Dst: "solid"},
-                        {Name: "vaporize", Src: []string{"liquid"}, Dst: "gas"},
-                        {Name: "condense", Src: []string{"gas"}, Dst: "liquid"},
+fsm := fsm.NewFSM(
+        "solid",
+        fsm.Events{
+                {Name: "melt", Src: []string{"solid"}, Dst: "liquid"},
+                {Name: "freeze", Src: []string{"liquid"}, Dst: "solid"},
+                {Name: "vaporize", Src: []string{"liquid"}, Dst: "gas"},
+                {Name: "condense", Src: []string{"gas"}, Dst: "liquid"},
+        },  
+        fsm.Callbacks{
+                "enter_solid": func(e *fsm.Event) {
+                        fmt.Println("enter_solid: " + e.FSM.Current())
                 },  
-                fsm.Callbacks{
-                        "enter_solid": func(e *fsm.Event) {
-                                fmt.Println("enter_solid: " + e.FSM.Current())
-                        },  
-                        "enter_liquid": func(e *fsm.Event) {
-                                fmt.Println("enter_liquid: " + e.FSM.Current())
-                        },  
-                        "enter_gas": func(e *fsm.Event) {
-                                fmt.Println("enter_gas: " + e.FSM.Current())
-                        },  
+                "enter_liquid": func(e *fsm.Event) {
+                        fmt.Println("enter_liquid: " + e.FSM.Current())
                 },  
-        )   
+                "enter_gas": func(e *fsm.Event) {
+                        fmt.Println("enter_gas: " + e.FSM.Current())
+                },  
+        },  
+)   
 
-        fmt.Println(fsm.Current()) // 'solid'
-        fsm.Event("melt")
-        fmt.Println(fsm.Current()) // 'liquid'
-        fsm.Event("vaporize")
-        fmt.Println(fsm.Current()) // 'gas'
+fmt.Println(fsm.Current()) // 'solid'
+fsm.Event("melt")
+fmt.Println(fsm.Current()) // 'liquid'
+fsm.Event("vaporize")
+fmt.Println(fsm.Current()) // 'gas'
 ```
 
 ## Multiple states for a transition 一个动作与多种状态间的转换
@@ -109,27 +90,16 @@ If a transition is allowed `from` multiple states then declare the transitions w
 
 可以给相同的动作名称定义不同的状态转换逻辑：
 
-```javascript
-  { name: 'step',  from: 'A', to: 'B' }, //当前状态为 A 时，执行 step 动作后，状态转换为 B ;
-  { name: 'step',  from: 'B', to: 'C' }, //当前状态为 B 时，执行 step 动作后，状态转换为 C ;
-  { name: 'step',  from: 'C', to: 'D' }  //当前状态为 C 时，执行 step 动作后，状态转换为 D ;
-```
-
 ```go
- {Name: "step", Src: []string{"A"}, Dst: "B"}, //当前状态为 A 时，执行 step 动作后，状态转换为 B ;
- {Name: "step", Src: []string{"B"}, Dst: "C"}, //当前状态为 B 时，执行 step 动作后，状态转换为 C ;
- {Name: "step", Src: []string{"C"}, Dst: "D"}, //当前状态为 C 时，执行 step 动作后，状态转换为 D ;
+  {Name: "step", Src: []string{"A"}, Dst: "B"}, //当前状态为 A 时，执行 step 动作后，状态转换为 B ;
+  {Name: "step", Src: []string{"B"}, Dst: "C"}, //当前状态为 B 时，执行 step 动作后，状态转换为 C ;
+  {Name: "step", Src: []string{"C"}, Dst: "D"}, //当前状态为 C 时，执行 step 动作后，状态转换为 D ;
 ```
 
 If a transition with multiple `from` states always transitions `to` the same state, e.g:
 
 同一个动作名称，也可以从不同的状态转换到固定的一个状态：
 
-```javascript
-  { name: 'reset', from: 'B', to: 'A' },
-  { name: 'reset', from: 'C', to: 'A' },
-  { name: 'reset', from: 'D', to: 'A' }
-```
 
 ```go
   {Name: "reset1", Src: []string{"B"}, Dst: "A"},
@@ -141,10 +111,6 @@ If a transition with multiple `from` states always transitions `to` the same sta
 
 上述定义也能像下面这样更简便的方法定义：
 
-```javascript
-  { name: 'reset', from: [ 'B', 'C', 'D' ], to: 'A' }
-```
-
 ```go
   {Name: "reset2", Src: []string{"B", "C", "D"}, Dst: "A"}, // same as reset1
 ```
@@ -153,42 +119,30 @@ Combining these into a single example:
 
 将以上逻辑组合到一个示例代码中就是这样：
 
-```javascript
-  var fsm = new StateMachine({
-    init: 'A',
-    transitions: [
-      { name: 'step',  from: 'A',               to: 'B' },
-      { name: 'step',  from: 'B',               to: 'C' },
-      { name: 'step',  from: 'C',               to: 'D' },
-      { name: 'reset', from: [ 'B', 'C', 'D' ], to: 'A' }
-    ]
-  })
-```
-
 ```go
-        fsm := fsm.NewFSM(
-                "A",
-                fsm.Events{
-                        {Name: "step", Src: []string{"A"}, Dst: "B"},
-                        {Name: "step", Src: []string{"B"}, Dst: "C"},
-                        {Name: "step", Src: []string{"C"}, Dst: "D"},
-                        {Name: "reset", Src: []string{"B", "C", "D"}, Dst: "A"},
+fsm := fsm.NewFSM(
+        "A",
+        fsm.Events{
+                {Name: "step", Src: []string{"A"}, Dst: "B"},
+                {Name: "step", Src: []string{"B"}, Dst: "C"},
+                {Name: "step", Src: []string{"C"}, Dst: "D"},
+                {Name: "reset", Src: []string{"B", "C", "D"}, Dst: "A"},
+        },      
+        fsm.Callbacks{ 
+                "enter_A": func(e *fsm.Event) {
+                        fmt.Println(e.FSM.Current())
+                },
+                "enter_B": func(e *fsm.Event) {
+                        fmt.Println(e.FSM.Current())
                 },      
-                fsm.Callbacks{ 
-                        "enter_A": func(e *fsm.Event) {
-                                fmt.Println(e.FSM.Current())
-                        },
-                        "enter_B": func(e *fsm.Event) {
-                                fmt.Println(e.FSM.Current())
-                        },      
-                        "enter_C": func(e *fsm.Event) {
-                                fmt.Println(e.FSM.Current())
-                        },      
-                        "enter_D": func(e *fsm.Event) {
-                                fmt.Println(e.FSM.Current())
-                        },      
+                "enter_C": func(e *fsm.Event) {
+                        fmt.Println(e.FSM.Current())
                 },      
-        )               
+                "enter_D": func(e *fsm.Event) {
+                        fmt.Println(e.FSM.Current())
+                },      
+        },      
+)               
 ```
 
 This example will create an object with 2 transition methods:
