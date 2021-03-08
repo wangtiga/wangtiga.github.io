@@ -2306,7 +2306,7 @@ A year later, Go 1.7 introduced a  [new compiler backend](https://blog.golang.or
 
 
 
-### 4.2. Escape analysis 逃逸分析
+### 4.2. Escape analysis 逃逸分析 [^GoEscapeAnalysis]
 
 The first optimisation we’re doing to discuss is  _escape analysis_.
 
@@ -2319,8 +2319,8 @@ To illustrate what escape analysis does recall that the  [Go spec](https://golan
 
 A compliant Go implementation of the Go spec  _could_  store every allocation on the heap. That would put a lot of pressure on the the garbage collector, but it is in no way incorrect — for several years, gccgo had very limited support for escape analysis so could effectively be considered to be operating in this mode.
 
-把所有分配的变量都保存到 heap 中，也是一种符合 Go 语文编程规范的实现。
-这种方案对垃圾回收器的压力很大，但也不能说这种方案不对 －－ 很多年以来 gccgo 对逃逸分析的支持非常有限，基本可认为 Go 语文就是这样工作的。
+把所有分配的变量都保存到 heap 中，也是一种符合 Go 语言编程规范的实现。
+这种方案对垃圾回收器的压力很大，但也不能说这种方案不对 －－ 很多年以来 gccgo 对逃逸分析的支持非常有限，基本可认为 Go 语言就是这样工作的。
 
 However, a goroutine’s stack exists as a cheap place to store local variables; there is no need to garbage collect things on the stack. Therefore, where it is safe to do so, an allocation placed on the stack will be more efficient.
 
@@ -2329,7 +2329,7 @@ However, a goroutine’s stack exists as a cheap place to store local variables;
 
 In some languages, for example C and C++, the choice of allocating on the stack or on the heap is a manual exercise for the programmer—heap allocations are made with  `malloc`  and  `free`, stack allocation is via  `alloca`. Mistakes using these mechanisms are a common cause of memory corruption bugs.
 
-在某些语文中，比如 C 和 C++ ，变量在 stack 还是在 heap 中分配，是由程序员决定的：
+在某些语言中，比如 C 和 C++ ，变量在 stack 还是在 heap 中分配，是由程序员决定的：
 
 调用  `malloc` 或 `free` 函数分配的空间在 heap 分配；
 
@@ -2341,7 +2341,7 @@ In some languages, for example C and C++, the choice of allocating on the stack 
 
 In Go, the compiler automatically moves a value to the heap if it lives beyond the lifetime of the function call. It is said that the value  _escapes_  to the heap.
 
-在 Go 语文中，一个变量的生命周期超出函数调用的范围后，编译器会自动把变量移动到 heap 中。
+在 Go 语言中，一个变量的生命周期超出函数调用的范围后，编译器会自动把变量移动到 heap 中。
 也就是说，变量 _逃逸_ 到 heap 了。
 
 ```go
@@ -2406,11 +2406,13 @@ Because the  `numbers`  slice is only referenced inside  `Sum`, the compiler wil
 
 
 
-#### 4.2.1. Prove it!
+#### 4.2.1. Prove it! 证明！
 
 To print the compilers escape analysis decisions, use the  `-m`  flag.
 
-```
+使用 `-m` 选项输出编译器的逃逸分析结果。
+
+```sh
 % go build -gcflags=-m examples/esc/sum.go
 # command-line-arguments
 examples/esc/sum.go:22:13: inlining call to fmt.Println
@@ -2423,16 +2425,26 @@ examples/esc/sum.go:22:13: main []interface {} literal does not escape
 
 Line 8 shows the compiler has correctly deduced that the result of  `make([]int, 100)`  does not escape to the heap. The reason it did no
 
+第 8 行显示编译器已推断出来，不需要将 `make([]int, 100)` 的返回结果逃逸到堆上。确实没这个必要。
+
 The reason line 22 reports that  `answer`  escapes to the heap is  `fmt.Println`  is a  _variadic_  function. The parameters to a variadic function are  _boxed_  into a slice, in this case a  `[]interface{}`, so  `answer`  is placed into a interface value because it is referenced by the call to  `fmt.Println`. Since Go 1.6 the garbage collector requires  _all_  values passed via an interface to be pointers, what the compiler sees is  _approximately_:
 
-```
+而第 22 行报告 `answer` 逃逸到堆上的原因是， `fmt.Println` 是一个 _可变参数函数_ (variadic function)  。
+变参函数的参数要被 _装箱_ (boxed) 到 slice 中，此例中，
+由于 fmt.Println 函数调用使用了 answer 变量，所以 answer 要被装箱到 `[]interface{}` 类型中。
+而 Go 1.6 版本开始，垃圾回收器要求所有通过 interface 传递的值必须是指针，
+也就是说编译器实际上看到的代码 _近似于_ 下面这样：
+
+```go
 var answer = Sum()
 fmt.Println([]interface{&answer}...)
 ```
 
 We can confirm this using the  `-gcflags="-m -m"`  flag. Which returns
 
-```
+使用 `-gcflags="-m -m"` 标志来确认一下：
+
+```sh
 % go build -gcflags='-m -m' examples/esc/sum.go 2>&1 | grep sum.go:22
 examples/esc/sum.go:22:13: inlining call to fmt.Println func(...interface {}) (int, error) { return fmt.Fprintln(io.Writer(os.Stdout), fmt.a...) }
 examples/esc/sum.go:22:13: answer escapes to heap
@@ -2444,20 +2456,48 @@ examples/esc/sum.go:22:13: main []interface {} literal does not escape
 
 In short, don’t worry about line 22, its not important to this discussion.
 
-#### 4.2.2. Exercises
+总之，先忽略22行的分析结果，这不是本次讨论的重点内容。
 
--   Does this optimisation hold true for all values of  `count`?
+
+#### 4.2.2. Exercises 练习
+
+-   Does this optimisation hold true for all values of  `count`?  
+
+    count 取任意值都是这样吗？
     
 -   Does this optimisation hold true if  `count`  is a variable, not a constant?
+
+    如果 count 不是常量，而是变量，会怎样呢？
     
 -   Does this optimisation hold true if  `count`  is a parameter to  `Sum`?
+
+    如果 count 是 Sum 函数参数，会怎样呢？
+
+
+逃逸分析总结： [^GoEscapeAnalysis]
+
+  > 检查变量的生命周期是否是完全可知的，
+  > 如果通过检查，则可以在栈上分配。
+  > 否则，就是所谓的逃逸，必须在堆上进行分配。
+  
+  1. 逃逸分析是在编译器完成的，这是不同于jvm的运行时逃逸分析；
+  2. 如果变量在函数外部没有引用，则优先放到栈中；
+  3. 如果变量在函数外部存在引用，则必定放在堆中；
+
+常见的逃逸情况：
+
+  1. 变量占用内存非常大 (Go 中大于 32KB 认为是大对象，即`s :=make([]int, n, n)`中，一旦n达到8192)
+  2. 变量类型不确定 `a :=666; fmt.Println(a)`
+  2. 变量大小不确定 `n :=1;   s := make([]int, n)`
+  4. 函数返回变量指针给外部使用 `func foo() *int {}`
+
     
 
 #### 4.2.3. Escape analysis (continued)
 
 This example is a little contrived. It is not intended to be real code, just an example.
 
-```
+```go
 type Point struct{ X, Y int }
 
 const Width = 640
@@ -4093,4 +4133,5 @@ func initPPROF() {
 
 [^GoExecutionTracer]: [Go Execution Tracer](https://docs.google.com/document/u/1/d/1FP5apqzBgr7ahCCgFO-yoVhk4YZrNIDNf9RybngBc14/pub)
 
+[^GoEscapeAnalysis]: [详解逃逸分析-机器铃砍菜刀](https://mp.weixin.qq.com/s/VeNiik-6vi8yQPKnr18w8A)
 
