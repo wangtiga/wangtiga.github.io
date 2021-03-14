@@ -2497,6 +2497,9 @@ In short, don’t worry about line 22, its not important to this discussion.
 
 This example is a little contrived. It is not intended to be real code, just an example.
 
+下面示例有些造作。
+这些代码只是为演示 逃逸分析 而写，不会用于真实项目中。
+
 ```go
 type Point struct{ X, Y int }
 
@@ -2517,7 +2520,12 @@ func NewPoint() {
 
 `NewPoint`  creates a new  `*Point`  value,  `p`. We pass  `p`  to the  `Center`  function which moves the point to a position in the center of the screen. Finally we print the values of  `p.X`  and  `p.Y`.
 
-```
+NewPoint 创建一个 `*Point` 类型变量 p 。
+我们把 p 传到 Center 函数，此函数将 point 坐标移动到屏幕中央。
+最后，我们再输出 p 的坐标值 `p.X` `p.Y` 。
+
+
+```sh
 % go build -gcflags=-m examples/esc/center.go
 # command-line-arguments
 examples/esc/center.go:11:6: can inline Center
