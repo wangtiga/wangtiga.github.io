@@ -13,6 +13,17 @@ tags:  linux
 
 ### shell
 
+#### aria2 [https://zhuanlan.zhihu.com/p/30666881](https://zhuanlan.zhihu.com/p/30666881)
+
+```shell
+# start aria2c
+aria2c --enable-rpc --rpc-listen-all
+
+# webui aria2c
+node node-server.js
+```
+
+
 #### rsync
 
 ```shell
