@@ -546,12 +546,12 @@ There are ways to guarantee that go will not reach the network at all (e.g. GOPR
 那么作者说的比 vendor 更好的是哪些解决方法呢？
 会是 go.mod 中使用 replace 指令吗？
 
-> 译：2019.09.07 go1.3 已经发布，可以执行 `go env -w GOPROXY=https://goproxy.cn,direct` 此命令，直接使用七牛年提供的依赖代理服务。
+> 译：2019.09.07 go1.13 已经发布，可以执行 `go env -w GOPROXY=https://goproxy.cn,direct` 此命令，直接使用七牛年提供的依赖代理服务。
 
-> 译：对于 go1.3 之前的部分版本，也可以这样启用 GOPROXY `export GOPRXOY=https://goproxy.cn`。
+> 译：对于 go1.13 之前的部分版本，也可以这样启用 GOPROXY `export GOPRXOY=https://goproxy.cn`。
 启用 GOPRXOY 后，就这样能在国内网络环境中顺利使用 `golang.org/x/net` 库。
 
-> 译： 非 gomod 目录中，设置了 GOPROXY  时，使用 `go get -u golang.org/x/net` 命令仍然不走代理。需要强制启用 gomod `go env -w GO111MODULE=on`。
+> 译：[go1.16](https://golang.org/doc/go1.16#go-command) 之前版本中，在非 gomod 目录，即使设置了 GOPROXY 时，使用 `go get -u golang.org/x/net` 命令时仍然不会走代理下载源码。需要强制启用 gomod ，即 `go env -w GO111MODULE=on`。
 
 
 

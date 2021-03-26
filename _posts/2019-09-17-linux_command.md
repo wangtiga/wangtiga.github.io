@@ -462,6 +462,44 @@ sudo supervisorctl start xxxserver
 
 ### golang
 
+
+#### golang append `too many arguments to append`
+
+```go
+package main
+
+import "fmt"
+import "encoding/json"
+
+func main() {
+        buf, _ := json.Marshal(appendArray1(1, 2, 3, 4, 5, 6))
+        fmt.Printf("buf %v\n", string(buf))
+
+        buf, _ = json.Marshal(appendArray1(1, 2, 3, 4, 5, 6))
+        fmt.Printf("buf %v\n", string(buf))
+
+}
+
+func appendArray1(a1, a2 int, args ...int) []int {
+        ret := []int{}
+        ret = append(ret, a1, a2)
+        ret = append(ret, args...)
+        return ret
+}
+
+func appendArray2(a1, a2 int, args ...int) []int {
+        ret := []int{}
+        ret = append(ret, a1, a2, args...)
+        return ret
+}
+```
+
+```sh
+$ go run main.go 
+# command-line-arguments
+./main.go:24:14: too many arguments to append
+```
+
 #### install golang in ubuntu
 Install [recent Go](https://github.com/golang/go/wiki/Ubuntu):
 ```txt
