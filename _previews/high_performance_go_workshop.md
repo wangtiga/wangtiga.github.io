@@ -2542,9 +2542,18 @@ examples/esc/center.go:19:13: NewPoint []interface {} literal does not escape
 
 Even though  `p`  was allocated with the  `new`  function, it will not be stored on the heap, because no reference  `p`  escapes the  `Center`  function.
 
+虽然 p 是使用 new 函数分配的，但它没有存储在堆上，
+因为所有引用 p 的变量都在 Center 函数内部，没有发生逃逸现象。
+
 _Question_: What about line 19, if  `p`  doesn’t escape, what is escaping to the heap?
 
+_问题_: 如果 p 没有发生逃逸，那么 line 19 的提示是指哪个变量逃逸到了 heap 上呢？
+
 Write a benchmark to provide that  `Sum`  does not allocate.
+
+编写一个 benchmark 证明 Sum 没有在 heap 上分配变量。
+
+
 
 ### 4.3. Inlining
 
