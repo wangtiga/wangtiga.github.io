@@ -11,6 +11,59 @@ tags:  linux
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### docker
+
+```shell
+
+docker pull golang
+
+docker run --rm -it --name go-http-demo golang bash
+
+sudo docker image build --build-arg UID=$(id -u) --build-arg GID=$(id -g)  -t koa-demo:0.0.1 .
+
+sudo docker run --rm -tiv `pwd`:/go koa-demo:0.0.1
+
+sudo docker image build --build-arg UID=$(id -u) --build-arg GID=$(id -g) \
+  -f bb.dockerfile -t testimg .
+
+```
+
+https://github.com/mbrt/go-docker-dev
+
+http://www.ruanyifeng.com/blog/2018/02/docker-tutorial.html
+
+https://docs.docker.com/get-started/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### shell
 
 #### aria2 [https://zhuanlan.zhihu.com/p/30666881](https://zhuanlan.zhihu.com/p/30666881)

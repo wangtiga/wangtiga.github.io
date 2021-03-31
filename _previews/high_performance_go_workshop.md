@@ -2558,8 +2558,16 @@ Write a benchmark to provide that  `Sum`  does not allocate.
 ### 4.3. Inlining
 
 In Go function calls in have a fixed overhead; stack and preemption checks.
+Go 中的函数和存在固定开销；比如维护堆栈指针 和 抢占检查（TODO) 。
 
 Some of this is ameliorated by hardware branch predictors, but it’s still a cost in terms of function size and clock cycles.
+
+这在一定程度上可以通过硬件分支预测器得到改善，但在函数大小和时钟周期方面仍然存在开销。
+内联是避免这些成本的经典优化。
+直到 Go 1.11 内联仅适用于 leaf  函数，该函数不调用另一个函数。这样做的理由是：
+• 如果函数执行大量工作，则前导开销可以忽略不计。这就是为什么函数超过一定大小（目前一些指令计数，加上一些操作，防止所有内联（例如，在 Go 1.7 之前的 switch）
+• 另一方面，小型函数会为执行的相对较小的有用的工作进行固定的开销。这些是内联目标的功能，因为它们受益最大。
+另一个原因是沉重的内联使堆栈跟踪更难跟踪。
 
 Inlining is the classical optimisation that avoids these costs.
 
