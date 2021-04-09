@@ -338,31 +338,9 @@ $ find ./_posts/  | xargs wc -l
 wc: ./_posts/: Is a directory
       0 ./_posts/
     268 ./_posts/2019-07-14-datarate_bandwidth_datasize.md
-    679 ./_posts/2019-11-03-4735_2019_10.md
-     84 ./_posts/2019-10-12-grinder.md
-    251 ./_posts/2020-01-31-video_codec.md
-    463 ./_posts/2019-12-22-redis_distlock_redlock.md
-    410 ./_posts/2019-09-17-playing_with_go_module_proxies.md
-    543 ./_posts/2019-09-12-slow_down_go_faster.md
-    611 ./_posts/2019-06-17-computer-network.md
-     58 ./_posts/2019-10-01-english_bing_today.md
-    548 ./_posts/2019-10-01-english_word.md
-    177 ./_posts/2019-10-09-influxdb_practice.md
-    393 ./_posts/2020-01-01-gstream_basic_tutorial10_gstreamer_tools.md
-    363 ./_posts/2020-04-30-zoom_avoid_using_webrtc.md
     601 ./_posts/2019-09-01-introduction_to_go_modules.md
-    426 ./_posts/2019-06-12-4751_2014_10.md
-    473 ./_posts/2019-11-03-4735_2019_10_sql.md
-    654 ./_posts/2020-05-09-gstream_basic_tutorial08_shortcutting_pipeline.md
-    986 ./_posts/2019-07-17-golang_intro.md
-    352 ./_posts/2020-01-01-gstream_basic_tutorial07_multithreading_and_pad_availability.md
-   3731 ./_posts/2019-06-01-effective-golang.md
-    375 ./_posts/2019-08-24-tproxy.md
-    650 ./_posts/2019-11-06-vim_faq.md
-    137 ./_posts/2019-12-22-redis_distlock_setnx.md
     261 ./_posts/2019-08-13-mysql_utf8_utf8mb4.md
-    585 ./_posts/2019-06-12-4751_2014_04.md
-  14079 total
+   1130 total
 ```
 
 #### Linux查看实时网络速率
@@ -515,6 +493,50 @@ sudo supervisorctl start xxxserver
 
 ### golang
 
+#### AgoraIO SDK cannot find module rtctokenbuilder 
+
+```diff
+--- a/live_auth.go
++++ b/live_auth.go
+@@ -12,25 +12,25 @@ import (
+        "fmt"
+
+-       "github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/rtctokenbuilder"
++       rtctokenbuilder "github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/RtcTokenBuilder"
+```
+
+- 编译报错
+
+  同一份代码，windows 机器上编译正常，但 linux 上编译提示以下错误：
+  
+  `live_auth.go|16 col 2| cannot find module providing package github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/rtctokenbuilder: import lookup disabled by -mod=readonly (Go version in go.mod is 1.13, so vendor directory was not used.) `
+
+- 环境：
+
+  go version go1.16.2 但 go.mod 文件仍然使用 go 1.13
+
+- 原因：
+
+  原始目录名是大小写的 RtcTokenBuilder 。
+
+  所以 import "github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/rtctokenbuilder" 时,
+
+  由于 linux 系统中区分大小写，找不到名为 rtctokenbuilder 的目录，因为磁盘上保存的目录是 RtcTokenBuilder ；
+
+  而 windows 系统不区分大小写，所以使用 RtcTokenBuilder 或  rtctokenbuilder 都能找到这个文件夹；
+ 
+- github 上的 [Tools/DynamicKey/AgoraDynamicKey/go/src/RtcTokenBuilder/RtcTokenBuilder.go](https://github.com/AgoraIO/Tools/blob/master/DynamicKey/AgoraDynamicKey/go/src/RtcTokenBuilder/RtcTokenBuilder.go) 原始文件
+
+  其文件名是大小写 `RtcTokenBuilder.go`  ，但 package 包名又是小写的 `package rtctokenbuilder` ，不符合 effective go 推荐的做法。
+
+  ```go
+  package rtctokenbuilder
+  
+  import (
+  	"fmt"
+  	accesstoken "github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/AccessToken"
+  )
+  ```
 
 #### golang append `too many arguments to append`
 
@@ -562,24 +584,6 @@ $ sudo apt-get update
 $ sudo apt-get install golang-go
 ```
 
-#### vim-go 插件提示   "No AST for file"
-
-> [github issue 2353](https://github.com/fatih/vim-go/issues/2353)
-
-尝试更新 gopls 程序解决 2019/08/26
-
-```shell
-Same issue here. Just occasionally for me, 
-
-gopls  version
-version v0.1.0, built in $GOPATH mode
-
-go get -u golang.org/x/tools/cmd/gopls
-go install golang.org/x/tools/cmd/gopls
-
-gopls version
-version v0.1.3-cmd.gopls, built in $GOPATH mode
-```
 
 
 
