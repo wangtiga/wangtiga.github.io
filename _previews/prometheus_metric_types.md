@@ -31,7 +31,7 @@ The Prometheus server does not yet make use of the type information and flattens
 Prometheus 客户端库提供4种指标类型。
 不过，目前仅在 Prometheus 客户端及网络协议区分了这几种类型（用于根据具体类型来定制API使用方式）。
 实际上 Prometheus 的服务端并不区分指标类型，而是简单地把这些指标统一视为无类型的时序数据。
-这个特点在未来应该会有变化。
+这个特性未来可能还会有变化。
 
 
 ## Counter 计数器
@@ -70,13 +70,16 @@ Client library usage documentation for gauges:
 -   [Python](https://github.com/prometheus/client_python#gauge)
 -   [Ruby](https://github.com/prometheus/client_ruby#gauge)
 
-## Histogram 直方图
+## Histogram 直方图（柱状图）
 
 A  _histogram_  samples observations (usually things like request durations or response sizes) and counts them in configurable buckets. It also provides a sum of all observed values.
 
-_直方图_用于对指标数据（比如请求耗时或响应包大小）进行采样（并放入可配置的存储桶中计数），后续可以按取值区间对不同指标数据的出现次数进行统计。它也会记录样本总数。
+_直方图_ 用于对指标数据（比如请求耗时或响应包大小）进行采样，可以按取值区间对不同指标数据的出现次数进行统计。它也会记录所有样本的总和。
 
-> NOTE: 比如统计"语文考试中，大于90分的学生有多少人，大于80分的有多少人，大于60分的有多少人"时，就可以用直方图表示。
+> NOTE: 比如统计 "语文考试中，大于90分的学生有多少人，大于80分的有多少人，大于60分的有多少人" 时，就可以用直方图表示。
+
+> NOTE: bucket 桶。每段不同的样本区间都可以理解为一个桶，当一个采样值落在某个样本区间时，可以认为这个样本值落到对就的桶里，此桶的计数就可以 +1 了。
+
 
 A histogram with a base metric name of  `<basename>`  exposes multiple time series during a scrape:
 
@@ -86,7 +89,7 @@ A histogram with a base metric name of  `<basename>`  exposes multiple time seri
 
 使用直方图类型抓取数据时，会生成几种不同名称的时序数据。假设指标名称是 `<basename>` ：
 
-- 在不同取值敬意的样本数统计，保存在  `<basename>_bucket{le="<上边界>"}` 中。le表示 lower equal , 用于筛选小于等于上边界的数据。
+- 在不同取值区间的样本统计结果，保存在  `<basename>_bucket{le="<上边界>"}` 中。le表示 lower equal , 用于筛选小于等于上边界的数据。
 - 所有观测到的样本值的总和，保存在 `<basename>_sum` 中。
 - 所有观测到的样本总个数，保存在 `<basename>_count` 中。
 
@@ -100,7 +103,34 @@ A histogram with a base metric name of  `<basename>`  exposes multiple time seri
 > 6. `prometheus_http_request_duration_seconds_sum{handler="/metrics"}` 显示值应该是 4+2+3 ＝ 9s
 > 7. `prometheus_http_request_duration_seconds_count{handler="/metrics"}` 显示值应该是 1+1+1 ＝3次
 
-Use the  [`histogram_quantile()`  function](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)  to calculate quantiles from histograms or even aggregations of histograms. A histogram is also suitable to calculate an  [Apdex score](https://en.wikipedia.org/wiki/Apdex). When operating on buckets, remember that the histogram is  [cumulative](https://en.wikipedia.org/wiki/Histogram#Cumulative_histogram). See  [histograms and summaries](https://prometheus.io/docs/practices/histograms)  for details of histogram usage and differences to  [summaries](https://prometheus.io/docs/concepts/metric_types/#summary).
+Use the  [`histogram_quantile()`  function](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)  to calculate quantiles from histograms or even aggregations of histograms. 
+A histogram is also suitable to calculate an  [Apdex score](https://en.wikipedia.org/wiki/Apdex). 
+When operating on buckets, remember that the histogram is  [cumulative](https://en.wikipedia.org/wiki/Histogram#Cumulative_histogram). 
+See  [histograms and summaries](https://prometheus.io/docs/practices/histograms)  for details of histogram usage and differences to  [summaries](https://prometheus.io/docs/concepts/metric_types/#summary).
+
+使用 `histogram_quantile()`  函数可以从直方图（甚至直方图的聚合结果）中计算分位数。
+直方图还能用来生成性能指数。
+另外，要劳记，直方图在不同取值区间的统计结果是累积的。
+查看 [histograms and summaries](https://prometheus.io/docs/practices/histograms)  了解 直方图 与 概要图的详细区别。
+
+
+> NOTE: `histogram_quantile（φ float，b instant-vector）` 0 < φ < 1 ，比如 0.9 表示取 90% 分位数，即第 90 个百分位数。 
+
+> NOTE: 以后面解释分数数的示例数据为例子，将样本划分为四个取值区间： {0~3, 3~5.5, 5.5~7, 7~9}
+>
+> - ordinary histogram 显示的样本统计结果
+>   1. {0~3}  共3个样本；
+>   2. {3~5.5}共2个样本；
+>   3. {5.5~7}共3个样本；
+>   4. {7~9}  共3个样本；
+>
+> - cumulative histogram 显示的样本统计结果
+>   1. {0~3}  共3个样本；
+>   2. {3~5.5}共5个样本；
+>   3. {5.5~7}共8个样本；
+>   4. {7~9}  共10个样本；
+
+> NOTE: 性能指数(Apdex score) Apdex 是一个国际通用标准，是对用户体验满意度的量化值。响应时间(Response time) 
 
 > NOTE: 分位数是什么意义? 可以参考
 > 1. [四分位数 数学乐](https://www.shuxuele.com/data/quartiles.html)理解.
@@ -127,15 +157,24 @@ Client library usage documentation for histograms:
 -   [Python](https://github.com/prometheus/client_python#histogram)
 -   [Ruby](https://github.com/prometheus/client_ruby#histogram)
 
-## Summary[](https://prometheus.io/docs/concepts/metric_types/#summary)
+## Summary 概要图
 
 Similar to a  _histogram_, a  _summary_  samples observations (usually things like request durations and response sizes). While it also provides a total count of observations and a sum of all observed values, it calculates configurable quantiles over a sliding time window.
+
+与 直方图 类型， _概要图_ 用于对指标数据（比如请求耗时或响应包大小）进行采样，但它能直接按分位数对指标数据的出现次数和样本值总和进行统计。
 
 A summary with a base metric name of  `<basename>`  exposes multiple time series during a scrape:
 
 -   streaming  **φ-quantiles**  (0 ≤ φ ≤ 1) of observed events, exposed as  `<basename>{quantile="<φ>"}`
 -   the  **total sum**  of all observed values, exposed as  `<basename>_sum`
 -   the  **count**  of events that have been observed, exposed as  `<basename>_count`
+
+使用概要图类型抓取数据时，也会生成几种不同名称的时序数据。假设指标名称是 `<basename>` ：
+
+- 从 `<basename>{quantile="<φ>"}` 中获取特定分位数，**φ-quantiles** 取值范围是 0 ≤ φ ≤ 1
+- 所有观测到的样本值的总和，保存在 `<basename>_sum` 中。
+- 所有观测到的样本总个数，保存在 `<basename>_count` 中。
+
 
 See  [histograms and summaries](https://prometheus.io/docs/practices/histograms)  for detailed explanations of φ-quantiles, summary usage, and differences to  [histograms](https://prometheus.io/docs/concepts/metric_types/#histogram).
 
@@ -147,9 +186,28 @@ Client library usage documentation for summaries:
 -   [Ruby](https://github.com/prometheus/client_ruby#summary)
 
 
-# https://prometheus.io/docs/prometheus/latest/querying/basics/
 
-# Note
+# 笔记
+
+
+- 如何要得到网络上传下载速率？
+
+  被监控的程序(exporter 端)只要记录"当前值"，即 exporter 端只要记录总上传下载字节数。
+  经过 prometheus server 的定时抓取后，就能利用各种查询语法得到 不同时间和精度的 速率；
+
+  不需要在 exporter 中计算每秒的速率，再主动上报。
+
+- 如何分析接口平均耗时如何？耗时5s的接口总共有多少？耗时低于100的接口又有多少？
+
+  这就是直方图的用武之地了。
+  在 exporter 中还是只需要记录"当前值"，
+  但是要利用相关 client library 计算出不同取值区间的"当前值"。
+
+
+
+- 统计网络速率
+
+[prometheus querying basics](https://prometheus.io/docs/prometheus/latest/querying/basics/)
 
 ```proql
 
@@ -159,9 +217,11 @@ rate(windows_net_bytes_received_total{}[5m])
 
 rate(node_network_receive_bytes_total{}[5m])
 
-# TODO 5m 具体含义
+# 5m 表示对时序数据分成 5m 区间的多段数据，然后用 rate() 计算每秒钟的网络下载速率
 
 ```
+
+- 程序启动命令
 
 ```sh
 
@@ -176,6 +236,8 @@ https://github.com/prometheus/node_exporter
 
 https://github.com/prometheus-community/windows_exporter
 ```
+
+- 配置文件
 
 ```sh
 # my global config
