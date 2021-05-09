@@ -2736,7 +2736,7 @@ type ReadWriter interface {
 }
 ```
 
-This says just what it looks like: A  `ReadWriter`  can do what a  `Reader`  does  _and_what a  `Writer`  does; it is a union of the embedded interfaces (which must be disjoint sets of methods). Only interfaces can be embedded within interfaces.
+This says just what it looks like: A  `ReadWriter`  can do what a  `Reader`  does  _and_ what a  `Writer`  does; it is a union of the embedded interfaces (which must be disjoint sets of methods). Only interfaces can be embedded within interfaces.
 
 这么做，显而易见地表达了 ReadWriter 的作用，即同时拥有 Reader 和 Writer 的能力。
 ReadWriter 是两个 embedded interface 的并集（同时包含两者定义的method）。
@@ -2920,7 +2920,27 @@ Goroutine 是一种很简单的模型：
 因为 stack 初始时非常小，仅在需要时才在 heap 中分配或释放 storage 空间。
 所以它们的使用代价很小。
 
-> TODO 区分 堆、栈 的具体分别，及这里具体要讲的是什么情况。
+> NOTE 堆、栈 的具体分别: [物理上堆内存和栈内存有区别吗？ invalid s](https://www.zhihu.com/question/40129725/answer/125413057)
+> 1. stack 空间由编译器释放； CPU 指令支持；
+> 2. heap  空间由 c 语言程序员 或 go/java 语言 GC 释放；操作系统提供支持；相对 stack 开销大，且访问慢。
+> 3. process   共享 CPU ； 每个 process 有独立的 virtual address space （heap ＋ stack 等）；
+> 5. thread    共享 CPU ； 共享 virtual address space (主要是 heap) ；每个 thread 有独立的 thread context （ 主要是 stack 及 machine registers 等资源）；
+> 6. goroutine 共享 CPU ，但由 process 调度，而 thread 由 kernel 调度； 共享 virtual address space ；每个 goroutine 有独立的 stack ，但占用空间更小（thread 约 1MB ， goroutine 约 2KB ）；
+>
+> Stack vs Heap Memory Allocation [^StackVsHeap]
+
+  Parameter                       | STACK                                           | HEAP                                        |
+--------------------------------- | ----------------------------------------------- | ------------------------------------------- |
+  Basic                           | Memory is allocated in a contiguous block.      | Memory is allocated in any random order.    |
+  Allocation and Deallocation     | Automatic by compiler instructions.             | Manual by the programmer.                   |
+  Cost                            | Less                                            | More                                        |
+  Implementation                  | Easy                                            | Hard                                        |
+  Access time                     | Faster                                          | Slower                                      |
+  Main Issue                      | Shortage of memory                              | Memory fragmentation                        |
+  Locality of reference           | Excellent                                       | Adequate                                    |
+  Flexibility                     | Fixed-size                                      | Resizing is possible                        |
+  Data type structure             | Linear                                          | Hierarchical                                |
+
 
 Goroutines are multiplexed onto multiple OS threads so if one should block, such as while waiting for I/O, others continue to run. Their design hides many of the complexities of thread creation and management.
 
@@ -3738,5 +3758,6 @@ Build version go1.13
 [^EffectiveGoCn1]: [Effective Go studygolang](https://studygolang.com/articles/3228)
 [^EffectiveGoCn2]: [Effective Go docscn.studygolang](http://docscn.studygolang.com/doc/effective_go.html)
 
+[^StackVsHeap]: [Stack vs Heap Memory Allocation](https://www.geeksforgeeks.org/stack-vs-heap-memory-allocation/)
 
 
