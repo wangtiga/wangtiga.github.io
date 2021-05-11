@@ -535,4 +535,13 @@ Written on February 20, 2015
 
 [^vavrusamemory]: [What a C programmer should know about memory](https://marek.vavrusa.com/memory/)
 
+[[译] Ｃ程序员该知道的内存知识 (1)](https://segmentfault.com/a/1190000022531638)
+
+[[译] Ｃ程序员该知道的内存知识 (2)](https://segmentfault.com/a/1190000022545986)
+
+[[译] Ｃ程序员该知道的内存知识 (3)](https://segmentfault.com/a/1190000022656717)
+
+[[译] Ｃ程序员该知道的内存知识 (4)](https://segmentfault.com/a/1190000022721381)
+
+[[译] 程序员应该知道的内存知识](https://jason2506.gitbooks.io/cpumemory/content/)
 
