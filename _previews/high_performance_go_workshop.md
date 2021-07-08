@@ -4100,24 +4100,25 @@ import (
 // https://qcrao.com/2019/11/10/dive-into-go-pprof/
 //
 //# 下载 cpu profile，默认从当前开始收集 30s 的 cpu 使用情况，需要等待 30s
-//go tool pprof http://47.93.238.9:8080/debug/pprof/profile
-//go tool pprof http://47.93.238.9:8080/debug/pprof/profile?seconds=120   # wait 120s
+//go tool pprof http://127.0.0.1:6060/debug/pprof/profile
+//go tool pprof http://127.0.0.1:6060/debug/pprof/profile?seconds=120   # wait 120s
 //
 //# 下载 heap profile
-//go tool pprof http://47.93.238.9:8080/debug/pprof/heap
+//go tool pprof http://127.0.0.1:6060/debug/pprof/heap
 //
 //# 下载 goroutine profile
-//go tool pprof http://47.93.238.9:8080/debug/pprof/goroutine
+//go tool pprof http://127.0.0.1:6060/debug/pprof/goroutine
 //
 //# 下载 block profile
-//go tool pprof http://47.93.238.9:8080/debug/pprof/block
+//go tool pprof http://127.0.0.1:6060/debug/pprof/block
 //
 //# 下载 mutex profile
-//go tool pprof http://47.93.238.9:8080/debug/pprof/mutex
+//go tool pprof http://127.0.0.1:6060/debug/pprof/mutex
 //
 // go tool pprof -http=0.0.0.0:8080 /home/ws/pprof/pprof.mms.contentions.delay.017.pb.gz
-// go tool pprof -http=0.0.0.0:8080 /home/ws/pprof/pprof.mms.contentions.delay.018.pb.gz
-// open chorme http://localhost:8080/ui/flamegraph
+// go tool pprof -http=0.0.0.0:8080 http://127.0.0.1:6060/debug/pprof/heap
+//
+// open chrome http://localhost:8080/ui/flamegraph
 //
 func initPPROF() {
         runtime.SetMutexProfileFraction(2)

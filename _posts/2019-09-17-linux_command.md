@@ -266,6 +266,7 @@ $ chmod 600 ~/.ssh/authorized_keys
 
 
 #### tmux 持久化远程 ssh 会话
+
 ```shell
 # 启动
 $ tmux
@@ -275,13 +276,6 @@ $ tmux ls
 
 # 接入会话
 $ tmux attach -t 0
-
-# 窗格管理 快捷键
-Ctrl+b %：划分左右两个窗格。
-Ctrl+b "：划分上下两个窗格。
-Ctrl+b <arrow key>：光标切换到其他窗格。<arrow key>是指向要切换到的窗格的方向键，比如切换到下方窗格，就按方向键↓。
-Ctrl+b ;：光标切换到上一个窗格。
-Ctrl+b o：光标切换到下一个窗格。
 
 # 分离会话
 $ tmux detach
@@ -294,7 +288,22 @@ $ tmux rename-session -t 0 <new-name>
 $ tmux new -s <session-name>
 
 # 滚动屏幕 [scroll in tmux](https://www.freecodecamp.org/news/tmux-in-practice-scrollback-buffer-47d5ffa71c93/)
-$ Ctrl-b [  : 进入copy mode, 使用 Down/Up 或 PageDown 和PageUp 键翻页, q 或 Enter 退出 copy mode 。
+# Ctrl-b [  # 进入copy mode, 使用 Down/Up 或 PageDown 和PageUp 键翻页, q 或 Enter 退出 copy mode 。
+```
+
+```shell
+# 窗格管理 panel 快捷键
+# Ctrl+b % # 划分左右两个窗格。
+# Ctrl+b " # 划分上下两个窗格。
+# Ctrl+b <arrow key> # 光标切换到其他窗格。<arrow key>是指向要切换到的窗格的方向键，比如切换到下方窗格，就按方向键↓。
+# Ctrl+b ; # 光标切换到上一个窗格。
+# Ctrl+b o # 光标切换到下一个窗格。
+# Ctrl+b 按住 Ctrl 不动，松开 b 键，然后同再按 <arrow key> 可以调整空格大小
+
+# 窗口管理 window 快捷键
+# Ctrl+b c # 创建新窗口
+# Ctrl+b n # 切换到下一个窗口
+# Ctrl+b p # 切换到上一个窗口
 ```
 
 > [Tmux 使用教程](http://www.ruanyifeng.com/blog/2019/10/tmux.html)
