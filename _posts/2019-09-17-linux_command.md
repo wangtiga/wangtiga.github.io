@@ -436,6 +436,24 @@ sudo dd if=~/images/ubuntu.iso of=/dev/sdb
 #### tcpdump
 
 ```shell
+# 读取pcap文件，并显示摘要
+$ tcpdump -r ./lo_33434_8845.pcap -ttttN 
+2021-07-12 14:59:07.797176 IP test.33434 > test.8845: Flags [S], seq 4268287690, win 65495, options [mss 65495,sackOK,TS val 4248848834 ecr 0,nop,wscale 7], length 0
+2021-07-12 14:59:07.797181 IP test.8845 > test.33434: Flags [S.], seq 2411423277, ack 4268287691, win 65483, options [mss 65495,sackOK,TS val 4248848834 ecr 4248848834,nop,wscale 7], length 0
+2021-07-12 14:59:07.797185 IP test.33434 > test.8845: Flags [.], ack 1, win 512, options [nop,nop,TS val 4248848834 ecr 4248848834], length 0
+
+
+# 监听 lo 网卡上的数据，过滤显示 syn 或 fin 包
+$ sudo tcpdump "tcp and port 8845 and tcp[tcpflags] & (tcp-syn|tcp-fin) != 0" -i lo -N  
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on lo, link-type EN10MB (Ethernet), capture size 262144 bytes
+18:09:01.064281 IP test.49190 > test.8845: Flags [S], seq 1792207613, win 65495, options [mss 65495,sackOK,TS val 4260242101 ecr 0,nop,wscale 7], length 0
+18:09:01.064297 IP test.8845 > test.49190: Flags [S.], seq 582524750, ack 1792207614, win 65483, options [mss 65495,sackOK,TS val 4260242101 ecr 4260242101,nop,wscale 7], length 0
+18:09:01.067032 IP test.49190 > test.8845: Flags [F.], seq 535, ack 222, win 512, options [nop,nop,TS val 4260242104 ecr 4260242104], length 0
+18:09:01.067178 IP test.8845 > test.49190: Flags [F.], seq 222, ack 536, win 512, options [nop,nop,TS val 4260242104 ecr 4260242104], length 0
+```
+
+```shell
 # 按最后一列的值排序shell 按 column 排序
 awk '{print $NF,$0}' file.txt | sort -nr | cut -f2- -d' '
 # awk 命令中 `$NF` 表示的最后一个Field（列），即输出最后一个字段的内容
@@ -500,7 +518,29 @@ sudo supervisorctl stop xxxserver
 sudo supervisorctl start xxxserver
 ```
 
+
+
 ### golang
+
+
+#### golang 为什么将 struct{} 用做 context.Value() 的 key ？
+
+1. 可隐藏  context 的字段。用 string/int 做 key 时，只要知道变量值就从 ctx 获取 value ，但定义一个小写的 struct ，外部 package 就无法随意取value 了。
+2. string 有内存分配开销；
+
+```go
+type metadataKey struct{}
+type Metadata map[string]string
+// NewContext creates a new context with the given metadata
+func NewContext(ctx context.Context, md Metadata) context.Context {
+        return context.WithValue(ctx, metadataKey{}, md)
+}
+"vendor/github.com/micro/go-micro/v2/metadata/metadata.go" 126 行
+```
+
+[Use struct{} as keys for context.Value() in Go](https://gist.github.com/ww9/4ad7b2ddfb94816a30dfdf2218e02f48)
+
+
 
 #### AgoraIO SDK cannot find module rtctokenbuilder 
 

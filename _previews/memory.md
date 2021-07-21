@@ -531,6 +531,85 @@ _Open question_  — is there anything better than Markdown code block, where I 
 
 Written on February 20, 2015
 
+
+# Linux Memory Types  
+
+[linux top命令VIRT,RES,SHR,DATA的含义](https://javawind.net/p131)
+
+- VIRT：virtual memory usage 虚拟内存
+  1. 进程“需要的”虚拟内存大小，包括进程使用的库、代码、数据等
+  2. 假如进程申请100m的内存，但实际只使用了10m，那么它会增长100m，而不是实际的使用量
+
+- RES：resident memory usage 常驻内存 [RSS – Resident Set Size 实际使用物理内存](https://cloud.tencent.com/developer/article/1407483)
+  1. 进程当前使用的内存大小，但不包括swap out
+  2. 包含其他进程的共享
+  3. 如果申请100m的内存，实际使用10m，它只增长10m，与VIRT相反
+  4. 关于库占用内存的情况，它只统计加载的库文件所占内存大小
+
+- SHR：shared memory 共享内存
+  1. 除了自身进程的共享内存，也包括其他进程的共享内存
+  2. 虽然进程只使用了几个共享库的函数，但它包含了整个共享库的大小
+  3. 计算某个进程所占的物理内存大小公式：RES – SHR
+  4. swap out后，它将会降下来
+
+- DATA
+  1. 数据占用的内存。如果top没有显示，按f键可以显示出来。
+  2. 真正的该程序要求的数据空间，是真正在运行中要使用的。
+
+
+```sh
+$ uname -a
+Linux 5.4.0-77-generic #86~18.04.1-Ubuntu
+
+# man top
+   Linux Memory Types
+       For  our purposes there are three types of memory, and one is optional.  First is physical memory, a limited resource where code and data must reside when executed or referenced.  Next is the optional swap file, where modified (dirty) memory can be saved
+       and later retrieved if too many demands are made on physical memory.  Lastly we have virtual memory, a nearly unlimited resource serving the following goals:
+
+          1. abstraction, free from physical memory addresses/limits
+          2. isolation, every process in a separate address space
+          3. sharing, a single mapping can serve multiple needs
+          4. flexibility, assign a virtual address to a file
+
+       Regardless of which of these forms memory may take, all are managed as pages (typically 4096 bytes) but expressed by default in top as KiB (kibibyte).  The memory discussed under topic `2c. MEMORY Usage' deals with physical memory and the swap  file  for
+       the system as a whole.  The memory reviewed in topic `3. FIELDS / Columns Display' embraces all three memory types, but for individual processes.
+
+       For each such process, every memory page is restricted to a single quadrant from the table below.  Both physical memory and virtual memory can include any of the four, while the swap file only includes #1 through #3.  The memory in quadrant #4, when mod‐
+       ified, acts as its own dedicated swap file.
+
+                                     Private | Shared
+                                 1           |          2
+            Anonymous  . stack               |
+                       . malloc()            |
+                       . brk()/sbrk()        | . POSIX shm*
+                       . mmap(PRIVATE, ANON) | . mmap(SHARED, ANON)
+                      -----------------------+----------------------
+                       . mmap(PRIVATE, fd)   | . mmap(SHARED, fd)
+          File-backed  . pgms/shared libs    |
+                                 3           |          4
+
+       The following may help in interpreting process level memory values displayed as scalable columns and discussed under topic `3a. DESCRIPTIONS of Fields'.
+
+          %MEM - simply RES divided by total physical memory
+          CODE - the `pgms' portion of quadrant 3
+          DATA - the entire quadrant 1 portion of VIRT plus all
+                 explicit mmap file-backed pages of quadrant 3
+          RES  - anything occupying physical memory which, beginning with
+                 Linux-4.5, is the sum of the following three fields:
+                 RSan - quadrant 1 pages, which include any
+                        former quadrant 3 pages if modified
+                 RSfd - quadrant 3 and quadrant 4 pages
+                 RSsh - quadrant 2 pages
+          RSlk - subset of RES which cannot be swapped out (any quadrant)
+          SHR  - subset of RES (excludes 1, includes all 2 & 4, some 3)
+          SWAP - potentially any quadrant except 4
+          USED - simply the sum of RES and SWAP
+          VIRT - everything in-use and/or reserved (all quadrants)
+
+       Note: Even though program images and shared libraries are considered private to a process, they will be accounted for as shared (SHR) by the kernel.
+
+```
+
 [^v2exmemory]: [踩坑记： go 服务内存暴涨](https://www.v2ex.com/t/666257?p=1)
 
 [^vavrusamemory]: [What a C programmer should know about memory](https://marek.vavrusa.com/memory/)
