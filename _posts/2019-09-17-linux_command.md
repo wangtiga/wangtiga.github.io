@@ -298,7 +298,8 @@ $ tmux new -s <session-name>
 # Ctrl+b <arrow key> # 光标切换到其他窗格。<arrow key>是指向要切换到的窗格的方向键，比如切换到下方窗格，就按方向键↓。
 # Ctrl+b ; # 光标切换到上一个窗格。
 # Ctrl+b o # 光标切换到下一个窗格。
-# Ctrl+b 按住 Ctrl 不动，松开 b 键，然后同再按 <arrow key> 可以调整空格大小
+# Ctrl+b Ctrl+<arrow key> # 按住 Ctrl 不动，松开 b 键，然后同再按 <arrow key> 可以调整空格大小
+# Ctrl+b M+<arrow key> #  M 在 Mac 中表示 opt 按键
 
 # 窗口管理 window 快捷键
 # Ctrl+b c # 创建新窗口
@@ -308,6 +309,7 @@ $ tmux new -s <session-name>
 
 > [Tmux 使用教程](http://www.ruanyifeng.com/blog/2019/10/tmux.html)
 
+> man tmux 能查看更详细的使用说明
 
 
 #### Linux格式化 json base64

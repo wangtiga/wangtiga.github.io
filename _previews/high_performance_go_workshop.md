@@ -376,7 +376,7 @@ CPU 的核心数量主要由散热情况决定。
 
 CPUs are not getting faster, but they are getting wider with hyper threading and multiple cores. Dual core on mobile parts, quad core on desktop parts, dozens of cores on server parts. Will this be the future of computer performance? Unfortunately not.
 
-CPU虽然没有变得更快，但由于超纯种和多核心技术的发展，CPU变的更“宽”了。
+CPU虽然没有变得更快，但由于超线程和多核心技术的发展，CPU变的更“宽”了。
 在移动设备上使用双核处理器，桌面设备上使用四核处理器，在服务器中使用几十核心的处理器。
 在以后的日子，只要增加核心数量 ，计算机性能就能一直提升吗？
 当然不可能了。
@@ -3790,13 +3790,22 @@ for i, v := range vals {
 return s
 ```
 
-### 6.9. Using sync.Pool
+### 6.9. Using sync.Pool 使用 sync.Pool
 
 The  `sync`  package comes with a  `sync.Pool`  type which is used to reuse common objects.
 
+`sync` package 中有一个 `sync.Pool` 类型，用来得用对象资源。
+
 `sync.Pool`  has no fixed size or maximum capacity. You add to it and take from it until a GC happens, then it is emptied unconditionally. This is  [by design](https://groups.google.com/forum/#!searchin/golang-dev/gc-aware/golang-dev/kJ_R6vYVYHU/LjoGriFTYxMJ):
 
+`sync.Pool`  没有固定的大小或最大容量限制. 
+你可以往 Pool 中添加对象，在发生垃圾回收(GC)前取出这个对象来使用，
+发生 GC 时，会清除这个对象。这样的行为是有意设计的 [by design](https://groups.google.com/forum/#!searchin/golang-dev/gc-aware/golang-dev/kJ_R6vYVYHU/LjoGriFTYxMJ):
+
+
 > If before garbage collection is too early and after garbage collection too late, then the right time to drain the pool must be during garbage collection. That is, the semantics of the Pool type must be that it drains at each garbage collection. — Russ Cox
+
+> 在 GC 之前放水太早，太 GC 之后放水太晚，最好的时机就是在垃圾回收的过程中给 pool 放水。 因为 Pool 类型的语意就决定了，必须在垃圾回收的过程中给池子放水，
 
 sync.Pool in action
 
@@ -3812,6 +3821,8 @@ func fn() {
 
 `sync.Pool`  is not a cache. It can and will be emptied  _at_any_time_.
 
+`sync.Pool` 不是缓存（缓冲存储）。它里面的数据随时都有可能被清理。
+
 Do not place important items in a  `sync.Pool`, they will be discarded.
 
 The design of sync.Pool emptying itself on each GC may change in Go 1.13 which will help improve its utility.
@@ -3819,6 +3830,9 @@ The design of sync.Pool emptying itself on each GC may change in Go 1.13 which w
 > This CL fixes this by introducing a victim cache mechanism. Instead of clearing Pools, the victim cache is dropped and the primary cache is moved to the victim cache. As a result, in steady-state, there are (roughly) no new allocations, but if Pool usage drops, objects will still be collected within two GCs (as opposed to one). — Austin Clements
 
 [https://go-review.googlesource.com/c/go/+/166961/](https://go-review.googlesource.com/c/go/+/166961/)
+
+[sync: smooth out Pool behavior over GC with a victim cache](https://github.com/golang/go/commit/2dcbf8b3691e72d1b04e9376488cef3b6f93b286#diff-491b0013c82345bf6cfa937bd78b690d)
+
 
 ### 6.10. Exercises
 
