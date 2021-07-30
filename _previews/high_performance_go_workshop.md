@@ -3799,13 +3799,14 @@ The  `sync`  package comes with a  `sync.Pool`  type which is used to reuse comm
 `sync.Pool`  has no fixed size or maximum capacity. You add to it and take from it until a GC happens, then it is emptied unconditionally. This is  [by design](https://groups.google.com/forum/#!searchin/golang-dev/gc-aware/golang-dev/kJ_R6vYVYHU/LjoGriFTYxMJ):
 
 `sync.Pool`  没有固定的大小或最大容量限制. 
-你可以往 Pool 中添加对象，在发生垃圾回收(GC)前取出这个对象来使用，
-发生 GC 时，会清除这个对象。这样的行为是有意设计的 [by design](https://groups.google.com/forum/#!searchin/golang-dev/gc-aware/golang-dev/kJ_R6vYVYHU/LjoGriFTYxMJ):
+你可以往 Pool 中添加对象，在垃圾回收(GC)前取出这个对象来使用，
+发生 GC 时，会清除这个对象。
+这种行为是有意设计的 [by design](https://groups.google.com/forum/#!searchin/golang-dev/gc-aware/golang-dev/kJ_R6vYVYHU/LjoGriFTYxMJ):
 
 
 > If before garbage collection is too early and after garbage collection too late, then the right time to drain the pool must be during garbage collection. That is, the semantics of the Pool type must be that it drains at each garbage collection. — Russ Cox
 
-> 在 GC 之前放水太早，太 GC 之后放水太晚，最好的时机就是在垃圾回收的过程中给 pool 放水。 因为 Pool 类型的语意就决定了，必须在垃圾回收的过程中给池子放水，
+> 在 GC 之前放水太早，而 GC 之后放水太晚，最好的时机就是在垃圾回收的过程中给 pool 放水。 因为 Pool 类型的语意就决定了，必须在垃圾回收的过程中给池子放水，
 
 sync.Pool in action
 
@@ -3819,19 +3820,28 @@ func fn() {
 }
 ```
 
-`sync.Pool`  is not a cache. It can and will be emptied  _at_any_time_.
-
-`sync.Pool` 不是缓存（缓冲存储）。它里面的数据随时都有可能被清理。
+`sync.Pool`  is not a cache. It can and will be emptied  _at any time_.
 
 Do not place important items in a  `sync.Pool`, they will be discarded.
 
-The design of sync.Pool emptying itself on each GC may change in Go 1.13 which will help improve its utility.
+`sync.Pool` 不是缓存（缓冲存储）。它里面的数据随时都有可能被清理。
 
-> This CL fixes this by introducing a victim cache mechanism. Instead of clearing Pools, the victim cache is dropped and the primary cache is moved to the victim cache. As a result, in steady-state, there are (roughly) no new allocations, but if Pool usage drops, objects will still be collected within two GCs (as opposed to one). — Austin Clements
+所以不要在 sync.Pool 中保留重要数据（持久对象）。
+
+> NOTE: sync.Pool 中只用于缓存对象，减少频繁建立临时对象的次数，从而减轻GC压力。比如 HTTP 框架 Gin 用 sync.Pool 来复用每个请求都会创建的 gin.Context 对象。 [^GoSyncPool]
+
+
+The design of sync.Pool emptying itself on each GC may change in Go 1.13 which will help improve its utility. 
+
+> This CL fixes this by introducing a victim cache mechanism. Instead of clearing Pools, the victim cache is dropped and the primary cache is moved to the victim cache. As a result, in steady-state, there are (roughly) no new allocations, but if Pool usage drops, objects will still be collected within two GCs (as opposed to one). — Austin Clements 
 
 [https://go-review.googlesource.com/c/go/+/166961/](https://go-review.googlesource.com/c/go/+/166961/)
 
-[sync: smooth out Pool behavior over GC with a victim cache](https://github.com/golang/go/commit/2dcbf8b3691e72d1b04e9376488cef3b6f93b286#diff-491b0013c82345bf6cfa937bd78b690d)
+Go 1.13 版本在 GC 时清理 sync.Pool 的过程进行了优化。[^GoSmoothPoolGCWithVictim]
+
+> 这次优化引入了 victim 机制。GC 次清理 Pool 中 primary 的缓存对象时(Object)，会先放到 victim 队列中，第二次 GC 过程才会丢弃 victim 中的数据。这样能维护一种相对稳定的状态，（大致上）没有新的内存分配操作，但是 Pool 使用率下降时，缓存对象会在两次 GC 后销毁。
+
+> NOTE: 我把 victim 理解成伤员队列。即这些缓存数据本次 GC 时不用了，如果本次 GC 过后，立即有 Get() 申请对象，刚 pool 中已经空，就会尝试复用 viticim 队列的对象。如果情况紧急，受伤的士兵(victim)，也会立即被派往商场。
 
 
 ### 6.10. Exercises
@@ -4175,3 +4185,6 @@ func initPPROF() {
 
 [^GoEscapeAnalysis]: [详解逃逸分析-机器铃砍菜刀](https://mp.weixin.qq.com/s/VeNiik-6vi8yQPKnr18w8A)
 
+[^GoSyncPool]: [深度分析 Golang sync.Pool 底层原理](https://mp.weixin.qq.com/s/_GxRIzVJ2YKZkZms0wYqRg)
+
+[^GoSmoothPoolGCWithVictim]: [sync: smooth out Pool behavior over GC with a victim cache](https://github.com/golang/go/commit/2dcbf8b3691e72d1b04e9376488cef3b6f93b286#diff-491b0013c82345bf6cfa937bd78b690d)

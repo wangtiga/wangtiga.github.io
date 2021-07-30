@@ -260,6 +260,7 @@ $  sudo tail -f /var/log/secure
 Jul 1 11:33:23 vm-19 sshd[123456]: Authentication refused: bad ownership or modes for file /home/tiga/.ssh/authorized_keys
 
 $ chmod 700 ~/.ssh
+$ chmod 700 ~/.ssh/*
 $ chmod 600 ~/.ssh/authorized_keys
 ```
 
