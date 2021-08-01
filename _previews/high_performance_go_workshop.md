@@ -1534,7 +1534,7 @@ pprof supports several types of profiling, we’ll discuss three of these today:
     
 pprof 支持分析以下几种类型：
 
-- CPU 性能剖析
+- 处理器性能剖析
 - 内存性能剖析
 - 阻塞剖析
 - 锁（互斥量）争用剖析
@@ -1542,7 +1542,7 @@ pprof 支持分析以下几种类型：
 
 
 
-#### 3.2.1. CPU profiling [^qcraoPPROF]
+#### 3.2.1. CPU profiling 处理器性能剖析 [^qcraoPPROF]
 
 CPU profiling is the most common type of profile, and the most obvious.
 
@@ -1563,7 +1563,7 @@ profile 完毕后，就能 analyse（分析） 出 hottest code path （热点�
 
 
 
-#### 3.2.2. Memory profiling [^qcraoPPROF]
+#### 3.2.2. Memory profiling 内存性能剖析 [^qcraoPPROF]
 
 Memory profiling records the stack trace when a  _heap_  allocation is made.
 
@@ -1589,7 +1589,7 @@ Memory profile 是在堆(Heap)分配的时候，记录一下调用堆栈。
 
 
 
-#### 3.2.3. Block profiling
+#### 3.2.3. Block profiling 阻塞剖析
 
 Block profiling is quite unique to Go.
 
@@ -1626,7 +1626,7 @@ Block profile 很特殊，在排除 CPU 和 Memory 的性能瓶颈前，不要�
 
 
 
-#### 3.2.4. Mutex profiling
+#### 3.2.4. Mutex profiling 锁（互斥量）争用剖析
 
 Mutex profiling is simlar to Block profiling, but is focused exclusively on operations that lead to delays caused by mutex contention.
 
@@ -1723,7 +1723,7 @@ If you’ve been using Go for a while, you might have been told that  `pprof`  t
  
 
 
-#### 3.5.2. CPU profiling (exercise)
+#### 3.5.2. CPU profiling (exercise) 处理器剖析（练习）
 
 Let’s write a program to count words:
 
@@ -1814,7 +1814,7 @@ Let’s investigate why these programs have different run times using pprof.
 
 
 
-#### 3.5.3. Add CPU profiling 增加 CPU profile
+#### 3.5.3. Add CPU profiling 开启处理器剖析
 
 First, edit  `main.go`  and enable profiling
 
@@ -2053,7 +2053,7 @@ sys	0m0.000s
 
 
 
-#### 3.5.5. Memory profiling
+#### 3.5.5. Memory profiling 内存性能剖析
 
 The new  `words`  profile suggests that something is allocating inside the  `readbyte`  function. We can use pprof to investigate.
 
@@ -2065,7 +2065,7 @@ defer profile.Start(profile.MemProfile).Stop()
 
 Then run the program as usual
 
-```txt
+```shell
 % go run main2.go moby.txt
 2018/08/25 14:41:15 profile: memory profiling enabled (rate 4096), /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile312088211/mem.pprof
 "moby.txt": 181275 words
@@ -2105,7 +2105,7 @@ What are some ways we can avoid this? Try them and use CPU and memory profiling 
 
 
 
-##### Alloc objects vs. inuse objects
+##### Alloc objects vs. inuse objects 比较 已分配 与 使用中（已分配，未释放） 对象
 
 Memory profiles come in two varieties, named after their  `go tool pprof`  flags
 
@@ -2121,8 +2121,8 @@ Memory profile 中大概有两个类型，在 `go tool pprof` 将其命名为
 
 
 > 有两种内存分析策略：[^qcraoPPROF]
-> 一种是当前的（这一次采集）内存或对象的分配，称为 inuse；
-> 另一种是从程序运行到现在所有的内存分配，不管是否已经被 gc 过了，称为 alloc
+> 1. 一种是当前的（这一次采集）内存或对象的分配，称为 inuse；
+> 2. 另一种是从程序运行到现在所有的内存分配，不管是否已经被 gc 过了，称为 alloc
     
 
 To demonstrate this, here is a contrived program which will allocate a bunch of memory in a controlled manner.
@@ -2198,7 +2198,7 @@ What we see is not the objects that were  _allocated_  during the profile, but t
 
 
 
-#### 3.5.6. Block profiling
+#### 3.5.6. Block profiling 阻塞剖析
 
 The last profile type we’ll look at is block profiling. We’ll use the  `ClientServer`  benchmark from the  `net/http`  package
 
@@ -2215,16 +2215,18 @@ The last profile type we’ll look at is block profiling. We’ll use the  `Clie
 
 
 
-#### 3.5.7. Thread creation profiling
+#### 3.5.7. Thread creation profiling 线程创建剖析
 
 Go 1.11 (?) added support for profiling the creation of operating system threads.
 
 Add thread creation profiling to  `godoc`  and observe the results of profiling  `godoc -http=:8080 -index`.
 
 
+Go 1.11 支持对操作系统创建过程进行剖析。
 
 
-#### 3.5.8. Framepointers
+
+#### 3.5.8. Framepointers 帧指针
 
 Go 1.7 has been released and along with a new compiler for amd64, the compiler now enables frame pointers by default.
 
@@ -2249,7 +2251,7 @@ We won’t cover these tools in this workshop, but you can read and watch a pres
 -   [Seven ways to profile a Go program](https://www.bigmarker.com/remote-meetup-go/Seven-ways-to-profile-a-Go-program)  (webcast, 60 mins)
     
 
-#### 3.5.9. Exercise
+#### 3.5.9. Exercise 练习
 
 -   Generate a profile from a piece of code you know well. If you don’t have a code sample, try profiling  `godoc`.
     
@@ -2262,7 +2264,7 @@ We won’t cover these tools in this workshop, but you can read and watch a pres
 -   If you were to generate a profile on one machine and inspect it on another, how would you do it?
 
 - 尝试对熟悉的代码执行一次 profile 。如果找不到合适的代码进行测试，可以试试对 godoc 进行 profile 。
-- 如果要在一台机器上生成 profile ，而在另一台机器上分析，如果完成？
+- 如果要在一台机器上生成 profile ，而在另一台机器上分析，如何完成？
     
 
 ## 4. Compiler optimisations 编译器优化
@@ -2493,7 +2495,7 @@ In short, don’t worry about line 22, its not important to this discussion.
 
     
 
-#### 4.2.3. Escape analysis (continued)
+#### 4.2.3. Escape analysis (continued) 继续练习
 
 This example is a little contrived. It is not intended to be real code, just an example.
 
@@ -2555,7 +2557,7 @@ Write a benchmark to provide that  `Sum`  does not allocate.
 
 
 
-### 4.3. Inlining
+### 4.3. Inlining 内联
 
 In Go function calls in have a fixed overhead; stack and preemption checks.
 Go 中的函数和存在固定开销；比如维护堆栈指针 和 抢占检查（TODO) 。
@@ -3798,7 +3800,7 @@ The  `sync`  package comes with a  `sync.Pool`  type which is used to reuse comm
 
 `sync.Pool`  has no fixed size or maximum capacity. You add to it and take from it until a GC happens, then it is emptied unconditionally. This is  [by design](https://groups.google.com/forum/#!searchin/golang-dev/gc-aware/golang-dev/kJ_R6vYVYHU/LjoGriFTYxMJ):
 
-`sync.Pool`  没有固定的大小或最大容量限制. 
+`sync.Pool`  没有固定的大小，也不限制最大容量. 
 你可以往 Pool 中添加对象，在垃圾回收(GC)前取出这个对象来使用，
 发生 GC 时，会清除这个对象。
 这种行为是有意设计的 [by design](https://groups.google.com/forum/#!searchin/golang-dev/gc-aware/golang-dev/kJ_R6vYVYHU/LjoGriFTYxMJ):
@@ -3806,7 +3808,7 @@ The  `sync`  package comes with a  `sync.Pool`  type which is used to reuse comm
 
 > If before garbage collection is too early and after garbage collection too late, then the right time to drain the pool must be during garbage collection. That is, the semantics of the Pool type must be that it drains at each garbage collection. — Russ Cox
 
-> 在 GC 之前放水太早，而 GC 之后放水太晚，最好的时机就是在垃圾回收的过程中给 pool 放水。 因为 Pool 类型的语意就决定了，必须在垃圾回收的过程中给池子放水，
+> 在 GC 之前清理 Pool 有些早，而 GC 之后清理 Pool 又太晚，最好的时机就是在垃圾回收的过程中清理 Pool 。 因为 Pool 类型的语意决定，必须在垃圾回收的过程中清理 Pool 。
 
 sync.Pool in action
 
