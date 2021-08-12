@@ -264,6 +264,35 @@ $ chmod 700 ~/.ssh/*
 $ chmod 600 ~/.ssh/authorized_keys
 ```
 
+#### expect
+
+把以下文件保存到 ~/tool/bin/sshdomain ，然后再把 ~/tool/bin 添加到 /etc/paths 中，
+重启 terminal 后， Mac 中就能直接输入 sshdomain 登录到 ssh 后台了
+
+
+```sh
+#!/usr/bin/expect
+
+# https://segmentfault.com/a/1190000019464936
+
+# 设置超时时间，单位秒
+set timeout 10
+
+# 主要功能是给ssh运行进程加个壳，用来传递交互指令
+# ssh -A 是转发密钥设置，用于有堡垒机的场景，一般情况下不需要
+spawn ssh -A  yourname@yourdomain.com
+
+# 判断上次输出结果里是否包含 Password: 的字符串，如果有则立即返回，否则就等待一段时间后返回，这里等待时长就是前面设置的 10秒
+expect "*password"
+
+# 发送密码 \r 表示字符串结束
+send "yourpassword\r"
+
+# 执行完成后保持交互状态，把控制权交给控制台，这个时候就可以手工操作了。
+# 如果没有这一句登录完成后会退出，而不是留在远程终端上。
+interact
+```
+
 
 
 #### tmux 持久化远程 ssh 会话

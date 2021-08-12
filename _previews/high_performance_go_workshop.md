@@ -3843,7 +3843,11 @@ Go 1.13 版本在 GC 时清理 sync.Pool 的过程进行了优化。[^GoSmoothPo
 
 > 这次优化引入了 victim 机制。GC 次清理 Pool 中 primary 的缓存对象时(Object)，会先放到 victim 队列中，第二次 GC 过程才会丢弃 victim 中的数据。这样能维护一种相对稳定的状态，（大致上）没有新的内存分配操作，但是 Pool 使用率下降时，缓存对象会在两次 GC 后销毁。
 
-> NOTE: 我把 victim 理解成伤员队列。即这些缓存数据本次 GC 时不用了，如果本次 GC 过后，立即有 Get() 申请对象，刚 pool 中已经空，就会尝试复用 viticim 队列的对象。如果情况紧急，受伤的士兵(victim)，也会立即被派往商场。
+> NOTE: 我把 victim 理解成伤员队列。即这些缓存数据本次 GC 时不用了，如果本次 GC 过后，立即有 Get() 申请对象，刚好 primary (poolChain) 队列中已经清空，就会尝试复用 viticim 队列中的对象。[^GoSyncPool]
+> 即：
+> 1. 第一次 GC 时 poolChain 队列都是无人使用的对象，把这些对象转存到 viticim 队列（待退役的伤员），等待二次 GC 时清理（正式退役）；
+> 2. 如果第一次 GC 刚刚结束，突然有代码要申请新对象（新兵），此时 poolChain 为空，只有 allocate 内存，申请一个新成员（新兵）；
+> 3. 但是申请新成员消耗有些大，这时，就可以重新启用 victim 队列的对象（伤员），避免新的内存分配操作。
 
 
 ### 6.10. Exercises
