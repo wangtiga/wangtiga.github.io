@@ -665,6 +665,23 @@ $ sudo apt-get update
 $ sudo apt-get install golang-go
 ```
 
+#### golang goroutine id
+
+[golang faq](https://golang.org/doc/faq#no_goroutine_id)
+
+Why is there no goroutine ID?
+
+Goroutines do not have names; they are just anonymous workers. They expose no unique identifier, name, or data structure to the programmer. Some people are surprised by this, expecting the go statement to return some item that can be used to access and control the goroutine later.
+
+The fundamental reason goroutines are anonymous is so that the full Go language is available when programming concurrent code. By contrast, the usage patterns that develop when threads and goroutines are named can restrict what a library using them can do.
+
+Here is an illustration of the difficulties. Once one names a goroutine and constructs a model around it, it becomes special, and one is tempted to associate all computation with that goroutine, ignoring the possibility of using multiple, possibly shared goroutines for the processing. If the net/http package associated per-request state with a goroutine, clients would be unable to use more goroutines when serving a request.
+
+Moreover, experience with libraries such as those for graphics systems that require all processing to occur on the "main thread" has shown how awkward and limiting the approach can be when deployed in a concurrent language. The very existence of a special thread or goroutine forces the programmer to distort the program to avoid crashes and other problems caused by inadvertently operating on the wrong thread.
+
+For those cases where a particular goroutine is truly special, the language provides features such as channels that can be used in flexible ways to interact with it.
+
+
 
 
 
