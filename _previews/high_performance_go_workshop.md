@@ -2837,7 +2837,7 @@ Go is a bounds checked language. This means array and slice subscript operations
 
 For arrays, this can be done at compile time. For slices, this must be done at run time.
 
-```
+```go
 var v = make([]int, 9)
 
 var A, B, C, D, E, F, G, H, I int
@@ -2859,7 +2859,7 @@ func BenchmarkBoundsCheckInOrder(b *testing.B) {
 
 Use  `-gcflags=-S`  to disassemble  `BenchmarkBoundsCheckInOrder`. How many bounds check operations are performed per loop?
 
-```
+```go
 func BenchmarkBoundsCheckOutOfOrder(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		I = v[8]
@@ -2886,34 +2886,55 @@ Does rearranging the order in which we assign the  `A`  through  `I`  affect the
 -   What happens if  `v`  was declared as an array,  `var v [9]int`?
     
 
-## 5. Execution Tracer
+## 5. Execution Tracer 运行时追踪器
 
 The execution tracer was developed by  [Dmitry Vyukov](https://github.com/dvyukov)  for Go 1.5 and remained under documented, and under utilised, for several years.
 
 Unlike sample based profiling, the execution tracer is integrated into the Go runtime, so it does just know what a Go program is doing at a particular point in time, but  _why_.
 
-### 5.1. What is the execution tracer, why do we need it?
+tracer 由 [Dmitry Vyukov](https://github.com/dvyukov) 在 Go 1.5 版本时开发，到今天为止已经使用和维护很多年了。
+
+与基于样本的 profile 不凬， tracer 集成在 Go 的运行时中，所以它只能知道程序在特定时间点的运行状态。 但是 _为什么_ 呢？
+
+
+
+### 5.1. What is the execution tracer, why do we need it? 什么是运行时追踪器，为什么我们需要这个东西？
 
 I think its easiest to explain what the execution tracer does, and why it’s important by looking at a piece of code where the pprof,  `go tool pprof`  performs poorly.
 
 The  `examples/mandelbrot`  directory contains a simple mandelbrot generator. This code is derived from  [Francesc Campoy’s mandelbrot package](https://github.com/campoy/mandelbrot).
 
-```
+
+我们带大家用分别用 `go tool pprof` 和  tracer 分析一段有性能问题的代码，就很容易明白什么 tracer  ，以及为什么 tracer 这么重要了？
+
+在  `examples/mandelbrot`  目录有一个简单的 [曼德博集合](https://www.bilibili.com/video/BV1q7411A7Rz/) 生成器。 这段代码来自 [Francesc Campoy’s mandelbrot package](https://github.com/campoy/mandelbrot) 。
+
+
+
+```sh
 cd examples/mandelbrot
 go build && ./mandelbrot
 ```
 
 If we build it, then run it, it generates something like this
 
+我们编译运行后，会生成如下这样的图形
+
 ![mandelbrot](https://dave.cheney.net/high-performance-go-workshop/images/mandelbrot.png)
 
-#### 5.1.1. How long does it take?
+
+
+#### 5.1.1. How long does it take? 生成图像大概需要多久？
 
 So, how long does this program take to generate a 1024 x 1024 pixel image?
 
 The simplest way I know how to do this is to use something like  `time(1)`.
 
-```
+这个程序生成 1024 x 1024 像素的图像时，花费多久时间？
+
+最简单的办法是使用 time 命令测量程序的运行时间。
+
+```sh
 % time ./mandelbrot
 real    0m1.654s
 user    0m1.630s
@@ -2922,7 +2943,9 @@ sys     0m0.015s
 
 Don’t use  `time go run mandebrot.go`  or you’ll time how long it takes to  _compile_  the program as well as run it.
 
-#### 5.1.2. What is the program doing?
+不要运行  `time go run mandebrot.go` 命令，否则会把 _编译_ 程序花费的时间也计算在内。
+
+#### 5.1.2. What is the program doing? 这个程序做什么？
 
 So, in this example the program took 1.6 seconds to generate the mandelbrot and write to to a png.
 
@@ -2932,20 +2955,35 @@ One way to answer that question would be to use Go’s built in pprof support to
 
 Let’s try that.
 
-### 5.2. Generating the profile
+示例程序花费约 1.6s 时间生成了一个 mandelbrot 图像并写入 png 文件。
+
+这个程序运行效率高不高？还能优化得更快吗？
+
+可以先用 Go 内置的 pprof 工具对程序做一次剖析再回答这量。
+
+我们试－试。
+
+
+### 5.2. Generating the profile 生成剖析文件
 
 To turn generate a profile we need to either
 
 1.  Use the  `runtime/pprof`  package directly.
-    
 2.  Use a wrapper like  `github.com/pkg/profile`  to automate this.
-    
 
-### 5.3. Generating a profile with runtime/pprof
+任选以下两种方式生成 profile 文件
+
+1. 直接使用 `runtime/pprof` 内置 package 。
+2. 使用封装好的 `github.com/pkg/profile` 包自动生成。
+
+
+### 5.3. Generating a profile with runtime/pprof  使用 runtime/pprof 生成剖析文件
 
 To show you that there’s no magic, let’s modify the program to write a CPU profile to  `os.Stdout`.
 
-```
+使用很简单，修改代码把 CPU 剖析结果写入 `os.Stdout` 。
+
+```go
 
 import "runtime/pprof"
 
@@ -2956,28 +2994,43 @@ func main() {
 
 By adding this code to the top of the  `main`  function, this program will write a profile to  `os.Stdout`.
 
-```
+把上面的代码添加到 main 函数的最开头，程序就会把 profile 结果写到 os.Stdout 中。
+
+```go
 cd examples/mandelbrot-runtime-pprof
 go run mandelbrot.go > cpu.pprof
 ```
 
 We can use  `go run`  in this case because the cpu profile will only include the execution of  `mandelbrot.go`, not its compilation.
 
-#### 5.3.1. Generating a profile with github.com/pkg/profile
+我们这里直接使用 go run 运行代码，因为 cpu profile 结果仅包含 mandelbrot.go 的执行过程，不会包含编译过程。
+
+
+
+#### 5.3.1. Generating a profile with github.com/pkg/profile 使用 github.com/pkg/profile 生成剖析文件
 
 The previous slide showed a super cheap way to generate a profile, but it has a few problems.
 
 -   If you forget to redirect the output to a file then you’ll blow up that terminal session. 😞 (hint:  `reset(1)`  is your friend)
-    
 -   If you write anything else to  `os.Stdout`, for example,  `fmt.Println`  you’ll corrupt the trace.
-    
+
+上面的代码是生成 profile 的最简单的方式，但它有一些问题。
+
+- 如果你忘记重定向输出到文件，会破坏终端会话。（提示：可用用 reset 命令解决） 
+- 如果你调用了某些函数向 os.Stdout 写数据，比如， fmt.Println ，就会破坏 profile 文件的数据
+  
 
 The recommended way to use  `runtime/pprof`  is to  [write the trace to a file](https://godoc.org/runtime/pprof#hdr-Profiling_a_Go_program). But, then you have to make sure the trace is stopped, and file is closed before your program stops, including if someone `^C’s it.
 
+使用 `runtime/pprof` 官方建议方法请参考 [Profiling a Go program](https://godoc.org/runtime/pprof#hdr-Profiling_a_Go_program). 
+另外，一定要确认程序停止前，停止 trace 并关闭文件，尤其是人为 `^C` 结束程序的情况。
+
+
 So, a few years ago I wrote a  [package](https://godoc.org/github.gom/pkg/profile)  to take care of it.
 
-```
+所以，我在几年前写了一个 [package](https://godoc.org/github.gom/pkg/profile) 来处理这些情况。
 
+```go
 import "github.com/pkg/profile"
 
 func main() {
@@ -2986,7 +3039,9 @@ func main() {
 
 If we run this version, we get a profile written to the current working directory
 
-```
+运行程序后，会将 profile 文件写入当前目录。
+
+```sh
 % go run mandelbrot.go
 2017/09/17 12:22:06 profile: cpu profiling enabled, cpu.pprof
 2017/09/17 12:22:08 profile: cpu profiling disabled, cpu.pprof
@@ -2994,7 +3049,10 @@ If we run this version, we get a profile written to the current working director
 
 Using  `pkg/profile`  is not mandatory, but it takes care of a lot of the boilerplate around collecting and recording traces, so we’ll use it for the rest of this workshop.
 
-#### 5.3.2. Analysing the profile
+不强制使用 `pkg/profile` ，但这个 package 简化了收集和记录 trace 信息的代码，所以后面会使用它进行演示。
+
+
+#### 5.3.2. Analysing the profile 分析剖析结果
 
 Now we have a profile, we can use  `go tool pprof`  to analyse it.
 
@@ -3106,7 +3164,7 @@ This tool is a little bit different to  `go tool pprof`. The execution tracer is
 
 We can see from the trace that the program is only using one cpu.
 
-```
+```go
 func seqFillImg(m *img) {
 	for i, row := range m.m {
 		for j := range row {
