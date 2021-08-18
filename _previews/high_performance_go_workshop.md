@@ -3023,12 +3023,12 @@ The previous slide showed a super cheap way to generate a profile, but it has a 
 The recommended way to use  `runtime/pprof`  is to  [write the trace to a file](https://godoc.org/runtime/pprof#hdr-Profiling_a_Go_program). But, then you have to make sure the trace is stopped, and file is closed before your program stops, including if someone `^C’s it.
 
 使用 `runtime/pprof` 官方建议方法请参考 [Profiling a Go program](https://godoc.org/runtime/pprof#hdr-Profiling_a_Go_program). 
-另外，一定要确认程序停止前，停止 trace 并关闭文件，尤其是人为 `^C` 结束程序的情况。
+另外，一定要确认程序停止前，停止 trace 并关闭文件，尤其要处理好人为 `Ctrl + C` 结束程序的情况。
 
 
 So, a few years ago I wrote a  [package](https://godoc.org/github.gom/pkg/profile)  to take care of it.
 
-所以，我在几年前写了一个 [package](https://godoc.org/github.gom/pkg/profile) 来处理这些情况。
+所以，我在几年前写了一个 [package](https://godoc.org/github.gom/pkg/profile) 专门处理这些细节。
 
 ```go
 import "github.com/pkg/profile"
@@ -3056,17 +3056,39 @@ Using  `pkg/profile`  is not mandatory, but it takes care of a lot of the boiler
 
 Now we have a profile, we can use  `go tool pprof`  to analyse it.
 
-```
+生成了 profile 文件后，我们可以用 `go tool pprof` 来分析它。
+
+```sh
 % go tool pprof -http=:8080 cpu.pprof
 ```
 
 In this run we see that the program ran for 1.81s seconds (profiling adds a small overhead). We can also see that pprof only captured data for 1.53 seconds, as pprof is sample based, relying on the operating system’s  `SIGPROF`  timer.
 
-Since Go 1.9 the  `pprof`  trace contains all the information you need to analyse the trace. You no longer need to also have the matching binary which produced the trace. 🎉
+我们看到这一次运行程序花了 1.81s 稍（因为开启 profile 增加了一些额外开销）。
+但 pprof 却只捕获到 1.53 秒，这是因为， pprof 是基于样本分析的，与操作系统的 `SIGPROF` 定时器有关。
+
+
+> NOTE 调用 `setitimer(which, 10ms, NULL);` 后 process 占用 CPU 超过 10ms 时 (user+system 的时间) ，process 就会收到 SIGPROF 信号。信号处理函数记录当前 callstack ，并统计相同 callstack 出现的次数，就能大致估算出占用 CPU 时间较长的函数了。 [^Go_Profiler_Internals]
+
+> NOTE linux 手册 manx 的含义 [^setitimer_SIGPROF]
+- man1 introduction to user commands
+- man2 introduction to system calls
+- man7 introduction to administration and privileged commands
+
+
+
+
+
+
+> Since Go 1.9 the  `pprof`  trace contains all the information you need to analyse the trace. You no longer need to also have the matching binary which produced the trace. 🎉
+
+> 从 Go 1.9 开始 pprof 的 trace 文件已经包含了所有需要的信息。不必提供生成 trace 文件的二进制程序，也能进行分析了。
 
 We can use the  `top`  pprof function to sort functions recorded by the trace
 
-```
+可以使用 pprof 的 `top` 命令对 trace 统计的函数信息进行排序。
+
+```sh
 % go tool pprof cpu.pprof
 Type: cpu
 Time: Mar 24, 2019 at 5:18pm (CET)
@@ -3090,9 +3112,15 @@ Showing top 10 nodes out of 35
 
 We see that the  `main.fillPixel`  function was on the CPU the most when pprof captured the stack.
 
+可以看到，pprof 所捕获的 stack 信息中，占用 CPU 时间最多是 `main.fillPixel` 函数。
+
 Finding  `main.paint`  on the stack isn’t a surprise, this is what the program does; it paints pixels. But what is causing  `paint`  to spend so much time? We can check that with the  _cummulative_  flag to  `top`.
 
-```
+还有 `main.paint` 也占用了较多的 CPU 时间，这也在意料之内，因为程序的主要工作确实集中在绘制像素上。
+但到底是什么原因导致 `paint` 占用了这么多时间呢？
+我们给 top 命令加上 cummulative 标志看看。
+
+```sh
 (pprof) top --cum
 Showing nodes accounting for 1630ms, 85.34% of 1910ms total
 Showing top 10 nodes out of 35
@@ -3113,21 +3141,33 @@ This is sort of suggesting that  `main.fillPixed`  is actually doing most of the
 
 You can also visualise the profile with the  `web`  command, which looks like this:
 
-```txt
-Type: cpuTime: Sep 17, 2017 at 12:22pm (AEST)Duration: 1.81s, Total samples = 1.53s (84.33%)Showing nodes accounting for 1.53s, 100% of 1.53s totalmainpaintmandelbrot.go1s (65.36%)runtimemainproc.go0 of 1.53s (100%)mainmainmandelbrot.go0 of 1.53s (100%)1.53smainfillPixelmandelbrot.go0.27s (17.65%)of 1.27s (83.01%)1s(inline)image/pngEncodewriter.go0 of 0.26s (16.99%)0.26smainseqFillImgmandelbrot.go0 of 1.27s (83.01%)1.27sruntimemallocgcmalloc.go0.13s (8.50%)of 0.16s (10.46%)runtime(*mcache)nextFreemalloc.go0 of 0.03s (1.96%)0.03simage/png(*encoder)writeImagewriter.go0 of 0.19s (12.42%)main(*img)Atmandelbrot.go0 of 0.18s (11.76%)0.11simage/pngfilterwriter.go0.01s (0.65%)0.01scompress/zlib(*Writer)Writewriter.go0 of 0.07s (4.58%)0.07simage/png(*Encoder)Encodewriter.go0 of 0.26s (16.99%)image/png(*encoder)writeIDATswriter.go0 of 0.19s (12.42%)0.19simage/pngopaquewriter.go0 of 0.07s (4.58%)0.07sruntimeconvT2Inoptriface.go0 of 0.18s (11.76%)0.18ssyscallSyscallasm_darwin_amd64.s0.05s (3.27%)0.16sruntimememmovememmove_amd64.s0.02s (1.31%)0.02scompress/flate(*compressor)deflatedeflate.go0.01s (0.65%)of 0.07s (4.58%)compress/flate(*compressor)findMatchdeflate.go0 of 0.01s (0.65%)0.01scompress/flate(*compressor)writeBlockdeflate.go0 of 0.05s (3.27%)0.05sruntimemmapsys_darwin_amd64.s0.02s (1.31%)compress/flate(*huffmanBitWriter)writehuffman_bit_writer.go0 of 0.05s (3.27%)compress/flate(*dictWriter)Writedeflate.go0 of 0.05s (3.27%)0.05scompress/flate(*huffmanBitWriter)writeTokenshuffman_bit_writer.go0 of 0.05s (3.27%)compress/flate(*huffmanBitWriter)writeBitshuffman_bit_writer.go0 of 0.01s (0.65%)0.01scompress/flate(*huffmanBitWriter)writeCodehuffman_bit_writer.go0 of 0.04s (2.61%)0.04sruntimesystemstackasm_amd64.s0 of 0.03s (1.96%)runtime(*mcache)nextFreefunc1malloc.go0 of 0.02s (1.31%)0.02sruntime(*mheap)allocfunc1mheap.go0 of 0.01s (0.65%)0.01scompress/flatematchLendeflate.go0.01s (0.65%)runtime(*mcentral)growmcentral.go0 of 0.02s (1.31%)runtime(*mheap)allocmheap.go0 of 0.01s (0.65%)0.01sruntimeheapBitsinitSpanmbitmap.go0 of 0.01s (0.65%)0.01sruntimememclrNoHeapPointersmemclr_amd64.s0.01s (0.65%)bufio(*Writer)Flushbufio.go0 of 0.05s (3.27%)image/png(*encoder)Writewriter.go0 of 0.05s (3.27%)0.05sbufio(*Writer)Writebufio.go0 of 0.05s (3.27%)0.05scompress/flate(*Writer)Writedeflate.go0 of 0.07s (4.58%)compress/flate(*compressor)writedeflate.go0 of 0.07s (4.58%)0.07s0.01s0.07scompress/flate(*huffmanBitWriter)writeBlockhuffman_bit_writer.go0 of 0.05s (3.27%)0.05s0.05s0.01s0.05s0.04s0.07simage/png(*encoder)writeChunkwriter.go0 of 0.05s (3.27%)0.05sos(*File)Writefile.go0 of 0.05s (3.27%)0.05s0.19s0.26s0.07sinternal/poll(*FD)Writefd_unix.go0 of 0.05s (3.27%)syscallWritesyscall_unix.go0 of 0.05s (3.27%)0.05s1.27sos(*File)writefile_unix.go0 of 0.05s (3.27%)0.05s0.05s0.03sruntime(*mcache)refillmcache.go0 of 0.02s (1.31%)0.02sruntime(*mcentral)cacheSpanmcentral.go0 of 0.02s (1.31%)0.02s0.02s0.01sruntime(*mheap)alloc_mmheap.go0 of 0.01s (0.65%)0.01sruntime(*mheap)allocSpanLockedmheap.go0 of 0.01s (0.65%)runtime(*mheap)growmheap.go0 of 0.01s (0.65%)0.01s0.01sruntime(*mheap)sysAllocmalloc.go0 of 0.01s (0.65%)0.01sruntimesysMapmem_darwin.go0 of 0.01s (0.65%)0.01sruntimenewMarkBitsmheap.go0 of 0.01s (0.65%)0.01sruntimenewArenaMayUnlockmheap.go0 of 0.01s (0.65%)runtimesysAllocmem_darwin.go0 of 0.01s (0.65%)0.01s0.01s0.01s0.01ssyscallwritezsyscall_darwin_amd64.go0 of 0.05s (3.27%)0.05s0.05s
-```
+可以看到按 cummulative  排序后， main.fillPixed 函数耗时最多。
 
-### 5.4. Tracing vs Profiling
+另外，还可以用 web 命令生成一个可视化的 svg 图像，就是下面这样：
+
+![](https://raw.githubusercontent.com/davecheney/high-performance-go-workshop/master/examples/mandelbrot-pkg-profile/cpu.svg)
+
+
+### 5.4. Tracing vs Profiling 追踪与剖析之间的区别
 
 Hopefully this example shows the limitations of profiling. Profiling told us what the profiler saw;  `fillPixel`  was doing all the work. There didn’t look like there was much that could be done about that.
 
 So now it’s a good time to introduce the execution tracer which gives a different view of the same program.
 
-#### 5.4.1. Using the execution tracer
+希望这个示例展示出了 profile 的局限性。
+ profile 只能分析出它能捕获取那些信息。
+我们只能定位到 fillPixel 做了很多工作，耗费了较多时间，
+但除此以外的信息我们就不知道了。
+
+
+
+#### 5.4.1. Using the execution tracer 使用追踪器
 
 Using the tracer is as simple as asking for a  `profile.TraceProfile`, nothing else changes.
 
-```
+把参数改成 profile.TraceProfile 就能使用追踪器了，很简单。
+
+```go
 
 import "github.com/pkg/profile"
 
@@ -3137,7 +3177,9 @@ func main() {
 
 When we run the program, we get a  `trace.out`  file in the current working directory.
 
-```
+运行程序后，就会在当前目录生成 trace.out 文件。
+
+```sh
 % go build mandelbrot.go
 % % time ./mandelbrot
 2017/09/17 13:19:10 profile: trace enabled, trace.out
@@ -3150,7 +3192,9 @@ sys     0m0.020s
 
 Just like pprof, there is a tool in the  `go`  command to analyse the trace.
 
-```
+与 pprof 类似， go 命令也提供了相关工具分析 trace 。
+
+```sh
 % go tool trace trace.out
 2017/09/17 12:41:39 Parsing trace...
 2017/09/17 12:41:40 Serializing trace...
@@ -3160,9 +3204,28 @@ Just like pprof, there is a tool in the  `go`  command to analyse the trace.
 
 This tool is a little bit different to  `go tool pprof`. The execution tracer is reusing a lot of the profile visualisation infrastructure built into Chrome, so  `go tool trace`  acts as a server to translate the raw execution trace into data which Chome can display natively.
 
-#### 5.4.2. Analysing the trace
+这个工具与 go tool pprof 有一点区别。
+追踪器复用了很多 Chrome 的可视化工具，
+即 go tool trace 运行起来后类似一个 HTTP server ，它直接将 trace 信息转换成图像，由 Chrome 显示出来。
+
+> NOTE 实现上 go tool pprof 与 go tool trace 都可以启动一个 HTTP server 显示图形化的分析结果了。我目前用的 go1.16.5 版本中，都支持下面这样的参数:
+```sh
+ % go tool pprof -http=:8080 cpu.pprof
+ Serving web UI on http://localhost:8080
+
+ % go tool trace -http=:8080 trace.out 
+ 2021/08/15 17:59:56 Parsing trace...
+ 2021/08/15 18:00:03 Splitting trace...
+ 2021/08/15 18:00:20 Opening browser. Trace viewer is listening on http://[::]:8080
+```
+
+
+
+#### 5.4.2. Analysing the trace 分析追踪信息
 
 We can see from the trace that the program is only using one cpu.
+
+从 trace 的分析结果中，可推推断出程序只用了一个 CPU 。
 
 ```go
 func seqFillImg(m *img) {
@@ -3173,12 +3236,27 @@ func seqFillImg(m *img) {
 	}
 }
 ```
-
+默认 
 This isn’t a surprise, by default  `mandelbrot.go`  calls  `fillPixel`  for each pixel in each row in sequence.
+
+这也不奇怪， mandelbrot.go 代码中是逐行调用 fillPixel 处理每个像素的。
 
 Once the image is painted, see the execution switches to writing the  `.png`  file. This generates garbage on the heap, and so the trace changes at that point, we can see the classic saw tooth pattern of a garbage collected heap.
 
+图像绘制完成后，就开始写 png 文件。
+此时会在堆在产生大量待回收的垃圾，
+追踪器分析结果中也能看到，从这个点开始，heap 状态出现一些锯齿状的图像，这是 GC 回收 heap 导致的典型现象。
+
+
+> NOTE 浏览器中打开 `View trace` 页面能观察到一些概览。
+> 包含 goroutine 数量，  heap 分配情况，threads 创建和销毁情况，以及各个 CPU 核心上运行的 goroutine 情况。
+> 从这里的状态可对程序的运行状态进行一些推断。
+
+
 The trace profile offers timing resolution down to the  _microsecond_  level. This is something you just can’t get with external profiling.
+
+分析器的剖析结果能显示 毫秒 级别的时序统计数据。
+外部剖析工具肯定做不到的。
 
 go tool trace
 
@@ -4252,3 +4330,7 @@ func initPPROF() {
 [^GoSyncPool]: [深度分析 Golang sync.Pool 底层原理](https://mp.weixin.qq.com/s/_GxRIzVJ2YKZkZms0wYqRg)
 
 [^GoSmoothPoolGCWithVictim]: [sync: smooth out Pool behavior over GC with a victim cache](https://github.com/golang/go/commit/2dcbf8b3691e72d1b04e9376488cef3b6f93b286#diff-491b0013c82345bf6cfa937bd78b690d)
+
+[^setitimer_SIGPROF]: [setitimer SIGPROF](https://man7.org/linux/man-pages/man2/setitimer.2.html)
+
+[^Go_Profiler_Internals]: [Go Profiler Internals](https://www.instana.com/blog/go-profiler-internals/)
