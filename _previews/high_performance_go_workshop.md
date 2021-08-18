@@ -3236,7 +3236,7 @@ func seqFillImg(m *img) {
 	}
 }
 ```
-默认 
+
 This isn’t a surprise, by default  `mandelbrot.go`  calls  `fillPixel`  for each pixel in each row in sequence.
 
 这也不奇怪， mandelbrot.go 代码中是逐行调用 fillPixel 处理每个像素的。
@@ -3255,52 +3255,45 @@ Once the image is painted, see the execution switches to writing the  `.png`  fi
 
 The trace profile offers timing resolution down to the  _microsecond_  level. This is something you just can’t get with external profiling.
 
-分析器的剖析结果能显示 毫秒 级别的时序统计数据。
-外部剖析工具肯定做不到的。
+追踪器的分析结果能显示 毫秒 级别的时序统计数据。
+其他分析工具肯定做不到的。
 
-go tool trace
-
-Before we go on there are some things we should talk about the usage of the trace tool.
-
--   The tool uses the javascript debugging support built into Chrome. Trace profiles can only be viewed in Chrome, they won’t work in Firefox, Safari, IE/Edge. Sorry.
-    
--   Because this is a Google product, it supports keyboard shortcuts; use  `WASD`  to navigate, use  `?`  to get a list.
-    
--   Viewing traces can take a  **lot**  of memory. Seriously, 4Gb won’t cut it, 8Gb is probably the minimum, more is definitely better.
-    
--   If you’ve installed Go from an OS distribution like Fedora, the support files for the trace viewer may not be part of the main  `golang`  deb/rpm, they might be in some  `-extra`  package.
-    
-
-
-> Go Execution Tracer [^GoExecutionTracer]
+> go tool trace
+> 
+> Before we go on there are some things we should talk about the usage of the trace tool.
 >
-> wget http://localhost:6060/debug/pprof/trace
+> -   The tool uses the javascript debugging support built into Chrome. Trace profiles can only be viewed in Chrome, they won’t work in Firefox, Safari, IE/Edge. Sorry.
+>    
+> -   Because this is a Google product, it supports keyboard shortcuts; use  `WASD`  to navigate, use  `?`  to get a list.
+>    
+> -   Viewing traces can take a  **lot**  of memory. Seriously, 4Gb won’t cut it, 8Gb is probably the minimum, more is definitely better.
+>     
+> -   If you’ve installed Go from an OS distribution like Fedora, the support files for the trace viewer may not be part of the main  `golang`  deb/rpm, they might be in some  `-extra`  package.
 >
-> go tool trace -http=:7000 ./trace.out
+    
+> go tool trace
 >
-
-
-> 使用 pprof 格式查看  trace 信息[Command Trace](https://golang.org/cmd/trace/)
-
-```txt
- go tool trace -pprof=net 7000ms_trace > 7000ms_trace.pprof.net
- go tool trace -pprof=sync 7000ms_trace > 7000ms_trace.pprof.sync
- go tool trace -pprof=syscall 7000ms_trace > 7000ms_trace.pprof.syscall
- go tool trace -pprof=sched 7000ms_trace > 7000ms_trace.pprof.sched
-
- go tool pprof -http=:7001 ./7000ms_trace.pprof.net
-```
+> 开始其他内容前，我们先讲讲 trace 工具的用法。
+> 
+> - 此工具使用 Chrome 内置的 javascript debug 功能，所以只能用 Chrome 分析 trace 文件，像 Fireforx, Safari, IE/Edge 等浏览器都不支持，抱歉。
+> - 这是 Google 的产品，所以支持键盘快捷键，可用 WASD 按键导航，使用 ? 查看完整快捷键列表。
+> - 分析 trace 过程非常耗内存。4Gb 肯定不够，最少 8Gb ，内存越大越好。
+> - 某些系统中安装的 Go 版本可能没有内置 trace 分析工具，比如 Fedora 这类系统的 golang deb/rpm 包中就没有。
+> 
 
 
 
 
-### 5.5. Using more than one CPU
+
+### 5.5. Using more than one CPU 使用多核 CPU
 
 We saw from the previous trace that the program is running sequentially and not taking advantage of the other CPUs on this machine.
 
+我们从之前的 trace 分析结果可以怎么，这个程序只使用了一个 CPU 串行运算，没有利用多核的优势。
+
 Mandelbrot generation is known as  _embarassingly_parallel_. Each pixel is independant of any other, they could all be computed in parallel. So, let’s try that.
 
-```
+```sh
 % go build mandelbrot.go
 % time ./mandelbrot -mode px
 2017/09/17 13:19:48 profile: trace enabled, trace.out
@@ -4296,6 +4289,25 @@ func initPPROF() {
                 log.Println(http.ListenAndServe(listenAddr, nil))
         }()
 }
+```
+
+> Go Execution Tracer [^GoExecutionTracer]
+>
+> wget http://localhost:6060/debug/pprof/trace?seconds=30s
+>
+> go tool trace -http=:7000 ./trace.out
+>
+
+
+> 使用 pprof 格式查看  trace 信息[Command Trace](https://golang.org/cmd/trace/)
+
+```txt
+ go tool trace -pprof=net 7000ms_trace > 7000ms_trace.pprof.net
+ go tool trace -pprof=sync 7000ms_trace > 7000ms_trace.pprof.sync
+ go tool trace -pprof=syscall 7000ms_trace > 7000ms_trace.pprof.syscall
+ go tool trace -pprof=sched 7000ms_trace > 7000ms_trace.pprof.sched
+
+ go tool pprof -http=:7001 ./7000ms_trace.pprof.net
 ```
 
 [^HighPerformanceWorkShopEN]:[High Performance Work Shop](https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#mechanical_sympathy)
