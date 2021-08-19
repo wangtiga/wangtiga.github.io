@@ -3183,7 +3183,7 @@ When we run the program, we get a  `trace.out`  file in the current working dire
 % go build mandelbrot.go
 % % time ./mandelbrot
 2017/09/17 13:19:10 profile: trace enabled, trace.out
-2017/09/17 13:19:12 profile: trace disabled, trace.out
+2017/09/17 13:19:12 profile: trace disabled, trace.out （约38K)
 
 real    0m1.740s
 user    0m1.707s
@@ -3293,11 +3293,15 @@ We saw from the previous trace that the program is running sequentially and not 
 
 Mandelbrot generation is known as  _embarassingly_parallel_. Each pixel is independant of any other, they could all be computed in parallel. So, let’s try that.
 
+mandelbroat 集合十分适合并行处理。
+每个像素都可以独立计算。
+所以我们试着优化下。
+
 ```sh
 % go build mandelbrot.go
 % time ./mandelbrot -mode px
 2017/09/17 13:19:48 profile: trace enabled, trace.out
-2017/09/17 13:19:50 profile: trace disabled, trace.out
+2017/09/17 13:19:50 profile: trace disabled, trace.out （约25M)
 
 real    0m1.764s
 user    0m4.031s
@@ -3306,6 +3310,9 @@ sys     0m0.865s
 
 So the runtime was basically the same. There was more user time, which makes sense, we were using all the CPUs, but the real (wall clock) time was about the same.
 
+相比之前单核运行花费的总时间基本相同。
+虽然 真实时间（墙上时间）基本一致，但 user time 变多了。这属于情理之中的。
+
 Let’s look a the trace.
 
 As you can see this trace generated  _much_  more data.
@@ -3313,19 +3320,38 @@ As you can see this trace generated  _much_  more data.
 -   It looks like lots of work is being done, but if you zoom right in, there are gaps. This is believed to be the scheduler.
     
 -   While we’re using all four cores, because each  `fillPixel`  is a relatively small amount of work, we’re spending a lot of time in scheduling overhead.
-    
 
-### 5.6. Batching up work
+我们分析下 trace 文件吧。
+
+你能明显发现 trace 文件变大了。
+
+- 看起来，每个 CPU 核心的工作量都变多了，但放大页面后会发现（ W 放大； S 缩小），其中有很多空隙。可以断定，这是调试器产生的空隙。
+
+- 虽然 CPU 全部四核心都用上了，但由于 fillPixel 函数完成的工作量相对总体来说太小了，太多时间都花费到调试过程。
+
+> NOTE goroutine 开的太多，每个 goroutine 完成的工作量又太小，所以造成 CPU 频繁调度，浪费时间。
+
+
+
+
+### 5.6. Batching up work  分批次处理
 
 Using one goroutine per pixel was too fine grained. There wasn’t enough work to justify the cost of the goroutine.
 
 Instead, let’s try processing one row per goroutine.
 
-```
+给每个像素一个 goroutine 的分配粒度有点太细。
+每个 goroutine 的工作量太小了。
+
+我们试试给每行一个 goroutine 。
+
+> NOTE fine grained 细粒度； coarse grained 粗粒度；
+
+```sh
 % go build mandelbrot.go
 % time ./mandelbrot -mode row
 2017/09/17 13:41:55 profile: trace enabled, trace.out
-2017/09/17 13:41:55 profile: trace disabled, trace.out
+2017/09/17 13:41:55 profile: trace disabled, trace.out（约54K)
 
 real    0m0.764s
 user    0m1.907s
@@ -3334,12 +3360,67 @@ sys     0m0.025s
 
 This looks like a good improvement, we almost halved the runtime of the program. Let’s look at the trace.
 
+这一次看起来提升很大，几乎将程序的运行时间减半了。
+直接看看 trace 文件吧。
+
 As you can see the trace is now smaller and easier to work with. We get to see the whole trace in span, which is a nice bonus.
 
 -   At the start of the program we see the number of goroutines ramp up to around 1,000. This is an improvement over the 1 << 20 that we saw in the previous trace.
     
 -   Zooming in we see  `onePerRowFillImg`  runs for longer, and as the goroutine  _producing_  work is done early, the scheduler efficiently works through the remaining runnable goroutines.
     
+
+这次的 trace 文件非常小，很容易分析。
+页面上只需要一个时间段就包含了整个 trace 的分析结果，赞。
+
+- 在程序启动的过程， goroutine 数量涨到约 1000 个，就不再增加了。对比上一次 trace 分析结果（按 row 建 goroutine 时），约创建了 2^20 = 1,048,576 个 goroutine （NOTE Goroutine analysis 页面有详细 goroutine 数量 ）。
+
+- 在 View Trace 中放大页面显示，可发现 goroutine 数量很早就不再增加，而 onePerRowFillImg 函数运行了很长时间，剩余的 goroutine 调度过程还是很高效的。
+
+
+> NOTE: 这里指的是 View Trace 菜单。当 trace 文件很大时，会对整个 trace 文件按时间分段显示；
+
+> 较小的 trace ，分析结果页面的菜单是这样：
+```html
+View trace
+Goroutine analysis
+Network blocking profile (⬇)
+Synchronization blocking profile (⬇)
+Syscall blocking profile (⬇)
+Scheduler latency profile (⬇)
+User-defined tasks
+User-defined regions
+Minimum mutator utilization
+```
+
+> 较大小的 trace ，分析结果页面的菜单是这样：
+```html
+View trace (0s-503.053527ms)
+View trace (503.053527ms-821.7136ms)
+View trace (821.7136ms-1.027754385s)
+View trace (1.027754385s-1.166073978s)
+View trace (1.166074443s-1.306796334s)
+View trace (1.30679645s-1.439181294s)
+View trace (1.439181323s-1.57482048s)
+View trace (1.574820567s-1.762615476s)
+View trace (1.762616872s-2.261745338s)
+View trace (2.261745832s-2.902762298s)
+View trace (2.902762385s-3.456024989s)
+View trace (3.456024989s-4.066428538s)
+View trace (4.06642877s-4.617241832s)
+View trace (4.617242269s-5.110484712s)
+
+Goroutine analysis
+Network blocking profile (⬇)
+Synchronization blocking profile (⬇)
+Syscall blocking profile (⬇)
+Scheduler latency profile (⬇)
+User-defined tasks
+User-defined regions
+Minimum mutator utilization
+```
+
+
 
 ### 5.7. Using workers
 
