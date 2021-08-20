@@ -3424,9 +3424,12 @@ Minimum mutator utilization
 
 
 
-### 5.7. Using workers
+### 5.7. Using workers 使用协程池 (workers 译成协程池，goroutine 译成协程)
 
 `mandelbrot.go`  supports one other mode, let’s try it.
+
+mandelbrot.go 支持协和池模式，我们试试吧。
+
 
 ```sh
 % go build mandelbrot.go
@@ -3441,7 +3444,14 @@ sys     0m1.284s
 
 So, the runtime was much worse than any previous. Let’s look at the trace and see if we can figure out what happened.
 
+运行时间反而变得更长了。
+分析下 trace 文件看看到底是怎么回事吧。
+
 Looking at the trace you can see that with only one worker process the producer and consumer tend to alternate because there is only one worker and one consumer. Let’s increase the number of workers
+
+通过 trace 文件分析结果会发现，协程池只有一个 goroutine ，生产者协程和消费者协程在交替运行。
+我们增加协程池的数量试试。
+
 
 ```sh
 % go build mandelbrot.go
@@ -3456,6 +3466,13 @@ sys     0m4.311s
 
 So that made it worse! More real time, more CPU time. Let’s look at the trace to see what happened.
 
+结果更差了。
+运行时长更长，耗费的 CPU 时间也更多了。
+赶紧看看 trace 文件分析下。
+
+> NOTE 打开 `Goroutine analysis` 页面，点 ` main.nWorkersFillImg.func1 N=4` 能看到 Sync Block 和 Scheduler wait 占用超过 2s，而 Execution 只有不到 1s
+
+
 That trace is a mess. There were more workers available, but the seemed to spend all their time fighting over the work to do.
 
 This is because the channel is  _unbuffered_. An unbuffered channel cannot send until there is someone ready to receive.
@@ -3469,7 +3486,25 @@ This is because the channel is  _unbuffered_. An unbuffered channel cannot send 
 
 What we see here is a lot of latency introduced by the unbuffered channel. There are lots of stops and starts inside the scheduler, and potentially locks and mutexes while waiting for work, this is why we see the  `sys`  time higher.
 
-### 5.8. Using buffered channels
+trace 分析结果很乱。
+虽然协程池的协程数量变多了，但 goroutine 大多时间都在等开工。
+
+这是因为我们使用的是 _无缓冲_ channel 类型。
+向无缓冲 channel 发送数据时，发送方也会一直阻塞，直到有接收方接收数据。
+
+- 消费者协程从 channel 接收任务数据的之前，生产者无法发出数据。
+
+- 生产者向 channel 发任务后，消费者协程才能接收任务（否则消费者一直处在阻塞等待的状态）。所以这些协程在阻塞等待的时候互相竞争。
+
+- 发送方没有特权，没法优先给已经处理 running 状态的消费者协程发任务数据。
+
+所以我们看到，由于使用无缓冲 channel 产生大量延迟。
+调度过程有大量 start 和 stop 操作，
+在协程等待接收任务的过程出现 lock 和 mutex ，这就是存在大量 sys （CPU 内核态）运行时长的原因。
+
+
+
+### 5.8. Using buffered channels 使用带缓冲的 channel 
 
 ```go
 import "github.com/pkg/profile"
