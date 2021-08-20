@@ -3381,6 +3381,7 @@ As you can see the trace is now smaller and easier to work with. We get to see t
 > NOTE: 这里指的是 View Trace 菜单。当 trace 文件很大时，会对整个 trace 文件按时间分段显示；
 
 > 较小的 trace ，分析结果页面的菜单是这样：
+
 ```html
 View trace
 Goroutine analysis
@@ -3394,6 +3395,7 @@ Minimum mutator utilization
 ```
 
 > 较大小的 trace ，分析结果页面的菜单是这样：
+
 ```html
 View trace (0s-503.053527ms)
 View trace (503.053527ms-821.7136ms)
@@ -3426,7 +3428,7 @@ Minimum mutator utilization
 
 `mandelbrot.go`  supports one other mode, let’s try it.
 
-```
+```sh
 % go build mandelbrot.go
 % time ./mandelbrot -mode workers
 2017/09/17 13:49:46 profile: trace enabled, trace.out
@@ -3441,7 +3443,7 @@ So, the runtime was much worse than any previous. Let’s look at the trace and 
 
 Looking at the trace you can see that with only one worker process the producer and consumer tend to alternate because there is only one worker and one consumer. Let’s increase the number of workers
 
-```
+```sh
 % go build mandelbrot.go
 % time ./mandelbrot -mode workers -workers 4
 2017/09/17 13:52:51 profile: trace enabled, trace.out
@@ -3469,15 +3471,14 @@ What we see here is a lot of latency introduced by the unbuffered channel. There
 
 ### 5.8. Using buffered channels
 
-```
-
+```go
 import "github.com/pkg/profile"
 
 func main() {
 	defer profile.Start(profile.TraceProfile, profile.ProfilePath(".")).Stop()
 ```
 
-```
+```sh
 % go build mandelbrot.go
 % time ./mandelbrot -mode workers -workers 4
 2017/09/17 14:23:56 profile: trace enabled, trace.out
