@@ -3537,11 +3537,25 @@ Using this method we got nearly the same speed using a channel to hand off work 
 
 Modify  `nWorkersFillImg`  to work per row. Time the result and analyse the trace.
 
+非常接近之前 按像素行数创建 goroutine 模式 的测试结果。
+
+分析带缓冲 channel 的 trace 文件可发现：
+
+- 生产者很快就把 channel 填满了，不必阻塞等待消费者接收任务。
+- 消费者也能快速从 channel 获取任务，也不必阻塞等生产者。
+
+使用带缓冲的通知后，我们按像素分配 goroutine 就能达到近似之前 按行分配 goroutine 的速度。
+
+可以尝试修改 nWorkersFillImg 函数，变成按行分配 goroutine 的方式。比对下执行时间，并分析 trace 文件。
+
+> NOTE 按行分配 goroutine ＋ 带缓冲的 channel ，应该是效率最高的一种方法了。具体代码参考 [high-performance-go-workshop/examples/mandelbrot-buffered/exercise/mandelbrot.go](https://github.com/davecheney/high-performance-go-workshop/blob/master/examples/mandelbrot-buffered/exercise/mandelbrot.go#L131)
+
+
 ### 5.9. Mandelbrot microservice
 
 It’s 2019, generating Mandelbrots is pointless unless you can offer them on the internet as a serverless microservice. Thus, I present to you,  _Mandelweb_
 
-```
+```sh
 % go run examples/mandelweb/mandelweb.go
 2017/09/17 15:29:21 listening on http://127.0.0.1:8080/
 ```
