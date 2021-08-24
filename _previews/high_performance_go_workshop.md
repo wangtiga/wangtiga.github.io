@@ -3209,6 +3209,7 @@ This tool is a little bit different to  `go tool pprof`. The execution tracer is
 即 go tool trace 运行起来后类似一个 HTTP server ，它直接将 trace 信息转换成图像，由 Chrome 显示出来。
 
 > NOTE 实现上 go tool pprof 与 go tool trace 都可以启动一个 HTTP server 显示图形化的分析结果了。我目前用的 go1.16.5 版本中，都支持下面这样的参数:
+
 ```sh
  % go tool pprof -http=:8080 cpu.pprof
  Serving web UI on http://localhost:8080
@@ -3551,9 +3552,15 @@ Modify  `nWorkersFillImg`  to work per row. Time the result and analyse the trac
 > NOTE 按行分配 goroutine ＋ 带缓冲的 channel ，应该是效率最高的一种方法了。具体代码参考 [high-performance-go-workshop/examples/mandelbrot-buffered/exercise/mandelbrot.go](https://github.com/davecheney/high-performance-go-workshop/blob/master/examples/mandelbrot-buffered/exercise/mandelbrot.go#L131)
 
 
-### 5.9. Mandelbrot microservice
+### 5.9. Mandelbrot microservice 曼德博 微服务
 
 It’s 2019, generating Mandelbrots is pointless unless you can offer them on the internet as a serverless microservice. Thus, I present to you,  _Mandelweb_
+
+在 2019 年，除非你把这个生成 曼德博集合 的程序做成服务放在互联网上，否则这个程序没什么实际用处。
+也就是现在要给你演示的 Mandelweb 程序。
+
+
+> NOTE 作者的意思是把生成 曼德博集合 的程序做成一个服务端程序，对外提供一个 api 接口。客户端调用接口，传递相关参数，就能生成一个符合要求的图像。
 
 ```sh
 % go run examples/mandelweb/mandelweb.go
@@ -3562,11 +3569,19 @@ It’s 2019, generating Mandelbrots is pointless unless you can offer them on th
 
 [http://127.0.0.1:8080/mandelbrot](http://127.0.0.1:8080/mandelbrot)
 
-#### 5.9.1. Tracing running applications
+
+
+#### 5.9.1. Tracing running applications 追踪运行中的程序
 
 In the previous example we ran the trace over the whole program.
 
+之前的示例中，我们运行程序的整个过程都在执行 trace 追踪。
+
 As you saw, traces can be very large, even for small amounts of time, so collecting trace data continually would generate far too much data. Also, tracing can have an impact on the speed of your program, especially if there is a lot of activity.
+
+你也看到了，即使程序的运行时间很短，生成的 trace 文件也可能非常大。
+如果持续收集 trace 信息，那产生的数据量将大到不可想像。
+另外，收集 trace 信息的过程，还会影响程序的运行效率，尤其是你的程序在工作最活跃的时候影响更大。
 
 What we want is a way to collect a short trace from a running program.
 
