@@ -79,6 +79,14 @@ node node-server.js
 
 #### rsync
 
+目标主机的 ssh 服务在 8022 端口上
+
+```shell
+rsync -avz -e "ssh -p 2232" SRC/ user@remote.host:/DEST/ 
+```
+
+脚本
+
 ```shell
 #!/bin/sh
 
@@ -87,7 +95,7 @@ set -x
 
 echo ""
 echo ""
-echo "I will upload ccmserver to targethost, and restart it!" 
+echo "I will upload bserver to targethost, and restart it!" 
 echo "  usage: deplay.sh hostitem"
 echo ""
 
@@ -229,9 +237,30 @@ sudo lsof -nP -i  :443
 - -P 表示不显示端口俗称
 - 不加 sudo 只能查看以当前用户运行的程序
 
+#### Mac OS brew 换源
+
+```shell
+git -C "$(brew --repo)" remote set-url origin https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git
+git -C "$(brew --repo homebrew/core)" remote set-url origin https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git
+```
+
+参考 https://sspai.com/post/56009
 
 
-### ssh
+#### 更改 Mac OS history 最大历史命令记录数
+
+```shell
+# history size 
+export HISTFILESIZE=1000000 
+export HISTSIZE=1000000 
+history 0  # 显示所有历史命令
+```
+
+参考  https://apple.stackexchange.com/questions/246621/cant-increase-mac-osx-bash-shell-history-length
+
+
+
+#### ssh
 
 - use public key autologin remote host, ref [ruanyifeng](https://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html)
 
