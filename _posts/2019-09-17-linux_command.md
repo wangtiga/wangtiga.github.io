@@ -498,6 +498,8 @@ sudo dd if=~/images/ubuntu.iso of=/dev/sdb
 
 ```shell
 # 读取pcap文件，并显示摘要
+# -tttt 指定显示时间格式，
+# -n 显示原始 ip port ，不转换成域名或对应端的的服务名显示。 localhost.telnet 改为 127.0.0.1.23:
 $ tcpdump -r ./lo_33434_8845.pcap -ttttN 
 2021-07-12 14:59:07.797176 IP test.33434 > test.8845: Flags [S], seq 4268287690, win 65495, options [mss 65495,sackOK,TS val 4248848834 ecr 0,nop,wscale 7], length 0
 2021-07-12 14:59:07.797181 IP test.8845 > test.33434: Flags [S.], seq 2411423277, ack 4268287691, win 65483, options [mss 65495,sackOK,TS val 4248848834 ecr 4248848834,nop,wscale 7], length 0
@@ -543,7 +545,7 @@ tcpdump -i any -C 100 -s 0 -w /tmp/ws/dump_any.pcap
 > [Linux Tools Quick Tutorial crontab ](https://linuxtools-rst.readthedocs.io/zh_CN/latest/tool/crontab.html)
 
 
-### nc netcat
+#### nc netcat
 
 ```shell
 # listen tcp
@@ -562,7 +564,7 @@ $ nc -l -u 1234
 [10 useful ncat (nc) Command Examples for Linux Systems](https://www.linuxtechi.com/nc-ncat-command-examples-linux-systems/)
 
 
-### supervisorctl
+#### supervisorctl
 
 http://supervisord.org/introduction.html
 
