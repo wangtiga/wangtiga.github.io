@@ -574,12 +574,45 @@ sudo /usr/bin/python /bin/supervisord -c /etc/supervisord.conf
 
 # reload new conf in /etc/supervisord.d/*.conf
 sudo kill -HUP `pidof supervisord`
+sudo kill -1 `pidof supervisord`
 
 # restart pragram
 sudo supervisorctl status all
 sudo supervisorctl stop xxxserver
 sudo supervisorctl start xxxserver
 ```
+
+```txt
+Linux系统中的信号 http://www.infoq.com/cn/articles/linux-signal-system
+
+在下列情况下，我们的应用进程可能会收到系统信号：
+用户空间的其他进程调用了类似kill(2)函数
+进程自身调用了类似about(3)函数
+当子进程退出时，内核会向父进程发送SIGCHLD信号
+当父进程退出时，所有子进程会收到SIGHUP信号
+当用户通过键盘终端进程（ctrl+c）时，进程会收到SIGINT信号
+当进程运行出现问题时，可能会收到SIGILL、SIGFPE、SIGSEGV等信号
+当进程在调用mmap(2)的时候失败（可能是因为映射的文件被其他进程截短），会收到SIGBUS信号
+当使用性能调优工具时，进程可能会收到SIGPROF。这一般是程序未能正确处理中断系统函数（如read(2)）。
+当使用write(2)或类似数据发送函数时，如果对方已经断开连接，进程会收到SIGPIPE信号。
+如需了解所有系统信号，参见signal(7)手册。
+
+-SIGKILL (9) 
+-HUP (1)
+-INT (2)
+-TERM (15)
+```
+
+[Intro pages](https://man7.org/linux/man-pages/index.html)
+
+- intro(1) introduction to user commands
+- intro(2) introduction to system calls
+- intro(3) introduction to library functions
+- intro(4)
+- intro(5)
+- intro(6)
+- intro(7) introduction to overview and miscellany section. (describes conventions and protocols, character set standards, the standard filesystem layout.)
+- intro(8)
 
 
 
