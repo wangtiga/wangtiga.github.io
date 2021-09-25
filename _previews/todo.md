@@ -12,6 +12,28 @@ tags:   todo
 
 ## mind
 
+### 内卷
+
+- volute 螺旋形的，拉丁语原意是 "滚动"
+    英: [vəˈl(j)uːt]    美: [və'lʊt]
+
+- volution 涡旋
+    英: [vəˈl(j)uːʃ(ə)n]    美: [və'ljʊʃən]
+
+- evolution 向外滚动，进化
+    英: [ˌiːvəˈluːʃn; ˌevəˈluːʃn]    美: [ˌevəˈluːʃn]
+
+- revolution 再次滚动，颠覆现状，革命
+    英: [ˌrevəˈluːʃn]    美: [ˌrevəˈluːʃn]
+
+- involution 向内滚动，退化，内卷
+    英: [ˌɪnvəˈluːʃ(ə)n]    美: [ˌɪnvəˈluːʃən]
+
+出自 1960 《农业内卷化 -- 印度尼西亚的生态变化过程》 Agricultural Involution
+
+> 2020.09.25 阮一峰 科技爱好者周刊（第126期）：内卷化是什么？
+
+
 ### 上善若水
 
 > 老子《道德经》第八章
