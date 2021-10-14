@@ -9,9 +9,17 @@ tags:   log
 {:toc}
 
 
-## 命令行终端 Terminus
 
-1. MIT 开源 https://github.com/Eugeny/terminus
+## http/https 代理 whistle
+
+1. MIT 开源 https://github.com/avwo/whistle
+2. whistle(读音[ˈwɪsəl]，拼音[wēisǒu])基于Node实现的跨平台web调试代理工具
+3. 类似Windows平台上的Fiddler，主要用于查看、修改HTTP、HTTPS、Websocket的请求、响应，也可以作为HTTP代理服务器使用
+
+
+## 命令行终端 Tabby（原名 Terminus)
+
+1. MIT 开源 https://github.com/Eugeny/tabby
 2. 支持 windows / mac / linux 
 3. 支持 Zmodem 协议，可用 rz sz 命令直接在 shell 终端中 上传 下载 文件。（通过堡垒机远程主机时，尤其方便）
 
