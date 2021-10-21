@@ -371,7 +371,32 @@ $ tmux new -s <session-name>
 > man tmux 能查看更详细的使用说明
 
 
-#### Linux格式化 json base64
+#### Mac 解码
+
+- 解码 base64
+
+```shell
+% echo -n "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" | base64 -d
+{"alg":"HS256","typ":"JWT"}
+```
+
+[jwt](https://go-zero.dev/cn/jwt.html?h=jwt)
+
+
+- 计算 md5
+
+```shell
+% echo -n "123456" | md5
+e10adc3949ba59abbe56e057f20f883e
+
+% echo  "123456" | md5  # 没有 -n 参数,所以实际上计算的是 123456\n 的哈希值
+f447b20a7fcbf53a5d5be013ea0b15af
+```
+
+> echo -n 表示输出字符串时,不自动追加 "\n" 这样的换行符
+
+
+#### Linux 格式化 json base64
 
 使用 jq 命令格式化 json 数据
 ```shell
