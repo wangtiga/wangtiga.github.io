@@ -226,6 +226,19 @@ tab_monitor_net
 ```
 
 
+#### Mac OS 防止耳机播放键打开 music 应用
+
+https://www.zhihu.com/question/38813017/answer/146715121
+
+```sh
+# 关闭耳机暂停键打开 itunes music 
+sudo launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
+
+# 打开 
+sudo launchctl load -w /System/Library/LaunchAgents/com.apple.rcd.plist
+```
+
+
 #### Mac OS 查看占用端口的程序
 
 https://tonydeng.github.io/2016/07/07/use-lsof-to-replace-netstat/
