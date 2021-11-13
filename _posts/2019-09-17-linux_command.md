@@ -226,6 +226,72 @@ tab_monitor_net
 ```
 
 
+#### Mac OS 命令行中复制粘贴 clipboard
+
+http://sweetme.at/2013/11/17/copy-to-and-paste-from-the-clipboard-on-the-mac-osx-command-line/
+
+```sh
+% pwd | pbcopy
+% pbpaste
+/Users/tiga
+
+% curl -i -X GET "http://qq.com" | pbcopy
+% pbpaste
+HTTP/1.1 302 Moved Temporarily
+Server: stgw/1.3.12.4_1.13.5
+Date: Fri, 05 Nov 2021 06:53:50 GMT
+Content-Type: text/html
+Content-Length: 169
+Connection: keep-alive
+Location: https://www.qq.com/
+
+<html>
+<head><title>302 Found</title></head>
+<body bgcolor="white">
+<center><h1>302 Found</h1></center>
+<hr><center>stgw/1.3.12.4_1.13.5</center>
+</body>
+</html>
+```
+
+#### Mac OS 查看当前监听的端口
+
+https://stackoverflow.com/questions/4421633/who-is-listening-on-a-given-tcp-port-on-mac-os-x
+
+```sh
+% netstat -an | grep LISTEN
+tcp6       0      0  *.6379                 *.*                    LISTEN 
+tcp4       0      0  127.0.0.1.3306         *.*                    LISTEN 
+
+% sudo lsof -iTCP -sTCP:LISTEN -n -P
+Password:
+COMMAND     PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+redis-ser 53189   ws    6u  IPv4 0xf0011292d78bdb4f      0t0  TCP *:6379 (LISTEN)
+redis-ser 53189   ws    7u  IPv6 0xf0011292d7cb8f9f      0t0  TCP *:6379 (LISTEN)
+transform 53904   ws    9u  IPv4 0xf0011292d750778f      0t0  TCP 127.0.0.1:8081 (LISTEN)
+shorturl  53967   ws   12u  IPv6 0xf0011292d7cb70ff      0t0  TCP *:8888 (LISTEN)
+```
+
+
+#### Mac OS 修改 PATH
+
+https://scriptingosx.com/2017/05/where-paths-come-from/
+
+1. vi /etc/paths 文件添加 /xx/xx/bin 目录
+2. eval `/usr/libexec/path_helper -s` 更新 PATH
+3. source /etc/profile  更新 PATH
+
+```sh
+% cat /etc/paths
+/usr/local/bin
+/usr/bin
+/bin
+/usr/sbin
+/sbin
+```
+
+
+
 #### Mac OS 防止耳机播放键打开 music 应用
 
 https://www.zhihu.com/question/38813017/answer/146715121
