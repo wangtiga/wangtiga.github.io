@@ -2948,7 +2948,8 @@ Goroutine 在 OS thread 上是多路复用。
 如果一个 Goroutine 因等待 IO 操作而 block （阻塞），那么 CPU 就会切换到其他 Goroutine 运行。
 从设计层面就隐藏了创建和管理线程的开销。
 
-> TODO 多个 goroutine 有可能运行在一个 CPU 上，那么一个 goroutine 有可能这一秒在 CPU1 上运行，下一秒在CPU2 上运行吗？ 
+> NOTE 多个 goroutine 有可能运行在一个 CPU 上，那么一个 goroutine 有可能这一秒在 CPU1 上运行，下一秒在CPU2 上运行吗？ 
+> 了解 GMP 的原理就知道,  M 会从其他 MP 中偷取 G 的，所以一个 G 可能在多个不同 CPU 核心运行。
 
 
 Prefix a function or method call with the  `go`keyword to run the call in a new goroutine. When the call completes, the goroutine exits, silently. (The effect is similar to the Unix shell's  `&`  notation for running a command in the background.)
