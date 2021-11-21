@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "[译]Prometheus 指标类型"
-date:   2021-04-24 23:23:00 +0800
-tags:   tech
+title: "[译]Prometheus 指标类型"
+date: 2021-04-24 23:23:00 +0800
+tags: tech
 ---
 
 * category

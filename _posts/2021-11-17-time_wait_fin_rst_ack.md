@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "如果 client 向 TIME WAIT 状态的 server 重传 FIN 时， server 会回复 RST 还是 ACK ？"
-date:   2021-11-17 12:00:00 +0800
-tags:   tech
+title: "如果 client 向 TIME WAIT 状态的 server 重传 FIN 时， server 会回复 RST 还是 ACK ？"
+date: 2021-11-17 12:00:00 +0800
+tags: tech
 ---
 
 * category

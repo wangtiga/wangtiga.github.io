@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Jekyll In Termux"
-date:   2021-01-24 09:22:00 +0800
-tags:   tech
+title: "Jekyll In Termux"
+date: 2021-01-24 09:22:00 +0800
+tags: tech
 ---
 
 

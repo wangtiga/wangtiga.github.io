@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "[译] Effective Go"
-date:   2019-06-01 09:22:00 +0800
-tags: golang
+title: "[译] Effective Go"
+date: 2019-06-01 09:22:00 +0800
+tags: tech
 ---
 
 * category

@@ -2,7 +2,7 @@
 layout: post
 title:  "[译] Go Module 简介 / 试用 Go Module Proxy"
 date:   2019-09-01 18:00:00 +0800
-tags:   golang
+tags:   tech
 ---
 
 * category

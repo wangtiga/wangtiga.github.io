@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Chinese Communist Revolution"
-date:   2021-04-04 11:00:00 +0800
-tags:   exam
+title: "Chinese Communist Revolution"
+date: 2021-04-04 11:00:00 +0800
+tags: exam
 ---
 
 * category

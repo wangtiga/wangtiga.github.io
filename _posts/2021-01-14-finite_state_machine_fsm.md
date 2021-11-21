@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "[译]有限状态机"
-date:   2021-01-14 12:00:00 +0800
-tags:   todo
+title: "[译]有限状态机"
+date: 2021-01-14 12:00:00 +0800
+tags: tech 
 mermaid: true
 ---
 

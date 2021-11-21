@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Go语言入门资料"
-date:   2019-07-17 18:42:00 +0800
-tags: golang
+title: "Go语言入门资料"
+date: 2019-07-17 18:42:00 +0800
+tags: tech
 ---
 
 * category
