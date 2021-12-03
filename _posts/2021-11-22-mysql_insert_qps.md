@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "mysql 插入耗时大概是多少？"
-date:   2021-11-22 12:00:00 +0800
-tags:   tech
+title: "MySQL 插入耗时大概是多少？"
+date: 2021-11-22 12:00:00 +0800
+tags: tech
 ---
 
 * category
@@ -10,7 +10,7 @@ tags:   tech
 
 
 
-##  mysql 插入耗时大概是多少？
+##  MySQL 插入耗时大概是多少？
 
 [^qcrao_architecture]: [搞定系统设计 02：估算的一些方法 ](https://mp.weixin.qq.com/s/fH-AJpE99ulSLbC_1jxlqw)
 [^gozero_shorturl]: [gozero shorturl ](https://go-zero.dev/cn/shorturl.html?h=short)
