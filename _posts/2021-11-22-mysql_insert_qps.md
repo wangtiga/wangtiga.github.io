@@ -98,7 +98,6 @@ Minimum number of seconds to run all queries: 226.226 seconds
 Maximum number of seconds to run all queries: 226.226 seconds 
 Number of clients running queries: 1 
 Average number of queries per client: 1000000 
-ws@koolearndeMacBook-Pro test % [server exited unexpectedly] 
 
 
 % mysqlslap -h127.0.0.1 -uroot -p123456 --concurrency=1 --iterations=1 --auto-generate-sql --auto-generate-sql-load-type=write --auto-generate-sql-add-autoincrement --engine=innodb --number-of-queries=1 --only-print 

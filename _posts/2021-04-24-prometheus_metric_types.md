@@ -288,4 +288,61 @@ scrape_configs:
 # "prometheus.yml" 39 行 --38%--  
 ```
 
+- 查询
+
+
+- prometheus.yml 的 `scrape_interval` 配置基至少 500ms 才能让 `irate(rpc_requests_total {} [1s])` 查询出结果,
+
+设置 600ms 时，查询结果是不连续的;
+```json
+{appName: "apptest1", time: "2022-09-20 17:26:32", count: "128", state: "success"}
+{appName: "apptest1", time: "2022-09-20 17:26:31", count: "127", state: "success"}
+{appName: "apptest1", time: "2022-09-20 17:26:29", count: "128", state: "success"}
+{appName: "apptest1", time: "2022-09-20 17:26:28", count: "128", state: "success"}
+{appName: "apptest1", time: "2022-09-20 17:26:26", count: "128", state: "success"}
+{appName: "apptest1", time: "2022-09-20 17:26:25", count: "128", state: "success"}
+```
+
+- prometheus client 端 QueryRange 接口 Range.Step 参数含义
+
+在 prometheus client 端 QueryRange 接口中 Range.Step 表示返回的结果列表中，相邻两条数据的时间间隔；
+而 prometheus server 端 会验证 (endTime - startTime) > (11000 * step) 时报错；
+
+1. 如果 step 为 1s ，那么 endTime - startTime 最大为 11000s ，即 11000s/60/60 = 183.3min/60 = 3h 小时
+2. 如果 endTime - startTime 为 1day  ，那么 step 最小为 1day/11000s = 86400s/11000s = 7.8s 约 8s
+3. 如果 endTime - startTime 为 1week ，那么 step 最小为 1week/11000s = 86400s * 7 / 11000s = 54.98s 约 60s
+4. 如果 endTime - startTime 为 1year ，那么 step 最小为 1year/11000s = 86400s * 365 / 11000s = 2866.90s = 47.78m 约 1h
+
+相关代码
+```go
+//  https://github.com/prometheus/prometheus "web/api/v1/api.go" 1741 lines
+// For safety, limit the number of returned points per timeseries.
+// This is sufficient for 60s resolution for a week or 1h resolution for a year.
+func (api *API) queryRange(r *http.Request) (result apiFuncResult) {
+    // hide other code ...
+    if end.Sub(start)/step > 11000 {
+        err := errors.New("exceeded maximum resolution of 11,000 points per timeseries. Try decreasing the query resolution (?step=XX)")
+        return apiFuncResult{nil, &apiError{errorBadData, err}, nil, nil}
+    }
+    // hide other code ...
+}
+
+// https://github.com/prometheus/client_golang "api/prometheus/v1/api.go"
+type Range struct {  // Range represents a sliced time range.
+        // The boundaries of the time range.
+        Start, End time.Time
+        // The maximum time between two slices within the boundaries.
+        Step time.Duration
+}
+type API interface {
+    QueryRange(ctx context.Context, query string, r Range) (model.Value, Warnings, error)
+}
+
+```
+
+
+
+
+
+
 [^PROMETHEUS_METRIC_TYPES]: [Prometheus Metric Types](https://prometheus.io/docs/concepts/metric_types/#metric-types)
