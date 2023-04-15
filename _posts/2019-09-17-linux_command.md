@@ -136,6 +136,9 @@ echo "That's all done!"
   ```
 
 - video
+  ```shell
+  printf "file '%s'\n" *.mp4 > mylist.txt && ffmpeg -f concat -safe 0 -i mylist.txt -c copy `basename "$(pwd)"`.mp4
+  ```
 
   ```shell
   # mkv to rtp h264 video
